@@ -1,0 +1,261 @@
+
+// ============================================================
+// TYPES
+// ============================================================
+export type TextureData = {
+    pattern:  string;
+    color:    string;
+    hairs:    string;
+    tail:     string;
+    snout:    string;
+    head:     string;
+};
+
+// ============================================================
+// TEXTURE CATALOGS — index matches RP array order exactly
+// ============================================================
+export const ALL_BLACK_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "solid", color: "black",  hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // all_black
+    1:  { pattern: "solid", color: "black",  hairs: "short",  tail: "normal",  snout: "normal", head: "flat"  }, // all_black2
+    2:  { pattern: "solid", color: "black",  hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // all_black3
+    3:  { pattern: "solid", color: "brown",  hairs: "short",  tail: "normal",  snout: "normal", head: "flat"  }, // all_black4
+    4:  { pattern: "solid", color: "brown",  hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // all_black5
+    5:  { pattern: "solid", color: "brown",  hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // all_black6
+    6:  { pattern: "solid", color: "black",  hairs: "short",  tail: "normal",  snout: "short",  head: "round" }, // all_black7
+    7:  { pattern: "solid", color: "white",  hairs: "short",  tail: "normal",  snout: "short",  head: "round" }, // all_black8
+    8:  { pattern: "solid", color: "white",  hairs: "short",  tail: "normal",  snout: "normal", head: "flat"  }, // all_black9
+    9:  { pattern: "solid", color: "white",  hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // all_black10
+    10: { pattern: "solid", color: "gray",   hairs: "short",  tail: "normal",  snout: "normal", head: "flat"  }, // all_black11
+    11: { pattern: "solid", color: "gray",   hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // all_black12
+    12: { pattern: "solid", color: "black",  hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // all_black13
+    13: { pattern: "solid", color: "black",  hairs: "short",  tail: "bobtail", snout: "normal", head: "flat"  }, // all_black14
+    14: { pattern: "solid", color: "black",  hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // all_black15
+    15: { pattern: "solid", color: "brown",  hairs: "short",  tail: "bobtail", snout: "normal", head: "flat"  }, // all_black16
+    16: { pattern: "solid", color: "brown",  hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // all_black17
+    17: { pattern: "solid", color: "brown",  hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // all_black18
+    18: { pattern: "solid", color: "black",  hairs: "short",  tail: "bobtail", snout: "short",  head: "round" }, // all_black19
+    19: { pattern: "solid", color: "gray",   hairs: "short",  tail: "bobtail", snout: "normal", head: "flat"  }, // all_black20
+    20: { pattern: "solid", color: "gray",   hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // all_black21
+    21: { pattern: "solid", color: "white",  hairs: "short",  tail: "bobtail", snout: "short",  head: "round" }, // all_black22
+    22: { pattern: "solid", color: "white",  hairs: "short",  tail: "bobtail", snout: "normal", head: "flat"  }, // all_black23
+    23: { pattern: "solid", color: "white",  hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // all_black24
+};
+
+export const BLACK_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "tuxedo",   color: "black", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // black
+    1:  { pattern: "bicolor",  color: "black", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // black2
+    2:  { pattern: "bicolor",  color: "white", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // black3
+    3:  { pattern: "tuxedo",   color: "black", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // black4
+    4:  { pattern: "bicolor",  color: "white", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // black5
+    5:  { pattern: "bicolor",  color: "black", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // black6
+    6:  { pattern: "tuxedo",   color: "black", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // black7
+    7:  { pattern: "bicolor",  color: "black", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // black8
+    8:  { pattern: "bicolor",  color: "white", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // black9
+    9:  { pattern: "bicolor",  color: "white", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // black10
+    10: { pattern: "tuxedo",   color: "black", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // black11
+    11: { pattern: "bicolor",  color: "black", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // black12
+    12: { pattern: "bicolor",  color: "white", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // black13
+    13: { pattern: "tuxedo",   color: "black", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // black14
+    14: { pattern: "bicolor",  color: "white", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // black15
+    15: { pattern: "bicolor",  color: "black", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // black16
+    16: { pattern: "tuxedo",   color: "black", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // black17
+    17: { pattern: "bicolor",  color: "black", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // black18
+    18: { pattern: "bicolor",  color: "white", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // black19
+    19: { pattern: "bicolor",  color: "white", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // black20
+};
+
+export const BRITISH_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "solid",         color: "gray",   hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair
+    1:  { pattern: "solid",         color: "black",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair2
+    2:  { pattern: "solid",         color: "black",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair3
+    3:  { pattern: "solid",         color: "white",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair4
+    4:  { pattern: "tabby",         color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair5
+    5:  { pattern: "tabby",         color: "orange", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair6
+    6:  { pattern: "tabby",         color: "orange", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair7
+    7:  { pattern: "tabby",         color: "orange", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair8
+    8:  { pattern: "tabby",         color: "orange", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair9
+    9:  { pattern: "tabby",         color: "orange", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair10
+    10: { pattern: "tabby",         color: "orange", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair11
+    11: { pattern: "tabby",         color: "brown",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair12
+    12: { pattern: "tabby",         color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair13
+    13: { pattern: "tabby",         color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair14
+    14: { pattern: "tabby",         color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair15
+    15: { pattern: "tabby",         color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair16
+    16: { pattern: "tabby",         color: "brown",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair17
+    17: { pattern: "tabby",         color: "brown",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair18
+    18: { pattern: "tabby",         color: "brown",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair19
+    19: { pattern: "tabby",         color: "orange", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair20
+    20: { pattern: "bicolor",       color: "orange", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair21
+    21: { pattern: "tuxedo",        color: "black",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair22
+    22: { pattern: "bicolor",       color: "black",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair23
+    23: { pattern: "calico",        color: "white",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair24
+    24: { pattern: "calico",        color: "white",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair25
+    25: { pattern: "tortoiseshell", color: "brown",  hairs: "short",  tail: "normal", snout: "short", head: "round" }, // british_shorthair26
+    26: { pattern: "tortoiseshell", color: "brown",  hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // british_shorthair27
+};
+
+export const CALICO_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "calico",        color: "white", hairs: "fluffy", tail: "normal",  snout: "short", head: "round" }, // calico
+    1:  { pattern: "calico",        color: "white", hairs: "short",  tail: "normal",  snout: "short", head: "round" }, // calico2
+    2:  { pattern: "calico",        color: "white", hairs: "fluffy", tail: "normal",  snout: "short", head: "round" }, // calico3
+    3:  { pattern: "calico",        color: "white", hairs: "short",  tail: "normal",  snout: "short", head: "round" }, // calico4
+    4:  { pattern: "bicolor",       color: "white", hairs: "short",  tail: "normal",  snout: "short", head: "round" }, // calico5
+    5:  { pattern: "bicolor",       color: "white", hairs: "fluffy", tail: "normal",  snout: "short", head: "round" }, // calico6
+    6:  { pattern: "tortoiseshell", color: "brown", hairs: "short",  tail: "normal",  snout: "short", head: "round" }, // calico7
+    7:  { pattern: "tortoiseshell", color: "brown", hairs: "fluffy", tail: "normal",  snout: "short", head: "round" }, // calico8
+    8:  { pattern: "calico",        color: "white", hairs: "short",  tail: "bobtail", snout: "short", head: "round" }, // calico9
+    9:  { pattern: "calico",        color: "white", hairs: "fluffy", tail: "bobtail", snout: "short", head: "round" }, // calico10
+    10: { pattern: "calico",        color: "white", hairs: "fluffy", tail: "bobtail", snout: "short", head: "round" }, // calico11
+    11: { pattern: "calico",        color: "white", hairs: "short",  tail: "bobtail", snout: "short", head: "round" }, // calico12
+    12: { pattern: "bicolor",       color: "white", hairs: "short",  tail: "bobtail", snout: "short", head: "round" }, // calico13
+    13: { pattern: "bicolor",       color: "white", hairs: "fluffy", tail: "bobtail", snout: "short", head: "round" }, // calico14
+    14: { pattern: "tortoiseshell", color: "brown", hairs: "short",  tail: "bobtail", snout: "short", head: "round" }, // calico15
+    15: { pattern: "tortoiseshell", color: "brown", hairs: "fluffy", tail: "bobtail", snout: "short", head: "round" }, // calico16
+};
+
+export const JELLIE_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie
+    1:  { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie2
+    2:  { pattern: "tabby",         color: "orange",    hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie3
+    3:  { pattern: "tabby",         color: "orange",    hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie4
+    4:  { pattern: "tabby",         color: "orange",    hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie5
+    5:  { pattern: "tabby",         color: "orange",    hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie6
+    6:  { pattern: "tabby",         color: "orange",    hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie7
+    7:  { pattern: "tabby",         color: "orange",    hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie8
+    8:  { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie9
+    9:  { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie10
+    10: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie11
+    11: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie12
+    12: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie13
+    13: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie14
+    14: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie15
+    15: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie16
+    16: { pattern: "tabby",         color: "orange",    hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie17
+    17: { pattern: "tabby",         color: "orange",    hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie18
+    18: { pattern: "tuxedo",        color: "black",     hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie19
+    19: { pattern: "tuxedo",        color: "black",     hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie20
+    20: { pattern: "calico",        color: "white",     hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie21
+    21: { pattern: "calico",        color: "white",     hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie22
+    22: { pattern: "tortoiseshell", color: "chocolate", hairs: "short",  tail: "normal", snout: "short", head: "round" }, // jellie23
+    23: { pattern: "tortoiseshell", color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // jellie24
+};
+
+export const OCELOT_TEXTURES: Record<number, TextureData> = {
+    0: { pattern: "tortoiseshell", color: "orange", hairs: "short", tail: "normal", snout: "normal", head: "flat" }, // ocelot
+};
+
+export const PERSIAN_TEXTURES: Record<number, TextureData> = {
+    0: { pattern: "solid",   color: "orange",    hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persian
+    1: { pattern: "solid",   color: "black",     hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain2
+    2: { pattern: "solid",   color: "chocolate", hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain3
+    3: { pattern: "solid",   color: "white",     hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain4
+    4: { pattern: "pointed", color: "white",     hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain5
+    5: { pattern: "solid",   color: "gray",      hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain6
+    6: { pattern: "bicolor", color: "gray",      hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain7
+    7: { pattern: "tuxedo",  color: "black",     hairs: "fluffy", tail: "normal", snout: "short", head: "round" }, // persain8
+};
+
+export const RAGDOLL_TEXTURES: Record<number, TextureData> = {
+    0: { pattern: "pointed", color: "white",     hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // ragdoll
+    1: { pattern: "pointed", color: "orange",    hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // ragdoll2
+    2: { pattern: "pointed", color: "cream",     hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // ragdoll3
+    3: { pattern: "pointed", color: "gray",      hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // ragdoll4
+    4: { pattern: "pointed", color: "chocolate", hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // ragdoll5
+};
+
+export const RED_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red
+    1:  { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red2
+    2:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red3
+    3:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red4
+    4:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red5
+    5:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red6
+    6:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red7
+    7:  { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red8
+    8:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red9
+    9:  { pattern: "tabby", color: "orange", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // red10
+    10: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red11
+    11: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red12
+    12: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red13
+    13: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // red14
+    14: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red15
+    15: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red16
+    16: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red17
+    17: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red18
+    18: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red19
+    19: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red20
+    20: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red21
+    21: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red22
+    22: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red23
+    23: { pattern: "tabby", color: "orange", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // red24
+    24: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red25
+    25: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red26
+    26: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red27
+    27: { pattern: "tabby", color: "orange", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // red28
+};
+
+export const SIAMESE_TEXTURES: Record<number, TextureData> = {
+    0: { pattern: "pointed", color: "cream", hairs: "short",  tail: "normal", snout: "normal", head: "round" }, // siamese
+    1: { pattern: "pointed", color: "cream", hairs: "short",  tail: "normal", snout: "normal", head: "round" }, // siamese2
+    2: { pattern: "pointed", color: "cream", hairs: "short",  tail: "normal", snout: "normal", head: "round" }, // siamese3
+    3: { pattern: "pointed", color: "cream", hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // siamese4
+    4: { pattern: "pointed", color: "cream", hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // siamese5
+    5: { pattern: "pointed", color: "cream", hairs: "fluffy", tail: "normal", snout: "normal", head: "round" }, // siamese6
+};
+
+export const TABBY_TEXTURES: Record<number, TextureData> = {
+    0:  { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby
+    1:  { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby2
+    2:  { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby3
+    3:  { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby4
+    4:  { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby5
+    5:  { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby6
+    6:  { pattern: "tabby",         color: "gray",      hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // tabby7
+    7:  { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // tabby8
+    8:  { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // tabby9
+    9:  { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // tabby10
+    10: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "normal",  snout: "normal", head: "round" }, // tabby11
+    11: { pattern: "tortoiseshell", color: "orange",    hairs: "short",  tail: "normal",  snout: "normal", head: "round" }, // tabby12
+    12: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby13
+    13: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby14
+    14: { pattern: "tabby",         color: "chocolate", hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby15
+    15: { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby16
+    16: { pattern: "tabby",         color: "gray",      hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby17
+    17: { pattern: "tabby",         color: "gray",      hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // tabby18
+    18: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // tabby19
+    19: { pattern: "tabby",         color: "chocolate", hairs: "fluffy", tail: "bobtail", snout: "normal", head: "round" }, // tabby20
+    20: { pattern: "tortoiseshell", color: "gray",      hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby21
+    21: { pattern: "tortoiseshell", color: "orange",    hairs: "short",  tail: "bobtail", snout: "normal", head: "round" }, // tabby22
+};
+
+export const WHITE_TEXTURES: Record<number, TextureData> = {
+    0: { pattern: "sphinx", color: "white",     hairs: "none", tail: "normal", snout: "normal", head: "flat" }, // white
+    1: { pattern: "sphinx", color: "chocolate", hairs: "none", tail: "normal", snout: "normal", head: "flat" }, // white2
+    2: { pattern: "sphinx", color: "white",     hairs: "none", tail: "normal", snout: "normal", head: "flat" }, // white3
+    3: { pattern: "sphinx", color: "gray",      hairs: "none", tail: "normal", snout: "normal", head: "flat" }, // white4
+};
+
+// ============================================================
+// EYE & WHISKER OPTIONS
+// ============================================================
+export const EYE_COLORS = ["green", "yellow", "blue", "brown", "orange", "teal", "gray", "heterochromia"] as const;
+export const EYE_SHAPES = ["narrow", "round", "almond"] as const;
+export const WHISKERS   = ["short", "medium", "long"] as const;
+
+// ============================================================
+// BREED LOOKUP — maps typeId → its texture catalog
+// ============================================================
+export const BREED_TEXTURES: Record<string, Record<number, TextureData>> = {
+    "clingy_cats:all_black": ALL_BLACK_TEXTURES,
+    "clingy_cats:black":     BLACK_TEXTURES,
+    "clingy_cats:british":   BRITISH_TEXTURES,
+    "clingy_cats:calico":    CALICO_TEXTURES,
+    "clingy_cats:jellie":    JELLIE_TEXTURES,
+    "clingy_cats:ocelot":    OCELOT_TEXTURES,
+    "clingy_cats:persian":   PERSIAN_TEXTURES,
+    "clingy_cats:ragdoll":   RAGDOLL_TEXTURES,
+    "clingy_cats:red":       RED_TEXTURES,
+    "clingy_cats:siamese":   SIAMESE_TEXTURES,
+    "clingy_cats:tabby":     TABBY_TEXTURES,
+    "clingy_cats:white":     WHITE_TEXTURES,
+};
