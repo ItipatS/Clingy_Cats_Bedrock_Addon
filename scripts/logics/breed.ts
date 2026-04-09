@@ -125,15 +125,24 @@ function determineBabyBreed(mother: ParentGeneData, father: ParentGeneData | und
 
 export function handleConception(mother: Entity): void {
     const fatherEntity = findFather(mother);
-    pregnancyMap.set(mother.id, {
+    const record: ConceptionRecord = {
         mother: captureGenes(mother),
         father: fatherEntity ? captureGenes(fatherEntity) : undefined,
-    });
+    };
+    pregnancyMap.set(mother.id, record);
+    mother.setDynamicProperty("clingy_cats:conception_data", JSON.stringify(record));
 }
 
 export function handleGiveBirth(mother: Entity): void {
-    const record = pregnancyMap.get(mother.id);
+    const record: ConceptionRecord | undefined =
+        pregnancyMap.get(mother.id) ??
+        (() => {
+            const raw = mother.getDynamicProperty("clingy_cats:conception_data") as string | undefined;
+            return raw ? JSON.parse(raw) as ConceptionRecord : undefined;
+        })();
+
     pregnancyMap.delete(mother.id);
+    mother.setDynamicProperty("clingy_cats:conception_data", undefined);
 
     const { mother: momGenes, father: dadGenes } = record ?? { mother: captureGenes(mother), father: undefined };
     const babyBreed = determineBabyBreed(momGenes, dadGenes);

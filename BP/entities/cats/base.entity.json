@@ -564,15 +564,12 @@
 			"clingy_cats:born": {
 				"sequence": [
 					{ "remove": { "component_groups": ["clingy_cats:adult"] } },
-					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:wild"] } },
+					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:tamed"] } },
 					{ "trigger": "clingy_cats:randomize_behavior_trait" },
 					{ "trigger": "clingy_cats:randomize_personality" },
 					{ "trigger": "clingy_cats:randomize_favorite_food" },
 					{ "trigger": "clingy_cats:randomize_favorite_block" },
-					{ "trigger": "clingy_cats:randomize_sound_variant" },
-					{ "trigger": "clingy_cats:randomize_eye_color" },
-					{ "trigger": "clingy_cats:randomize_eye_shape" },
-					{ "trigger": "clingy_cats:randomize_whiskers" }
+					{ "trigger": "clingy_cats:randomize_sound_variant" }
 				]
 			},
 
