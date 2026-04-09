@@ -4,7 +4,7 @@ import {
     assignInheritedAppearance,
     assignRandomEyesAndWhiskers,
     assignInheritedEyesAndWhiskers,
-    findNearestAdult
+    findBothParents
 } from "../logics/breed";
 
 export function registerCatSpawnSubscriber(): void {
@@ -21,14 +21,15 @@ export function registerCatSpawnSubscriber(): void {
         }
 
         if (message === "born") {
-            const mother = findNearestAdult(sourceEntity);
-            if (!mother) {
+            const parents = findBothParents(sourceEntity);
+            if (parents.length === 0) {
                 assignRandomAppearance(sourceEntity);
                 assignRandomEyesAndWhiskers(sourceEntity);
                 return;
             }
-            assignInheritedAppearance(sourceEntity, mother);
-            assignInheritedEyesAndWhiskers(sourceEntity, mother);
+            const [parentA, parentB] = parents;
+            assignInheritedAppearance(sourceEntity, parentA, parentB);
+            assignInheritedEyesAndWhiskers(sourceEntity, parentA, parentB);
             return;
         }
     });

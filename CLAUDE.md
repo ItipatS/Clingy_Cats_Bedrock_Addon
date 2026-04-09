@@ -28,6 +28,10 @@ Custom item effects if complex
 Everything else is pure BP.
 
 Property System (complete — all client_sync: true)
+Property Budget
+Hard limit: 32 properties per entity type
+Currently using ~15 → 17 slots remaining
+
 json"clingy_cats:sub_variant":    { "type": "int",  "range": [0, 126], "default": 0 }
 "clingy_cats:pattern":        { "type": "enum",  "values": ["solid","tabby","tuxedo","bicolor","calico","tortoiseshell","pointed","sphinx"] }
 "clingy_cats:color":          { "type": "enum",  "values": ["black","white","gray","brown","orange","chocolate","cream"] }
@@ -272,3 +276,266 @@ https://bedrock.dev/docs/stable/Entities#AI%20Goals
 https://bedrock.dev/docs/stable/Entity%20Events
 https://bedrock.dev/docs/stable/Entities#Filters 
 https://wiki.bedrock.dev/entities/entity-events
+
+BP Knowledge Corrections Learned
+
+Molang expressions → only work in fields explicitly typed as Molang (like experience_reward). Decimal/Integer/Boolean fields are hardcoded only
+is_sneaking → valid BP filter test with subject: "other" or subject: "player"
+is_sneak_held → checks if sneak key is physically held. Different from is_sneaking
+follow_mob with filters + preferred_actor_type → baby following mother pure BP, no Script needed
+parent subject → documented but unusable for custom entities (no component to set parent relationship)
+bool_property / enum_property / float_property / int_property → all valid BP filter tests with operators (>, <, != etc.)
+random_chance filter → probabilistic gating without Script
+
+Filter Subject Domains
+self     — the entity calling the test
+other    — the other member of interaction
+player   — the player involved
+damager  — the damaging actor
+target   — caller's current target
+parent   — caller's parent (unusable for custom)
+block    — the block involved
+Components With Event Hooks (full map)
+INTERACTION
+minecraft:interact              → on_interact (+ target: other context!)
+minecraft:damage_sensor         → on_damage (can fire on OTHER entity too)
+minecraft:trusting              → trust_event
+minecraft:tameable              → tame_event
+minecraft:ageable               → grow_up event
+minecraft:healable              → on_heal
+
+MOVEMENT/GOAL
+behavior.avoid_mob_type         → on_escape_event
+behavior.avoid_block            → on_escape_event
+behavior.move_to_block          → on_stay_completed, on_reach, on_failed
+behavior.go_home                → on_home, on_failed
+behavior.drop_item_for          → on_drop_attempt
+behavior.tempt                  → no hook
+
+DETECTION
+minecraft:environment_sensor    → triggers[]
+minecraft:entity_sensor         → subsensors[]
+minecraft:block_sensor          → on_break
+minecraft:target_nearby_sensor  → on_inside_range, on_outside_range, on_vision_lost_inside_range
+minecraft:timer                 → time_down_event
+
+TRANSFORMATION/MISC
+minecraft:transformation        → event via identifier string
+minecraft:on_target_acquired    → direct event
+minecraft:on_wake_with_owner    → direct event
+Avoid Components (3 exist)
+
+behavior.avoid_mob_type → flee from entities
+behavior.avoid_block → flee from blocks
+Both accept on_escape_event hook
+All movement params (max_dist, sprint_speed_multiplier etc.) live inside each entity_types entry, NOT at component root
+
+Wild Encounter Design
+One clingy_cats:wild component group. Trait properties filter behavior from inside via enum_property test. No explosion of separate trait groups needed.
+Priority ladder:
+0  — behavior.float
+1  — behavior.panic
+4  — behavior.avoid_mob_type (shy/independent filtered)
+5  — behavior.tempt
+6  — behavior.look_at_player (curious/friendly only via filter)
+7  — behavior.random_look_around_and_sit
+8  — behavior.random_stroll
+9  — behavior.random_look_around
+Tame vs Trust
+
+minecraft:trusting → cat trusts first (stops fleeing, allows approach)
+minecraft:tameable → full tame after trust
+Matches real cat behavior — trust before bond
+Tame probability matrix → Script (personality × favorite_food interaction)
+
+Example of complex sequence/filter in components/ai goal
+"wiki:on_hit": {
+    "randomize":[
+        // 60% chance nothing happens
+        {
+            "weight": 60
+        },
+        // 40% chance this entry is run
+        {
+            "weight": 40,
+            "sequence": [
+                // Runs separate event required for all attacks
+                {
+                    "trigger": "attack_event"
+                },
+                // Runs if entity is not sheared (entity becomes sheared if under half health)
+                {
+                    "filters": {
+                        "test": "has_component",
+                        "operator": "!=",
+                        "value": "minecraft:is_sheared"
+                    },
+                    "sequence": [
+                        // Runs if player is within 5 blocks
+                        {
+                            "filters": {
+                                "test": "distance_to_nearest_player",
+                                "operator": "<=",
+                                "value": 5.0
+                            },
+                            "randomize": [
+                                {
+                                    "weight": 10,
+                                    "add": {
+                                        "component_groups": [
+                                            "explode"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 60,
+                                    "add": {
+                                        "component_groups": [
+                                            "attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 20,
+                                    "add": {
+                                        "component_groups": [
+                                            "range_attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 10
+                                }
+                            ]
+                        },
+                        // Runs if player is farther than 5 blocks and entity still has a target
+                        {
+                            "filters": {
+                                "all_of": [
+                                    {
+                                        "test": "distance_to_nearest_player",
+                                        "operator": ">",
+                                        "value": 5.0
+                                    },
+                                    {
+                                        "test": "has_target",
+                                        "operator": "equals",
+                                        "value": true
+                                    }
+                                ]
+                            },
+                            "randomize": [
+                                {
+                                    "weight": 30,
+                                    "add": {
+                                        "component_groups": [
+                                            "attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 60,
+                                    "add":{
+                                        "component_groups": [
+                                            "range_attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 10
+                                }
+                            ]
+                        }
+                    ]
+                },
+                // Runs if entity is sheared (under half health)
+                {
+                    "filters": {
+                        "test": "has_component",
+                        "value": "minecraft:is_sheared"
+                    },
+                    "sequence": [
+                        // Runs if player is within 5 blocks
+                        {
+                            "filters": {
+                                "test": "distance_to_nearest_player",
+                                "operator": "<=",
+                                "value": 5.0
+                            },
+                            "randomize": [
+                                {
+                                    "weight": 20,
+                                    "add":{
+                                        "component_groups": [
+                                            "explode"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 60,
+                                    "add": {
+                                        "component_groups": [
+                                            "strong_attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 20,
+                                    "add": {
+                                        "component_groups": [
+                                            "strong_range_attack"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        // Runs if player is farther than 5 blocks and entity still has a target
+                        {
+                            "filters": {
+                                "all_of": [
+                                    {
+                                        "test": "distance_to_nearest_player",
+                                        "operator": ">",
+                                        "value": 5.0
+                                    },
+                                    {
+                                        "test": "has_target",
+                                        "operator": "equals",
+                                        "value": true
+                                    }
+                                ]
+                            },
+                            "randomize": [
+                                {
+                                    "weight": 60,
+                                    "add": {
+                                        "component_groups": [
+                                            "strong_range_attack"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "weight": 40,
+                                    "randomize": [
+                                        {
+                                            "weight": 30,
+                                            "trigger": "rapid_fire"
+                                        },
+                                        {
+                                            "weight": 70,
+                                            "add": {
+                                                "component_groups": [
+                                                    "strong_blast"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
