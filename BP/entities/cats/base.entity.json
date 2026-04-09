@@ -165,23 +165,20 @@
 					"require_tame": true,
 					"require_full_health": false,
 					"allow_sitting": false,
-					"breed_items": [
-						"minecraft:cooked_cod",
-						"minecraft:cooked_salmon"
-					],
+					"breed_items": ["fish", "salmon"],
 					"breeds_with": [
-						{ "mate_type": "clingy_cats:british", "baby_type": "clingy_cats:british", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-    					{ "mate_type": "clingy_cats:siamese", "baby_type": "clingy_cats:siamese", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:persian", "baby_type": "clingy_cats:persian", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:white", "baby_type": "clingy_cats:white", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:all_black", "baby_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:calico", "baby_type": "clingy_cats:calico", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:tabby", "baby_type": "clingy_cats:tabby", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:black", "baby_type": "clingy_cats:black", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:jellie", "baby_type": "clingy_cats:jellie", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:red", "baby_type": "clingy_cats:red", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:ocelot", "baby_type": "clingy_cats:ocelot", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } },
-						{ "mate_type": "clingy_cats:ragdoll", "baby_type": "clingy_cats:ragdoll", "breed_event": { "event": "clingy_cats:on_breed", "target": "self" } }
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
 					],
 					"causes_pregnancy": true,
 					"environment_requirements": {
@@ -362,6 +359,28 @@
 				"speed_multiplier": 1.0
 				}
 			},
+			"clingy_cats:pregnant": {
+				"minecraft:behavior.move_to_block": {
+					"priority": 1,
+					"target_blocks": [
+						"minecraft:wool",
+						"minecraft:carpet",
+						"clingy_cats:cardboard_box",
+						"minecraft:furnace",
+						"minecraft:campfire",
+						"minecraft:bed"
+					],
+					"target_selection_method": "nearest",
+					"search_range": 16,
+					"search_height": 4,
+					"goal_radius": 1.0,
+					"stay_duration": 3.0,
+					"on_stay_completed": {
+						"event": "clingy_cats:give_birth",
+						"target": "self"
+					}
+				}
+			},
 			"clingy_cats:gift_for_owner": { //depend on breed and personality
 				"priority": 4,
 				"minecraft:behavior.drop_item_for": {
@@ -531,8 +550,31 @@
 			"minecraft:persistent": {}
 		},
 		"events": {
-			"clingy_cats:on_breed": {
-				//TODO based on breed and personality stereotype(add revelant component group of baby behavior like more likely to be playful, or calm, etc) and affection level add some effect to baby cat like faster growth, extra health, etc
+			"clingy_cats:become_pregnant": {
+				"sequence": [
+					{ "add": { "component_groups": ["clingy_cats:pregnant"] } },
+					{ "queue_command": { "command": "scriptevent clingycats:conception" } }
+				]
+			},
+			"clingy_cats:give_birth": {
+				"sequence": [
+					{ "remove": { "component_groups": ["clingy_cats:pregnant"] } },
+					{ "queue_command": { "command": "scriptevent clingycats:givebirth" } }
+				]
+			},
+			"clingy_cats:script_born": {
+				"sequence": [
+					{ "remove": { "component_groups": ["clingy_cats:adult"] } },
+					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:wild"] } },
+					{ "trigger": "clingy_cats:randomize_behavior_trait" },
+					{ "trigger": "clingy_cats:randomize_personality" },
+					{ "trigger": "clingy_cats:randomize_favorite_food" },
+					{ "trigger": "clingy_cats:randomize_favorite_block" },
+					{ "trigger": "clingy_cats:randomize_sound_variant" },
+					{ "trigger": "clingy_cats:randomize_eye_color" },
+					{ "trigger": "clingy_cats:randomize_eye_shape" },
+					{ "trigger": "clingy_cats:randomize_whiskers" }
+				]
 			},
 
 			"client:entity_interacted_with": {

@@ -1,0 +1,23 @@
+{
+    "format_version": "1.21.100",
+    "minecraft:item": {
+        "description": {
+            "identifier": "clingy_cats:all_black_spawn_egg"
+        },
+        "components": {
+            "minecraft:display_name": {
+                "value": "item.clingy_cats:all_black_spawn_egg.name"
+            },
+            "minecraft:icon": {
+                "textures": {
+                    "default": "all_black_spawn_egg"
+                }
+            },
+            "minecraft:entity_placer": {
+                "entity": "clingy_cats:all_black"
+            },
+            "minecraft:liquid_clipped": true,
+            "minecraft:max_stack_size": 64
+        }
+    }
+}
