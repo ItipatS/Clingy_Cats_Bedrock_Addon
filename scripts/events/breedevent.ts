@@ -11,10 +11,10 @@ export function registerCatSpawnSubscriber(): void {
         const { id, message, sourceEntity } = ev;
         if (!sourceEntity || !sourceEntity.isValid) return;
 
-        if (id === "clingycats:catspawn" && message === "wild") {
+        if (id === "clingycats:catspawn") {
             // Script-spawned babies (from givebirth) set this tag to skip random appearance
-            if (sourceEntity.hasTag("clingy_cats:script_born")) {
-                sourceEntity.removeTag("clingy_cats:script_born");
+            if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
+                sourceEntity.removeTag("clingy_cats:not_wild_spawn");
                 return;
             }
             assignRandomAppearance(sourceEntity);

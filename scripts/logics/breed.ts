@@ -140,9 +140,9 @@ export function handleGiveBirth(mother: Entity): void {
 
     const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
 
-    // Tag before catspawn:wild fires next tick so that handler skips random appearance
-    baby.addTag("clingy_cats:script_born");
-    baby.triggerEvent("clingy_cats:script_born");
+    // Tag before clingycats:catspawn fires next tick so that handler skips random appearance
+    baby.addTag("clingy_cats:not_wild_spawn");
+    baby.triggerEvent("clingy_cats:born");
 
     // Build fake parent entities for inheritance helpers using stored gene data
     // We pass mother and father as Entity references — breed.ts helpers read properties directly.
