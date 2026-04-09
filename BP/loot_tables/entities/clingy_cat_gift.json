@@ -1,0 +1,23 @@
+{
+    "pools": [
+        {
+            "rolls": 1,
+            "entries": [
+                { "type": "item", "name": "minecraft:string",             "weight": 20 },
+                { "type": "item", "name": "minecraft:feather",            "weight": 15 },
+                { "type": "item", "name": "minecraft:bone",               "weight": 10 },
+                { "type": "item", "name": "minecraft:rabbit_foot",        "weight": 8  },
+                { "type": "item", "name": "minecraft:rabbit_hide",        "weight": 8  },
+                { "type": "item", "name": "minecraft:rotten_flesh",       "weight": 7  },
+                { "type": "item", "name": "minecraft:leather",            "weight": 7  },
+                { "type": "item", "name": "minecraft:cooked_chicken",     "weight": 6  },
+                { "type": "item", "name": "minecraft:cooked_rabbit",      "weight": 6  },
+                { "type": "item", "name": "minecraft:phantom_membrane",   "weight": 4  },
+                { "type": "item", "name": "minecraft:cooked_salmon",      "weight": 4  },
+                { "type": "item", "name": "minecraft:cooked_cod",         "weight": 4  },
+                { "type": "item", "name": "minecraft:tropical_fish",      "weight": 2  },
+                { "type": "item", "name": "minecraft:emerald",            "weight": 1  }
+            ]
+        }
+    ]
+}

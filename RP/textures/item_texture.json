@@ -2,18 +2,7 @@
 	"resource_pack_name": "ClingyCats's Item Textures",
 	"texture_name": "atlas.items",
 	"texture_data": {
-		"base_spawn_egg":      { "textures": "textures/items/spawn_eggs/base_spawn_egg" },
-		"british_spawn_egg":   { "textures": "textures/items/spawn_eggs/british_spawn_egg" },
-		"siamese_spawn_egg":   { "textures": "textures/items/spawn_eggs/siamese_spawn_egg" },
-		"tabby_spawn_egg":     { "textures": "textures/items/spawn_eggs/tabby_spawn_egg" },
-		"persian_spawn_egg":   { "textures": "textures/items/spawn_eggs/persian_spawn_egg" },
-		"ragdoll_spawn_egg":   { "textures": "textures/items/spawn_eggs/ragdoll_spawn_egg" },
-		"all_black_spawn_egg": { "textures": "textures/items/spawn_eggs/all_black_spawn_egg" },
-		"black_spawn_egg":     { "textures": "textures/items/spawn_eggs/black_spawn_egg" },
-		"calico_spawn_egg":    { "textures": "textures/items/spawn_eggs/calico_spawn_egg" },
-		"jellie_spawn_egg":    { "textures": "textures/items/spawn_eggs/jellie_spawn_egg" },
-		"red_spawn_egg":       { "textures": "textures/items/spawn_eggs/red_spawn_egg" },
-		"ocelot_spawn_egg":    { "textures": "textures/items/spawn_eggs/ocelot_spawn_egg" },
-		"white_spawn_egg":     { "textures": "textures/items/spawn_eggs/white_spawn_egg" }
+		"test_spawn_egg":      { "textures": "textures/items/spawn_eggs/base_spawn_egg" },
+		"base_spawn_egg":      { "textures": "textures/items/spawn_eggs/base_spawn_egg" }
 	}
 }

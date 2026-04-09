@@ -73,21 +73,14 @@
 				"clingy_cats:hairs": { "type": "enum", "values": [ "short", "fluffy", "none" ], "default": "short", "client_sync": true},
 				"clingy_cats:tail": { "type": "enum", "values": [ "normal", "bobtail" ], "default": "normal", "client_sync": true},
 				"clingy_cats:snout": { "type": "enum", "values": [ "normal", "short" ], "default": "normal", "client_sync": true },
-				"clingy_cats:whiskers": { "type": "enum", "values": [ "short", "medium", "long" ], "default": "medium", "client_sync": true },
-				"clingy_cats:eye_shape": { "type": "enum", "values": [ "narrow", "round", "almond" ], "default": "narrow", "client_sync": true },
+				"clingy_cats:whiskers": { "type": "enum", "values": [ "short_white","short_black", "medium_white","medium_black", "long_white","long_black" ], "default": "medium_black", "client_sync": true },
+				"clingy_cats:eye_shape": { "type": "enum", "values": ["almond", "narrow", "round"  ], "default": "narrow", "client_sync": true },
 				"clingy_cats:eye_color": {
 					"type": "enum",
 					"values": [
-						"green",
-						"yellow",
-						"blue",
-						"brown",
-						"orange",
-						"teal",
-						"gray",
-						"heterochromia"
+						"emerald", "green", "yellow", "orange", "teal", "blue", "gray", "brown", "heterochromia1", "heterochromia2", "heterochromia3"
 					],
-					"default": "gray",
+					"default": "teal",
 					"client_sync": true
 				},
 				"clingy_cats:color": {
@@ -124,6 +117,7 @@
 					"default": "soft",
 					"client_sync": false
 				},
+				"clingy_cats:eye_index": { "type": "int", "range": [0, 33], "default": 0, "client_sync": true },
 				"clingy_cats:affection_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
 				"clingy_cats:trust_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
 				"clingy_cats:frequency": {"type": "int", "range": [0,100], "default": 50, "client_sync": false}
@@ -168,24 +162,11 @@
 					"allow_sitting": false,
 					"breed_items": ["fish", "salmon"],
 					"breeds_with": [
-						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+						{ "mate_type": "clingy_cats:test", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
 					],
 					"causes_pregnancy": true,
 					"environment_requirements": {
 						"blocks" : [ 
-							"minecraft:wool",
-							"minecraft:carpet",
 							"bed",
 							"furnace",
 							"campfire",
@@ -278,16 +259,12 @@
 					"within_radius": 16,
 					"can_get_scared": true,
 					"tempt_sound": "tempt",
-					"sound_interval": { "range_min": 3.0, "range_max": 8.0 },
 					"items": ["fish", "salmon"]
 					},
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
 					"ignore_visibility": false,
 					"sprint_distance": 10,
-					"avoid_mob_sound": "entity.cat.hiss",
-					"control_flags": ["jump", "move"],
-					"sound_interval": [ 8,3 ],
 					"entity_types": [
 						{
 							"filters": {
@@ -365,8 +342,6 @@
 				"minecraft:behavior.move_to_block": {
 					"priority": 1,
 					"target_blocks": [
-						"minecraft:wool",
-						"minecraft:carpet",
 						"furnace",
 						"bed",
 						"campfire",

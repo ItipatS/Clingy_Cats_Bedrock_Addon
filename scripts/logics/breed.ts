@@ -270,9 +270,19 @@ export function assignInheritedAppearance(baby: Entity, parentA: Entity, parentB
 }
 
 export function assignRandomEyesAndWhiskers(cat: Entity): void {
-    cat.setProperty("clingy_cats:eye_color",  randomFrom(EYE_COLORS.filter(c => c !== "heterochromia")));
-    cat.setProperty("clingy_cats:eye_shape",  randomFrom(EYE_SHAPES));
+    
+
+    const shape = randomFrom(EYE_SHAPES);
+    const color = randomFrom(EYE_COLORS);
+    
     cat.setProperty("clingy_cats:whiskers",   randomFrom(WHISKERS));
+
+    cat.setProperty("clingy_cats:eye_shape",  shape);
+    cat.setProperty("clingy_cats:eye_color",  color);
+    
+    const shapeIdx = EYE_SHAPES.indexOf(shape);
+    const colorIdx = EYE_COLORS.indexOf(color);
+    cat.setProperty("clingy_cats:eye_index", shapeIdx * 8 + colorIdx);
 }
 
 export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, parentB?: Entity): void {
@@ -281,8 +291,8 @@ export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, pa
     const inheritedColor = sourceEyeColor.getProperty("clingy_cats:eye_color") as string;
     const colorRoll = Math.random();
     if (colorRoll < 0.90)      baby.setProperty("clingy_cats:eye_color", inheritedColor);
-    else if (colorRoll < 0.99) baby.setProperty("clingy_cats:eye_color", randomFrom(EYE_COLORS.filter(c => c !== "heterochromia")));
-    else                       baby.setProperty("clingy_cats:eye_color", "heterochromia");
+    else if (colorRoll < 0.99) baby.setProperty("clingy_cats:eye_color", randomFrom(EYE_COLORS.filter(c => c !== "heterochromia1" && c !== "heterochromia2" && c !== "heterochromia3")));
+    else                       baby.setProperty("clingy_cats:eye_color", randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]));
 
     // Eye shape — 50/50 which parent, then drift ±1 from that parent's shape
     const sourceEyeShape = (parentB && Math.random() < 0.5) ? parentB : parentA;

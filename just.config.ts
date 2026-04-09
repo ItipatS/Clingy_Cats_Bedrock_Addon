@@ -12,14 +12,12 @@ import {
   ZipTaskParameters,
   STANDARD_CLEAN_PATHS,
   DEFAULT_CLEAN_DIRECTORIES,
-  getOrThrowFromProcess,
-  watchTask,
+watchTask,
 } from "@minecraft/core-build-tasks";
 import path from "path";
 
 // Setup env variables
 setupEnvironment(path.resolve(__dirname, ".env"));
-const projectName = getOrThrowFromProcess("PROJECT_NAME");
 
 // You can use `npm run build:production` to build a "production" build that strips out statements labelled with "dev:".
 const isProduction = argv()['production'];
@@ -35,14 +33,14 @@ const bundleTaskOptions: BundleTaskParameters = {
 };
 
 const copyTaskOptions: CopyTaskParameters = {
-  copyToBehaviorPacks: [`./behavior_packs/${projectName}`],
+  copyToBehaviorPacks: ["./BP"],
   copyToScripts: ["./dist/scripts"],
-  copyToResourcePacks: [`./resource_packs/${projectName}`],
+  copyToResourcePacks: ["./RP"],
 };
 
 const mcaddonTaskOptions: ZipTaskParameters = {
   ...copyTaskOptions,
-  outputFile: `./dist/packages/${projectName}.mcaddon`,
+  outputFile: `./dist/packages/ClingyCats.mcaddon`,
 };
 
 // Lint

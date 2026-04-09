@@ -238,14 +238,15 @@ export const WHITE_TEXTURES: Record<number, TextureData> = {
 // ============================================================
 // EYE & WHISKER OPTIONS
 // ============================================================
-export const EYE_COLORS = ["green", "yellow", "blue", "brown", "orange", "teal", "gray", "heterochromia"] as const;
-export const EYE_SHAPES = ["narrow", "round", "almond"] as const;
-export const WHISKERS   = ["short", "medium", "long"] as const;
+export const EYE_COLORS = ["emerald", "green", "yellow", "orange", "teal", "blue", "gray", "brown", "heterochromia1", "heterochromia2", "heterochromia3"] as const;
+export const EYE_SHAPES = ["almond", "narrow", "round"] as const;
+export const WHISKERS   = ["short_white","short_black", "medium_white","medium_black", "long_white","long_black" ] as const;
 
 // ============================================================
 // BREED LOOKUP — maps typeId → its texture catalog
 // ============================================================
 export const BREED_TEXTURES: Record<string, Record<number, TextureData>> = {
+    "clingy_cats:test":      BRITISH_TEXTURES,
     "clingy_cats:all_black": ALL_BLACK_TEXTURES,
     "clingy_cats:black":     BLACK_TEXTURES,
     "clingy_cats:british":   BRITISH_TEXTURES,
