@@ -2,10 +2,11 @@
 	"format_version": "1.26.10",
 	"minecraft:entity": {
 		"description": {
-			"identifier": "clingy_cats:base",
+			"identifier": "clingy_cats:test",
 			"spawn_category": "creature",
 			"is_spawnable": true,
 			"is_summonable": true,
+			"is_experimental": false,
 			"properties": {
 				"clingy_cats:sub_variant":{ "type": "int", "range": [0,126], "default": 0, "client_sync": true},
 				"clingy_cats:sound_variant": { "type": "enum", "values": ["default","royal"], "default": "default", "client_sync": true},
@@ -115,7 +116,7 @@
 					"type": "enum",
 					"values": ["cod","salmon","tropical","puffer","rabbit","chicken","treat_fish","treat_meat","treat_fancy"],
 					"default": "cod",
-					"client_sync": false  // ← BP only, RP doesn't need this
+					"client_sync": false
 				},
 				"clingy_cats:favorite_block": {
 					"type": "enum", 
@@ -183,9 +184,9 @@
 					"causes_pregnancy": true,
 					"environment_requirements": {
 						"blocks" : [ 
-							"wool",
-							"carpet",
-							"clingy_cats:cardboard_box",
+							"minecraft:wool",
+							"minecraft:carpet",
+							"bed",
 							"furnace",
 							"campfire",
 							"bed"
@@ -218,8 +219,7 @@
 							"value": "cat" 
 							}
 						]
-					},
-					"inherit_tamed": true
+					}
 				},
 				"minecraft:behavior.breed": {
 					"priority": 3,
@@ -230,6 +230,14 @@
 				"minecraft:health": {
 					"max": 20,
 					"value": 20
+				},
+				"minecraft:tameable": {
+					"probability": 0.33,
+					"tame_items": ["fish", "salmon"],
+					"tame_event": {
+						"event": "clingy_cats:on_tame",
+						"target": "self"
+					}
 				},
 				"minecraft:behavior.nearest_prioritized_attackable_target": {
 					"priority": 1,
@@ -271,7 +279,7 @@
 					"can_get_scared": true,
 					"tempt_sound": "tempt",
 					"sound_interval": { "range_min": 3.0, "range_max": 8.0 },
-					"items": ["fish", "salmon"] //need to be their favorite items
+					"items": ["fish", "salmon"]
 					},
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
@@ -279,14 +287,10 @@
 					"sprint_distance": 10,
 					"avoid_mob_sound": "entity.cat.hiss",
 					"control_flags": ["jump", "move"],
-					"on_escape_event": {
-								"event": "clingy_cats:scared_by_player",
-								"target": "self"
-					},
 					"sound_interval": [ 8,3 ],
 					"entity_types": [
 						{
-							"filters": { // example shy cats
+							"filters": {
 								"all_of": [
 									{
 										"test": "is_family",
@@ -306,10 +310,8 @@
 									}
 								]
 							},
-							
 							"max_dist": 16,
 							"max_flee": 20,
-							"river_speed_multiplier": 0.2,
 							"sprint_speed_multiplier": 1.5,
 							"walk_speed_multiplier": 1.0
 						}
@@ -332,17 +334,17 @@
 				"event": "clingy_cats:pet_slept_with_owner",
 				"target": "self"
 				},
-				"minecraft:behavior.pet_sleep_with_owner": {  //depend on breed and personality
+				"minecraft:behavior.pet_sleep_with_owner": {
 				"priority": 2,
 				"speed_multiplier": 1.2,
 				"search_radius": 10,
 				"search_height": 10,
 				"goal_radius": 1.0
 				},
-				"minecraft:behavior.stay_while_sitting": { //depend on breed and personality
+				"minecraft:behavior.stay_while_sitting": {
 				"priority": 3
 				},
-				"minecraft:behavior.follow_owner": {  //depend on breed and personality
+				"minecraft:behavior.follow_owner": {
 				"priority": 4,
 				"speed_multiplier": 1.0,
 				"start_distance": 10,
@@ -352,7 +354,7 @@
 				"priority": 5,
 				"speed_multiplier": 0.5,
 				"within_radius": 16,
-				"items": ["fish", "salmon"] //need to be their favorite items
+				"items": ["fish", "salmon"]
 				},
 				"minecraft:behavior.ocelot_sit_on_block": {
 				"priority": 7,
@@ -363,10 +365,10 @@
 				"minecraft:behavior.move_to_block": {
 					"priority": 1,
 					"target_blocks": [
-						"wool",
-						"carpet",
-						"clingy_cats:cardboard_box",
+						"minecraft:wool",
+						"minecraft:carpet",
 						"furnace",
+						"bed",
 						"campfire",
 						"bed"
 					],
@@ -381,7 +383,7 @@
 					}
 				}
 			},
-			"clingy_cats:gift_for_owner": { //depend on breed and personality
+			"clingy_cats:gift_for_owner": {
 				"minecraft:behavior.drop_item_for": {
 				"priority": 1,
 				"seconds_before_pickup": 0.0,
@@ -452,14 +454,14 @@
 			},
 			"minecraft:is_hidden_when_invisible": {},
 			"minecraft:attack_damage": {
-				"value": 4 //depends on breed and personality
+				"value": 4
 			},
 			"minecraft:breathable": {
 				"total_supply": 15,
 				"suffocate_time": 0
 			},
 			"minecraft:healable": {
-				"items": [ //might add all fish and their favorite items
+				"items": [
 				{
 					"item": "fish",
 					"heal_amount": 2
@@ -488,7 +490,7 @@
 				"value": 0.3
 			},
 			"minecraft:movement.amphibious": { "max_turn": 0.3 },
-			"minecraft:navigation.walk": { //depend on breed and personality
+			"minecraft:navigation.walk": {
 				"can_path_over_water": true,
 				"can_open_doors": false,
 				"avoid_water": true,
@@ -561,7 +563,7 @@
 					}
 				]
 			},
-			"minecraft:dweller": { //depend on breed and personality
+			"minecraft:dweller": {
 				"dwelling_type": "village",
 				"dweller_role": "passive",
 				"update_interval_base": 60,
@@ -590,7 +592,7 @@
 			"minecraft:behavior.panic": {
 				"priority": 1,
 				"speed_multiplier": 1.25,
-				"damage_sources": [ //depends on breed and personality, for example more confident cats might not be scared by as many things, while more anxious cats might be scared by more things
+				"damage_sources": [
 					"campfire",
 					"fire",
 					"fire_tick",
@@ -603,11 +605,11 @@
 				],
 				"ignore_mob_damage": true
 			},
-			"minecraft:behavior.leap_at_target": { //depend on breed and personality
+			"minecraft:behavior.leap_at_target": {
 				"priority": 3,
 				"target_dist": 0.3
 			},
-			"minecraft:behavior.ocelotattack": { //depend on breed and personality
+			"minecraft:behavior.ocelotattack": {
 				"priority": 4,
 				"cooldown_time": 1.0,
 				"x_max_rotation": 30.0,
@@ -620,11 +622,11 @@
 				"sprint_speed_multiplier": 1.33,
 				"walk_speed_multiplier": 0.8
 			},
-			"minecraft:behavior.random_stroll": { //depend on breed and personality
+			"minecraft:behavior.random_stroll": {
 				"priority": 8,
 				"speed_multiplier": 0.8
 			},
-			"minecraft:behavior.look_at_player": { //depend on breed and personality
+			"minecraft:behavior.look_at_player": {
 				"priority": 9
 			},
 			"minecraft:nameable": {},
@@ -663,14 +665,6 @@
 				]
 			},
 
-			"client:entity_interacted_with": {
-				//TODO based on breed and personality stereotype(add revelant component group of interaction like more likely to be petted, or fed, etc) and affection level add some effect to player like regeneration, speed boost, etc for a short duration
-			},
-
-			"clingy_cats:scared_by_player": {
-				//TODO based on breed and personality stereotype(add revelant component group like more likely to be scared by player, or not) and affection level
-			},
-			//TODO add event to actually set these randomly on spawn based on breed and personality streotype
 			"clingy_cats:randomize_behavior_trait": {},
 			"clingy_cats:randomize_personality": {},
 			"clingy_cats:randomize_favorite_food": {},
@@ -731,7 +725,6 @@
 						"add": {
 							"component_groups": [
 								"clingy_cats:tamed",
-								//todo add these and others component group later based on breed and personality stereotype
 								"clingy_cats:gift_for_owner"
 							]
 						}
@@ -779,10 +772,14 @@
 			}
 			,
 			"clingy_cats:pet_slept_with_owner": {
-				//TODO based on breed and personality stereotype(add revelant component group) and affection level add some effect to player like regeneration, speed boost, etc for a short duration
+				"add": {
+					"component_groups": ["clingy_cats:gift_for_owner"]
+				}
 			},
 			"clingy_cats:gifted_owner": {
-				//TODO based on breed and personality stereotype(add revelant component group) and affection level add some effect to player like regeneration, speed boost, etc for a short duration
+				"remove": {
+					"component_groups": ["clingy_cats:gift_for_owner"]
+				}
 			}
 		}
 	}
