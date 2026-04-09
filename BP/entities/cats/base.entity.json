@@ -182,13 +182,13 @@
 					],
 					"causes_pregnancy": true,
 					"environment_requirements": {
-						"blocks" : [
-							"minecraft:wool",
-							"minecraft:carpet",
+						"blocks" : [ 
+							"wool",
+							"carpet",
 							"clingy_cats:cardboard_box",
-							"minecraft:furnace",
-							"minecraft:campfire",
-							"minecraft:bed"
+							"furnace",
+							"campfire",
+							"bed"
 						],
 						"count": 10,
 						"radius": 16
@@ -363,12 +363,12 @@
 				"minecraft:behavior.move_to_block": {
 					"priority": 1,
 					"target_blocks": [
-						"minecraft:wool",
-						"minecraft:carpet",
+						"wool",
+						"carpet",
 						"clingy_cats:cardboard_box",
-						"minecraft:furnace",
-						"minecraft:campfire",
-						"minecraft:bed"
+						"furnace",
+						"campfire",
+						"bed"
 					],
 					"target_selection_method": "nearest",
 					"search_range": 16,
@@ -417,12 +417,35 @@
 					"target": "self"
 				}
 				}
+			},
+			"clingy_cats:aggressive": {
+				"minecraft:behavior.nearest_attackable_target": {
+					"priority": 2,
+					"reselect_targets": true,
+					"entity_types": [
+						{
+							"filters": {
+								"test": "is_family",
+								"subject": "other",
+								"value": "player"
+							},
+							"max_dist": 10
+						},
+						{
+							"filters": {
+								"test": "is_family",
+								"subject": "other",
+								"value": "mob"
+							},
+							"max_dist": 10
+						}
+					]
+				}
 			}
 		},
 		"components": {
 			"minecraft:type_family": { "family": ["cat", "mob", "animal"] },
 			"minecraft:collision_box": { "width": 0.6, "height": 0.7 },
-			"minecraft:spawn_egg_interaction": {},
 			"minecraft:leashable": {},
 			"minecraft:balloonable": {
 				"mass": 0.6
@@ -480,10 +503,63 @@
 			"minecraft:jump.static": {},
 			"minecraft:can_climb": {},
 			"minecraft:damage_sensor": {
-				"triggers": {
-				"cause": "fall",
-				"deals_damage": "no"
-				}
+				"triggers": [
+					{
+						"cause": "fall",
+						"deals_damage": "no"
+					},
+					{
+						"on_damage": {
+							"filters": {
+								"test": "enum_property",
+								"domain": "clingy_cats:personality",
+								"subject": "self",
+								"value": "confident"
+							},
+							"event": "clingy_cats:on_hurt_confident",
+							"target": "self"
+						},
+						"deals_damage": "yes"
+					},
+					{
+						"on_damage": {
+							"filters": {
+								"test": "enum_property",
+								"domain": "clingy_cats:personality",
+								"subject": "self",
+								"value": "calm"
+							},
+							"event": "clingy_cats:on_hurt_calm",
+							"target": "self"
+						},
+						"deals_damage": "yes"
+					},
+					{
+						"on_damage": {
+							"filters": {
+								"all_of": [
+									{
+										"test": "enum_property",
+										"domain": "clingy_cats:personality",
+										"subject": "self",
+										"operator": "!=",
+										"value": "confident"
+									},
+									{
+										"test": "enum_property",
+										"domain": "clingy_cats:personality",
+										"subject": "self",
+										"operator": "!=",
+										"value": "calm"
+									}
+								]
+							},
+							"event": "clingy_cats:on_hurt",
+							"target": "self"
+						},
+						"deals_damage": "yes"
+					}
+				]
 			},
 			"minecraft:dweller": { //depend on breed and personality
 				"dwelling_type": "village",
@@ -511,15 +587,21 @@
 			"minecraft:behavior.float": {
 				"priority": 0
 			},
-			"minecraft:behavior.panic": { //depend on breed and personality
-				"priority": 1,
-				"speed_multiplier": 1.25
-			},
-			"minecraft:behavior.mount_pathing": { //depend on breed and personality
+			"minecraft:behavior.panic": {
 				"priority": 1,
 				"speed_multiplier": 1.25,
-				"target_dist": 0,
-				"track_target": true
+				"damage_sources": [ //depends on breed and personality, for example more confident cats might not be scared by as many things, while more anxious cats might be scared by more things
+					"campfire",
+					"fire",
+					"fire_tick",
+					"freezing",
+					"lightning",
+					"lava",
+					"magma",
+					"temperature",
+					"soul_campfire"
+				],
+				"ignore_mob_damage": true
 			},
 			"minecraft:behavior.leap_at_target": { //depend on breed and personality
 				"priority": 3,
@@ -546,7 +628,15 @@
 				"priority": 9
 			},
 			"minecraft:nameable": {},
-			"minecraft:persistent": {}
+			"minecraft:persistent": {},
+			"minecraft:on_target_acquired": {
+				"event": "clingy_cats:target_acquired",
+				"target": "self"
+			},
+			"minecraft:on_target_escape": {
+				"event": "clingy_cats:calm_down",
+				"target": "self"
+			}
 		},
 		"events": {
 			"clingy_cats:become_pregnant": {
@@ -649,6 +739,45 @@
 					}
 				]
 			},
+			"clingy_cats:on_hurt": {
+				"sequence": [
+					{ "set_property": { "clingy_cats:emotion": "scared" } },
+					{ "set_property": { "clingy_cats:state": "hissing" } }
+				]
+			},
+			"clingy_cats:on_hurt_confident": {
+				"sequence": [
+					{ "set_property": { "clingy_cats:emotion": "angry" } },
+					{ "set_property": { "clingy_cats:state": "hissing" } },
+					{ "add": { "component_groups": ["clingy_cats:aggressive"] } }
+				]
+			},
+			"clingy_cats:on_hurt_calm": {
+				"sequence": [
+					{ "set_property": { "clingy_cats:emotion": "angry" } },
+					{
+						"filters": {
+							"test": "enum_property",
+							"domain": "clingy_cats:emotion",
+							"subject": "self",
+							"operator": "!=",
+							"value": "scared"
+						},
+						"add": { "component_groups": ["clingy_cats:aggressive"] }
+					}
+				]
+			},
+			"clingy_cats:target_acquired": {
+				"set_property": { "clingy_cats:state": "hunting" }
+			},
+			"clingy_cats:calm_down": {
+				"sequence": [
+					{ "remove": { "component_groups": ["clingy_cats:aggressive"] } },
+					{ "set_property": { "clingy_cats:emotion": "happy" } },
+					{ "set_property": { "clingy_cats:state": "idle" } }
+				]
+			}
+			,
 			"clingy_cats:pet_slept_with_owner": {
 				//TODO based on breed and personality stereotype(add revelant component group) and affection level add some effect to player like regeneration, speed boost, etc for a short duration
 			},
