@@ -1,8 +1,6 @@
 import { Entity } from "@minecraft/server";
 import { TextureData, BREED_TEXTURES, EYE_COLORS, EYE_SHAPES, WHISKERS } from "../configs/catsbreed";
 
-
-
 // ============================================================
 // HELPERS
 // ============================================================
@@ -30,6 +28,134 @@ export function randomFrom<T>(arr: readonly T[]): T {
 
 export function uniqueValues(catalog: Record<number, TextureData>, key: keyof TextureData): string[] {
     return [...new Set(Object.values(catalog).map(d => d[key]))];
+}
+
+// ============================================================
+// PREGNANCY DATA STORE
+// ============================================================
+interface ParentGeneData {
+    typeId:     string;
+    traits:     TextureData;
+    eyeColor:   string;
+    eyeShape:   string;
+    whiskers:   string;
+}
+
+interface ConceptionRecord {
+    mother: ParentGeneData;
+    father: ParentGeneData | undefined;
+}
+
+/** Keyed by mother entity ID, cleared after givebirth fires. */
+const pregnancyMap = new Map<string, ConceptionRecord>();
+
+function captureGenes(entity: Entity): ParentGeneData {
+    return {
+        typeId:   entity.typeId,
+        traits:   getParentTraits(entity),
+        eyeColor: entity.getProperty("clingy_cats:eye_color") as string,
+        eyeShape: entity.getProperty("clingy_cats:eye_shape") as string,
+        whiskers: entity.getProperty("clingy_cats:whiskers")  as string,
+    };
+}
+
+/**
+ * Find the father: the nearest adult cat family member that is NOT the mother.
+ * Relies on both parents still being close right after the breed event fires.
+ */
+function findFather(mother: Entity): Entity | undefined {
+    return mother.dimension
+        .getEntities({ location: mother.location, maxDistance: 6, families: ["cat"] })
+        .filter(e => e.id !== mother.id && !e.hasComponent("minecraft:is_baby"))
+        .sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
+}
+
+// ============================================================
+// CROSS-BREED GENETICS
+// ============================================================
+
+/**
+ * From both parent breed catalogs, collect valid patterns and colors.
+ * Find any third breed whose catalog has at least one texture matching
+ * a pattern from either parent AND a color from either parent.
+ */
+function findMutationBreed(motherTypeId: string, fatherTypeId: string): string {
+    const parentBreeds = new Set([motherTypeId, fatherTypeId]);
+    const motherCatalog = BREED_TEXTURES[motherTypeId];
+    const fatherCatalog = BREED_TEXTURES[fatherTypeId] ?? motherCatalog;
+
+    const validPatterns = new Set([
+        ...uniqueValues(motherCatalog, "pattern"),
+        ...uniqueValues(fatherCatalog, "pattern"),
+    ]);
+    const validColors = new Set([
+        ...uniqueValues(motherCatalog, "color"),
+        ...uniqueValues(fatherCatalog, "color"),
+    ]);
+
+    const candidates: string[] = [];
+    for (const [breedId, catalog] of Object.entries(BREED_TEXTURES)) {
+        if (parentBreeds.has(breedId)) continue;
+        const hasMatch = Object.values(catalog).some(
+            e => validPatterns.has(e.pattern) && validColors.has(e.color)
+        );
+        if (hasMatch) candidates.push(breedId);
+    }
+
+    return candidates.length > 0
+        ? randomFrom(candidates)
+        : randomFrom([motherTypeId, fatherTypeId]);
+}
+
+/**
+ * 45% mother breed, 45% father breed, 10% mutation to a genetically compatible third breed.
+ * Falls back to mother if no father data.
+ */
+function determineBabyBreed(mother: ParentGeneData, father: ParentGeneData | undefined): string {
+    if (!father || father.typeId === mother.typeId) return mother.typeId;
+    const roll = Math.random();
+    if (roll < 0.45) return mother.typeId;
+    if (roll < 0.90) return father.typeId;
+    return findMutationBreed(mother.typeId, father.typeId);
+}
+
+// ============================================================
+// PREGNANCY HANDLERS (called from events/breed.ts)
+// ============================================================
+
+export function handleConception(mother: Entity): void {
+    const fatherEntity = findFather(mother);
+    pregnancyMap.set(mother.id, {
+        mother: captureGenes(mother),
+        father: fatherEntity ? captureGenes(fatherEntity) : undefined,
+    });
+}
+
+export function handleGiveBirth(mother: Entity): void {
+    const record = pregnancyMap.get(mother.id);
+    pregnancyMap.delete(mother.id);
+
+    const { mother: momGenes, father: dadGenes } = record ?? { mother: captureGenes(mother), father: undefined };
+    const babyBreed = determineBabyBreed(momGenes, dadGenes);
+
+    const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
+
+    // Tag before catspawn:wild fires next tick so that handler skips random appearance
+    baby.addTag("clingy_cats:script_born");
+    baby.triggerEvent("clingy_cats:script_born");
+
+    // Build fake parent entities for inheritance helpers using stored gene data
+    // We pass mother and father as Entity references — breed.ts helpers read properties directly.
+    // Since both parents are still valid at this point, use them.
+    const parentA = mother; // always available
+    const parentBEntity = dadGenes
+        ? mother.dimension
+              .getEntities({ location: mother.location, maxDistance: 12, families: ["cat"] })
+              .find(e => e.id !== mother.id && e.id !== baby.id && !e.hasComponent("minecraft:is_baby"))
+        : undefined;
+
+    assignInheritedAppearance(baby, parentA, parentBEntity);
+    assignInheritedEyesAndWhiskers(baby, parentA, parentBEntity);
 }
 
 /** Read baked traits directly from a parent entity's properties. */

@@ -1,4 +1,4 @@
 // main.ts
-import { registerCatSpawnSubscriber } from "./events/breed";
+import { registerCatSpawnSubscriber } from "./events/breedevent";
 
 registerCatSpawnSubscriber();
