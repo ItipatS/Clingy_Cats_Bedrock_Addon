@@ -9,6 +9,7 @@
 			"is_experimental": false,
 			"properties": {
 				"clingy_cats:sub_variant":{ "type": "int", "range": [0,300], "default": 0, "client_sync": true},
+				"clingy_cats:sound_variant": { "type": "enum", "values": ["default", "royal"], "default": "default", "client_sync": true},
 				"clingy_cats:state": {
 					"type": "enum",
 					"values": [
@@ -124,20 +125,6 @@
 			}
 		},
 		"component_groups": {
-			"clingy_cats:sound_default": {
-				"minecraft:ambient_sound_interval": {
-					"event_name": "ambient",
-					"value": 8,
-					"range": 16
-				}
-			},
-			"clingy_cats:sound_royal": {
-				"minecraft:ambient_sound_interval": {
-					"event_name": "ambient.royal",
-					"value": 8,
-					"range": 16
-				}
-			},
 			"clingy_cats:baby": {
 				"minecraft:is_baby": {},
 				"minecraft:scale": {
@@ -277,7 +264,7 @@
 					"items": ["fish", "salmon"]
 					},
 				"minecraft:behavior.avoid_mob_type": {
-					"avoid_mob_sound": "mob.clingy_cat.hiss",
+					"avoid_mob_sound": "screech",
 					"priority": 4,
 					"ignore_visibility": false,
 					"sprint_distance": 10,
@@ -345,7 +332,7 @@
 					]
 				},
 				"minecraft:behavior.move_towards_dwelling_restriction": {
-				"priority": 7
+					"priority": 7
 				}
 				
 			},
@@ -701,11 +688,11 @@
 				"randomize": [
 					{
 						"weight": 1,
-						"add": { "component_groups": ["clingy_cats:sound_default"] }
+						"set_property": {	"clingy_cats:sound_variant": "default" }
 					},
 					{
 						"weight": 1,
-						"add": { "component_groups": ["clingy_cats:sound_royal"] }
+						"set_property": {	"clingy_cats:sound_variant": "royal" }
 					}
 				]
 			},
@@ -773,8 +760,7 @@
 			"clingy_cats:on_hurt": {
 				"sequence": [
 					{ "set_property": { "clingy_cats:emotion": "scared" } },
-					{ "set_property": { "clingy_cats:state": "hissing" } },
-					{ "queue_command": { "command": "playsound mob.clingy_cat.hurt @s" } }
+					{ "set_property": { "clingy_cats:state": "hissing" } }
 				]
 			},
 			"clingy_cats:on_hurt_confident": {

@@ -1,4 +1,4 @@
-import { world , Entity } from "@minecraft/server";
+import { Entity } from "@minecraft/server";
 import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
 
 // ============================================================
@@ -248,37 +248,6 @@ export function applyWhiskerData(cat: Entity, idx: number, data: WhiskerData): v
     cat.setProperty("clingy_cats:whisker_index", idx);
 }
 
-export function logCatProperties(cat: Entity): void {
-    const props = [
-        "clingy_cats:sub_variant",
-        "clingy_cats:pattern",
-        "clingy_cats:color",
-        "clingy_cats:hairs",
-        "clingy_cats:tail",
-        "clingy_cats:snout",
-        "clingy_cats:head",
-        "clingy_cats:eye_shape",
-        "clingy_cats:eye_color",
-        "clingy_cats:eye_index",
-        "clingy_cats:whiskers",
-        "clingy_cats:whisker_index",
-        "clingy_cats:behavior_trait",
-        "clingy_cats:personality",
-        "clingy_cats:state",
-        "clingy_cats:emotion",
-        "clingy_cats:sound_variant",
-        "clingy_cats:favorite_food",
-        "clingy_cats:favorite_block",
-        "clingy_cats:affection_level",
-        "clingy_cats:trust_level",
-    ] as const;
-
-    world.sendMessage(`§e=== ${cat.typeId} (${cat.id}) ===`);
-    for (const key of props) {
-        world.sendMessage(`§7${key.replace("clingy_cats:", "")}: §f${cat.getProperty(key)}`);
-    }
-}
-
 export function assignRandomAppearance(cat: Entity): void {
     const catalog = BREED_TEXTURES[cat.typeId];
     const maxIdx = Object.keys(catalog).length - 1;
@@ -368,19 +337,16 @@ export function handleSpawnTestCats(cat: Entity): void {
     const flatIdx = BREED_OFFSETS[chosenBreed] + localIdx;
     applyTextureData(cat, flatIdx, catalog[localIdx]);
     assignRandomEyesAndWhiskers(cat);
-    logCatProperties(cat);
 }
 
 /** Wild spawn — full random appearance + eyes + whiskers. */
 export function handleWildSpawn(cat: Entity): void {
     assignRandomAppearance(cat);
     assignRandomEyesAndWhiskers(cat);
-    logCatProperties(cat);
 }
 
 /** Inherited spawn — appearance + eyes + whiskers from parents. */
 export function handleInheritedSpawn(baby: Entity, parentA: Entity, parentB?: Entity): void {
     assignInheritedAppearance(baby, parentA, parentB);
     assignInheritedEyesAndWhiskers(baby, parentA, parentB);
-    logCatProperties(baby);
 }

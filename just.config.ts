@@ -51,8 +51,8 @@ task("typescript", tscTask());
 task("bundle", bundleTask(bundleTaskOptions));
 task("build", series("typescript", "bundle"));
 
-// Clean
-task("clean-local", cleanTask(DEFAULT_CLEAN_DIRECTORIES));
+// Clean — exclude "temp" so finished files staged there are preserved
+task("clean-local", cleanTask(DEFAULT_CLEAN_DIRECTORIES.filter((d) => d !== "temp")));
 task("clean-collateral", cleanCollateralTask(STANDARD_CLEAN_PATHS));
 task("clean", parallel("clean-local", "clean-collateral"));
 
