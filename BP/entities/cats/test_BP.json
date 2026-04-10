@@ -8,8 +8,7 @@
 			"is_summonable": true,
 			"is_experimental": false,
 			"properties": {
-				"clingy_cats:sub_variant":{ "type": "int", "range": [0,126], "default": 0, "client_sync": true},
-				"clingy_cats:sound_variant": { "type": "enum", "values": ["default","royal"], "default": "default", "client_sync": true},
+				"clingy_cats:sub_variant":{ "type": "int", "range": [0,300], "default": 0, "client_sync": true},
 				"clingy_cats:state": {
 					"type": "enum",
 					"values": [
@@ -125,6 +124,20 @@
 			}
 		},
 		"component_groups": {
+			"clingy_cats:sound_default": {
+				"minecraft:ambient_sound_interval": {
+					"event_name": "ambient",
+					"value": 8,
+					"range": 16
+				}
+			},
+			"clingy_cats:sound_royal": {
+				"minecraft:ambient_sound_interval": {
+					"event_name": "ambient.royal",
+					"value": 8,
+					"range": 16
+				}
+			},
 			"clingy_cats:baby": {
 				"minecraft:is_baby": {},
 				"minecraft:scale": {
@@ -260,9 +273,11 @@
 					"within_radius": 16,
 					"can_get_scared": true,
 					"tempt_sound": "tempt",
+					"sound_interval": [0, 100],
 					"items": ["fish", "salmon"]
 					},
 				"minecraft:behavior.avoid_mob_type": {
+					"avoid_mob_sound": "mob.clingy_cat.hiss",
 					"priority": 4,
 					"ignore_visibility": false,
 					"sprint_distance": 10,
@@ -288,6 +303,40 @@
 									}
 								]
 							},
+							"max_dist": 24,
+							"max_flee": 32,
+							"sprint_speed_multiplier": 1.8,
+							"walk_speed_multiplier": 1.0
+						},
+						{
+							"filters": {
+								"all_of": [
+									{
+										"test": "is_family",
+										"subject": "other",
+										"value": "player"
+									},
+									{
+										"test": "enum_property",
+										"domain": "clingy_cats:behavior_trait",
+										"subject": "self",
+										"operator": "!=",
+										"value": "shy"
+									},
+									{
+										"test": "enum_property",
+										"domain": "clingy_cats:behavior_trait",
+										"subject": "self",
+										"operator": "!=",
+										"value": "friendly"
+									},
+									{
+										"test": "is_sneaking",
+										"subject": "other",
+										"value": false
+									}
+								]
+							},
 							"max_dist": 16,
 							"max_flee": 20,
 							"sprint_speed_multiplier": 1.5,
@@ -295,7 +344,9 @@
 						}
 					]
 				},
-				"minecraft:behavior.avoid_block": {}
+				"minecraft:behavior.move_towards_dwelling_restriction": {
+				"priority": 7
+				}
 				
 			},
 			"clingy_cats:tamed": {
@@ -632,7 +683,7 @@
 			},
 			"clingy_cats:born": {
 				"sequence": [
-					{ "remove": { "component_groups": ["clingy_cats:adult"] } },
+					{ "remove": { "component_groups": ["clingy_cats:adult", "clingy_cats:wild"] } },
 					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:tamed"] } },
 					{ "trigger": "clingy_cats:randomize_behavior_trait" },
 					{ "trigger": "clingy_cats:randomize_personality" },
@@ -646,11 +697,21 @@
 			"clingy_cats:randomize_personality": {},
 			"clingy_cats:randomize_favorite_food": {},
 			"clingy_cats:randomize_favorite_block": {},
-			"clingy_cats:randomize_sound_variant": {},
-
+			"clingy_cats:randomize_sound_variant": {
+				"randomize": [
+					{
+						"weight": 1,
+						"add": { "component_groups": ["clingy_cats:sound_default"] }
+					},
+					{
+						"weight": 1,
+						"add": { "component_groups": ["clingy_cats:sound_royal"] }
+					}
+				]
+			},
 			"clingy_cats:spawn": {
 				"sequence": [
-					{ "trigger": "clingy_cats:randomize_behavior_trait" }, 
+						{ "trigger": "clingy_cats:randomize_behavior_trait" }, 
 						{ "trigger": "clingy_cats:randomize_personality" },
 						{ "trigger": "clingy_cats:randomize_favorite_food" },
 						{ "trigger": "clingy_cats:randomize_favorite_block" },
@@ -712,7 +773,8 @@
 			"clingy_cats:on_hurt": {
 				"sequence": [
 					{ "set_property": { "clingy_cats:emotion": "scared" } },
-					{ "set_property": { "clingy_cats:state": "hissing" } }
+					{ "set_property": { "clingy_cats:state": "hissing" } },
+					{ "queue_command": { "command": "playsound mob.clingy_cat.hurt @s" } }
 				]
 			},
 			"clingy_cats:on_hurt_confident": {

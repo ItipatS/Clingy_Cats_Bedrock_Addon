@@ -1,5 +1,11 @@
+// scripts/main.ts
+import { world as world3, system as system2 } from "@minecraft/server";
+
 // scripts/events/breedevent.ts
-import { system } from "@minecraft/server";
+import { world as world2, system } from "@minecraft/server";
+
+// scripts/logics/breed.ts
+import { world } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -428,6 +434,20 @@ var WHISKERS = [
   "long_black"
   // 5
 ];
+var BREED_TEXTURES = {
+  "clingy_cats:all_black": ALL_BLACK_TEXTURES,
+  "clingy_cats:black": BLACK_TEXTURES,
+  "clingy_cats:british": BRITISH_TEXTURES,
+  "clingy_cats:calico": CALICO_TEXTURES,
+  "clingy_cats:jellie": JELLIE_TEXTURES,
+  "clingy_cats:ocelot": OCELOT_TEXTURES,
+  "clingy_cats:persian": PERSIAN_TEXTURES,
+  "clingy_cats:ragdoll": RAGDOLL_TEXTURES,
+  "clingy_cats:red": RED_TEXTURES,
+  "clingy_cats:siamese": SIAMESE_TEXTURES,
+  "clingy_cats:tabby": TABBY_TEXTURES,
+  "clingy_cats:white": WHITE_TEXTURES
+};
 var BREED_OFFSETS = {
   "clingy_cats:white": 0,
   "clingy_cats:black": 4,
@@ -449,21 +469,7 @@ var TEST_TEXTURES = Object.fromEntries(
     ])
   )
 );
-var BREED_TEXTURES = {
-  "clingy_cats:test": TEST_TEXTURES,
-  "clingy_cats:all_black": ALL_BLACK_TEXTURES,
-  "clingy_cats:black": BLACK_TEXTURES,
-  "clingy_cats:british": BRITISH_TEXTURES,
-  "clingy_cats:calico": CALICO_TEXTURES,
-  "clingy_cats:jellie": JELLIE_TEXTURES,
-  "clingy_cats:ocelot": OCELOT_TEXTURES,
-  "clingy_cats:persian": PERSIAN_TEXTURES,
-  "clingy_cats:ragdoll": RAGDOLL_TEXTURES,
-  "clingy_cats:red": RED_TEXTURES,
-  "clingy_cats:siamese": SIAMESE_TEXTURES,
-  "clingy_cats:tabby": TABBY_TEXTURES,
-  "clingy_cats:white": WHITE_TEXTURES
-};
+BREED_TEXTURES["clingy_cats:test"] = TEST_TEXTURES;
 
 // scripts/logics/breed.ts
 function distanceSq(a, b) {
@@ -619,9 +625,9 @@ function logCatProperties(cat) {
     "clingy_cats:affection_level",
     "clingy_cats:trust_level"
   ];
-  console.log(`[ClingyCats] === ${cat.typeId} (${cat.id}) ===`);
+  world.sendMessage(`\xA7e=== ${cat.typeId} (${cat.id}) ===`);
   for (const key of props) {
-    console.log(`[ClingyCats]   ${key.replace("clingy_cats:", "")}: ${cat.getProperty(key)}`);
+    world.sendMessage(`\xA77${key.replace("clingy_cats:", "")}: \xA7f${cat.getProperty(key)}`);
   }
 }
 function assignRandomAppearance(cat) {
@@ -704,33 +710,42 @@ function handleInheritedSpawn(baby, parentA, parentB) {
 function registerCatSpawnSubscriber() {
   system.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
+    world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
-      if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
-        sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-        return;
-      }
       system.runTimeout(() => {
+        if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
+          sourceEntity.removeTag("clingy_cats:not_wild_spawn");
+          world2.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          return;
+        }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
+          world2.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
         }
         handleWildSpawn(sourceEntity);
-      }, 3);
+      }, 1);
       return;
     }
     if (id === "clingycats:conception") {
       handleConception(sourceEntity);
+      world2.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
       handleGiveBirth(sourceEntity);
+      world2.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
       return;
     }
   });
+  world2.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/main.ts
-registerCatSpawnSubscriber();
+system2.run(() => {
+  registerCatSpawnSubscriber();
+  world3.sendMessage("ClingyCats script loaded!");
+});
 
 //# sourceMappingURL=../debug/main.js.map

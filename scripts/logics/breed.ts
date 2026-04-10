@@ -1,4 +1,4 @@
-import { Entity } from "@minecraft/server";
+import { world , Entity } from "@minecraft/server";
 import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
 
 // ============================================================
@@ -273,9 +273,9 @@ export function logCatProperties(cat: Entity): void {
         "clingy_cats:trust_level",
     ] as const;
 
-    console.log(`[ClingyCats] === ${cat.typeId} (${cat.id}) ===`);
+    world.sendMessage(`§e=== ${cat.typeId} (${cat.id}) ===`);
     for (const key of props) {
-        console.log(`[ClingyCats]   ${key.replace("clingy_cats:", "")}: ${cat.getProperty(key)}`);
+        world.sendMessage(`§7${key.replace("clingy_cats:", "")}: §f${cat.getProperty(key)}`);
     }
 }
 

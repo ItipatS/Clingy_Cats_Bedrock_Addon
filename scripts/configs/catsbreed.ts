@@ -281,6 +281,24 @@ export type WhiskerData = {
 export type CatData = TextureData & EyesData & WhiskerData;
 
 
+// ============================================================
+// BREED LOOKUP — maps typeId → its texture catalog
+// ============================================================
+export const BREED_TEXTURES: Record<string, Record<number, TextureData>> = {
+    "clingy_cats:all_black": ALL_BLACK_TEXTURES,
+    "clingy_cats:black":     BLACK_TEXTURES,
+    "clingy_cats:british":   BRITISH_TEXTURES,
+    "clingy_cats:calico":    CALICO_TEXTURES,
+    "clingy_cats:jellie":    JELLIE_TEXTURES,
+    "clingy_cats:ocelot":    OCELOT_TEXTURES,
+    "clingy_cats:persian":   PERSIAN_TEXTURES,
+    "clingy_cats:ragdoll":   RAGDOLL_TEXTURES,
+    "clingy_cats:red":       RED_TEXTURES,
+    "clingy_cats:siamese":   SIAMESE_TEXTURES,
+    "clingy_cats:tabby":     TABBY_TEXTURES,
+    "clingy_cats:white":     WHITE_TEXTURES,
+};
+
 export const BREED_OFFSETS: Record<string, number> = {
     "clingy_cats:white":     0,
     "clingy_cats:black":     4,
@@ -295,6 +313,7 @@ export const BREED_OFFSETS: Record<string, number> = {
     "clingy_cats:jellie":    160,
 };
 
+// Flat texture map for test entity — built after BREED_TEXTURES and BREED_OFFSETS
 export const TEST_TEXTURES: Record<number, TextureData> = Object.fromEntries(
     Object.entries(BREED_OFFSETS).flatMap(([breedId, offset]) =>
         Object.entries(BREED_TEXTURES[breedId]).map(([localIdx, data]) => [
@@ -304,21 +323,5 @@ export const TEST_TEXTURES: Record<number, TextureData> = Object.fromEntries(
     )
 );
 
-// ============================================================
-// BREED LOOKUP — maps typeId → its texture catalog
-// ============================================================
-export const BREED_TEXTURES: Record<string, Record<number, TextureData>> = {
-    "clingy_cats:test":      TEST_TEXTURES,
-    "clingy_cats:all_black": ALL_BLACK_TEXTURES,
-    "clingy_cats:black":     BLACK_TEXTURES,
-    "clingy_cats:british":   BRITISH_TEXTURES,
-    "clingy_cats:calico":    CALICO_TEXTURES,
-    "clingy_cats:jellie":    JELLIE_TEXTURES,
-    "clingy_cats:ocelot":    OCELOT_TEXTURES,
-    "clingy_cats:persian":   PERSIAN_TEXTURES,
-    "clingy_cats:ragdoll":   RAGDOLL_TEXTURES,
-    "clingy_cats:red":       RED_TEXTURES,
-    "clingy_cats:siamese":   SIAMESE_TEXTURES,
-    "clingy_cats:tabby":     TABBY_TEXTURES,
-    "clingy_cats:white":     WHITE_TEXTURES,
-};
+// Register test catalog after it's built
+BREED_TEXTURES["clingy_cats:test"] = TEST_TEXTURES;
