@@ -11,6 +11,8 @@ export type TextureData = {
     head:     string;
 };
 
+export type Breed = "all_black" | "black" | "british_shorthair" | "calico" | "jellie" | "ocelot" | "persian";
+
 // ============================================================
 // TEXTURE CATALOGS — index matches RP array order exactly
 // ============================================================
@@ -238,15 +240,75 @@ export const WHITE_TEXTURES: Record<number, TextureData> = {
 // ============================================================
 // EYE & WHISKER OPTIONS
 // ============================================================
-export const EYE_COLORS = ["emerald", "green", "yellow", "orange", "teal", "blue", "gray", "brown", "heterochromia1", "heterochromia2", "heterochromia3"] as const;
-export const EYE_SHAPES = ["almond", "narrow", "round"] as const;
-export const WHISKERS   = ["short_white","short_black", "medium_white","medium_black", "long_white","long_black" ] as const;
+export const EYE_COLORS = [
+    "emerald", 
+    "green", 
+    "yellow", 
+    "orange", 
+    "teal", 
+    "blue", 
+    "gray", 
+    "brown", 
+    "heterochromia1", 
+    "heterochromia2", 
+    "heterochromia3"
+] as const;
+
+export const EYE_SHAPES = [
+    "almond", 
+    "narrow", 
+    "round"
+] as const;
+
+export const WHISKERS = [
+    "short_white",   // 0
+    "short_black",   // 1
+    "medium_white",  // 2
+    "medium_black",  // 3
+    "long_white",    // 4
+    "long_black",    // 5
+] as const;
+
+export type EyesData = {
+    shape: typeof EYE_SHAPES[number];
+    color: typeof EYE_COLORS[number];
+};
+
+export type WhiskerData = {
+    length: typeof WHISKERS[number];
+};
+
+export type CatData = TextureData & EyesData & WhiskerData;
+
+
+export const BREED_OFFSETS: Record<string, number> = {
+    "clingy_cats:white":     0,
+    "clingy_cats:black":     4,
+    "clingy_cats:red":       24,
+    "clingy_cats:siamese":   52,
+    "clingy_cats:british":   58,
+    "clingy_cats:calico":    85,
+    "clingy_cats:persian":   101,
+    "clingy_cats:ragdoll":   109,
+    "clingy_cats:tabby":     114,
+    "clingy_cats:all_black": 136,
+    "clingy_cats:jellie":    160,
+};
+
+export const TEST_TEXTURES: Record<number, TextureData> = Object.fromEntries(
+    Object.entries(BREED_OFFSETS).flatMap(([breedId, offset]) =>
+        Object.entries(BREED_TEXTURES[breedId]).map(([localIdx, data]) => [
+            offset + Number(localIdx),
+            data,
+        ])
+    )
+);
 
 // ============================================================
 // BREED LOOKUP — maps typeId → its texture catalog
 // ============================================================
 export const BREED_TEXTURES: Record<string, Record<number, TextureData>> = {
-    "clingy_cats:test":      BRITISH_TEXTURES,
+    "clingy_cats:test":      TEST_TEXTURES,
     "clingy_cats:all_black": ALL_BLACK_TEXTURES,
     "clingy_cats:black":     BLACK_TEXTURES,
     "clingy_cats:british":   BRITISH_TEXTURES,

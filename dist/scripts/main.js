@@ -396,11 +396,61 @@ var WHITE_TEXTURES = {
   3: { pattern: "sphinx", color: "gray", hairs: "none", tail: "normal", snout: "normal", head: "flat" }
   // white4
 };
-var EYE_COLORS = ["emerald", "green", "yellow", "orange", "teal", "blue", "gray", "brown", "heterochromia1", "heterochromia2", "heterochromia3"];
-var EYE_SHAPES = ["almond", "narrow", "round"];
-var WHISKERS = ["short_white", "short_black", "medium_white", "medium_black", "long_white", "long_black"];
+var EYE_COLORS = [
+  "emerald",
+  "green",
+  "yellow",
+  "orange",
+  "teal",
+  "blue",
+  "gray",
+  "brown",
+  "heterochromia1",
+  "heterochromia2",
+  "heterochromia3"
+];
+var EYE_SHAPES = [
+  "almond",
+  "narrow",
+  "round"
+];
+var WHISKERS = [
+  "short_white",
+  // 0
+  "short_black",
+  // 1
+  "medium_white",
+  // 2
+  "medium_black",
+  // 3
+  "long_white",
+  // 4
+  "long_black"
+  // 5
+];
+var BREED_OFFSETS = {
+  "clingy_cats:white": 0,
+  "clingy_cats:black": 4,
+  "clingy_cats:red": 24,
+  "clingy_cats:siamese": 52,
+  "clingy_cats:british": 58,
+  "clingy_cats:calico": 85,
+  "clingy_cats:persian": 101,
+  "clingy_cats:ragdoll": 109,
+  "clingy_cats:tabby": 114,
+  "clingy_cats:all_black": 136,
+  "clingy_cats:jellie": 160
+};
+var TEST_TEXTURES = Object.fromEntries(
+  Object.entries(BREED_OFFSETS).flatMap(
+    ([breedId, offset]) => Object.entries(BREED_TEXTURES[breedId]).map(([localIdx, data]) => [
+      offset + Number(localIdx),
+      data
+    ])
+  )
+);
 var BREED_TEXTURES = {
-  "clingy_cats:test": BRITISH_TEXTURES,
+  "clingy_cats:test": TEST_TEXTURES,
   "clingy_cats:all_black": ALL_BLACK_TEXTURES,
   "clingy_cats:black": BLACK_TEXTURES,
   "clingy_cats:british": BRITISH_TEXTURES,
@@ -493,8 +543,7 @@ function handleGiveBirth(mother) {
   baby.triggerEvent("clingy_cats:born");
   const parentA = mother;
   const parentBEntity = dadGenes ? mother.dimension.getEntities({ location: mother.location, maxDistance: 12, families: ["cat"] }).find((e) => e.id !== mother.id && e.id !== baby.id && !e.hasComponent("minecraft:is_baby")) : void 0;
-  assignInheritedAppearance(baby, parentA, parentBEntity);
-  assignInheritedEyesAndWhiskers(baby, parentA, parentBEntity);
+  handleInheritedSpawn(baby, parentA, parentBEntity);
 }
 function getParentTraits(parent) {
   return {
@@ -537,6 +586,44 @@ function applyTextureData(cat, idx, data) {
   cat.setProperty("clingy_cats:pattern", data.pattern);
   cat.setProperty("clingy_cats:color", data.color);
 }
+function applyEyesData(cat, idx, data) {
+  cat.setProperty("clingy_cats:eye_shape", data.shape);
+  cat.setProperty("clingy_cats:eye_color", data.color);
+  cat.setProperty("clingy_cats:eye_index", idx);
+}
+function applyWhiskerData(cat, idx, data) {
+  cat.setProperty("clingy_cats:whiskers", data.length);
+  cat.setProperty("clingy_cats:whisker_index", idx);
+}
+function logCatProperties(cat) {
+  const props = [
+    "clingy_cats:sub_variant",
+    "clingy_cats:pattern",
+    "clingy_cats:color",
+    "clingy_cats:hairs",
+    "clingy_cats:tail",
+    "clingy_cats:snout",
+    "clingy_cats:head",
+    "clingy_cats:eye_shape",
+    "clingy_cats:eye_color",
+    "clingy_cats:eye_index",
+    "clingy_cats:whiskers",
+    "clingy_cats:whisker_index",
+    "clingy_cats:behavior_trait",
+    "clingy_cats:personality",
+    "clingy_cats:state",
+    "clingy_cats:emotion",
+    "clingy_cats:sound_variant",
+    "clingy_cats:favorite_food",
+    "clingy_cats:favorite_block",
+    "clingy_cats:affection_level",
+    "clingy_cats:trust_level"
+  ];
+  console.log(`[ClingyCats] === ${cat.typeId} (${cat.id}) ===`);
+  for (const key of props) {
+    console.log(`[ClingyCats]   ${key.replace("clingy_cats:", "")}: ${cat.getProperty(key)}`);
+  }
+}
 function assignRandomAppearance(cat) {
   const catalog = BREED_TEXTURES[cat.typeId];
   const maxIdx = Object.keys(catalog).length - 1;
@@ -566,28 +653,51 @@ function assignInheritedAppearance(baby, parentA, parentB) {
 function assignRandomEyesAndWhiskers(cat) {
   const shape = randomFrom(EYE_SHAPES);
   const color = randomFrom(EYE_COLORS);
-  cat.setProperty("clingy_cats:whiskers", randomFrom(WHISKERS));
-  cat.setProperty("clingy_cats:eye_shape", shape);
-  cat.setProperty("clingy_cats:eye_color", color);
+  const whisker = randomFrom(WHISKERS);
   const shapeIdx = EYE_SHAPES.indexOf(shape);
   const colorIdx = EYE_COLORS.indexOf(color);
-  cat.setProperty("clingy_cats:eye_index", shapeIdx * 8 + colorIdx);
+  const whiskerIdx = WHISKERS.indexOf(whisker);
+  applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape, color });
+  applyWhiskerData(cat, whiskerIdx, { length: whisker });
 }
 function assignInheritedEyesAndWhiskers(baby, parentA, parentB) {
   const sourceEyeColor = parentB && Math.random() < 0.5 ? parentB : parentA;
   const inheritedColor = sourceEyeColor.getProperty("clingy_cats:eye_color");
   const colorRoll = Math.random();
-  if (colorRoll < 0.9) baby.setProperty("clingy_cats:eye_color", inheritedColor);
-  else if (colorRoll < 0.99) baby.setProperty("clingy_cats:eye_color", randomFrom(EYE_COLORS.filter((c) => c !== "heterochromia1" && c !== "heterochromia2" && c !== "heterochromia3")));
-  else baby.setProperty("clingy_cats:eye_color", randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]));
+  let finalColor;
+  if (colorRoll < 0.9) finalColor = inheritedColor;
+  else if (colorRoll < 0.99) finalColor = randomFrom(EYE_COLORS.filter((c) => !c.startsWith("heterochromia")));
+  else finalColor = randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]);
   const sourceEyeShape = parentB && Math.random() < 0.5 ? parentB : parentA;
   const inheritedShapeIdx = EYE_SHAPES.indexOf(sourceEyeShape.getProperty("clingy_cats:eye_shape"));
   const shapeDrift = Math.random() < 0.85 ? Math.max(0, Math.min(EYE_SHAPES.length - 1, inheritedShapeIdx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * EYE_SHAPES.length);
-  baby.setProperty("clingy_cats:eye_shape", EYE_SHAPES[shapeDrift]);
+  const idx = shapeDrift * EYE_COLORS.length + EYE_COLORS.indexOf(finalColor);
+  const eyedata = { shape: EYE_SHAPES[shapeDrift], color: finalColor };
+  applyEyesData(baby, idx, eyedata);
   const sourceWhiskers = parentB && Math.random() < 0.5 ? parentB : parentA;
   const inheritedWhiskerIdx = WHISKERS.indexOf(sourceWhiskers.getProperty("clingy_cats:whiskers"));
   const whiskerDrift = Math.random() < 0.9 ? Math.max(0, Math.min(WHISKERS.length - 1, inheritedWhiskerIdx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * WHISKERS.length);
-  baby.setProperty("clingy_cats:whiskers", WHISKERS[whiskerDrift]);
+  applyWhiskerData(baby, whiskerDrift, { length: WHISKERS[whiskerDrift] });
+}
+function handleSpawnTestCats(cat) {
+  const breedIds = Object.keys(BREED_OFFSETS);
+  const chosenBreed = randomFrom(breedIds);
+  const catalog = BREED_TEXTURES[chosenBreed];
+  const localIdx = Number(randomFrom(Object.keys(catalog)));
+  const flatIdx = BREED_OFFSETS[chosenBreed] + localIdx;
+  applyTextureData(cat, flatIdx, catalog[localIdx]);
+  assignRandomEyesAndWhiskers(cat);
+  logCatProperties(cat);
+}
+function handleWildSpawn(cat) {
+  assignRandomAppearance(cat);
+  assignRandomEyesAndWhiskers(cat);
+  logCatProperties(cat);
+}
+function handleInheritedSpawn(baby, parentA, parentB) {
+  assignInheritedAppearance(baby, parentA, parentB);
+  assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+  logCatProperties(baby);
 }
 
 // scripts/events/breedevent.ts
@@ -600,16 +710,13 @@ function registerCatSpawnSubscriber() {
         sourceEntity.removeTag("clingy_cats:not_wild_spawn");
         return;
       }
-      if (sourceEntity.typeId === "clingy_cats:test") {
-        const breeds = Object.keys(BREED_TEXTURES).filter((b) => b !== "clingy_cats:test");
-        const catalog = BREED_TEXTURES[randomFrom(breeds)];
-        const idx = Math.floor(Math.random() * Object.keys(catalog).length);
-        applyTextureData(sourceEntity, idx, catalog[idx]);
-        assignRandomEyesAndWhiskers(sourceEntity);
-        return;
-      }
-      assignRandomAppearance(sourceEntity);
-      assignRandomEyesAndWhiskers(sourceEntity);
+      system.runTimeout(() => {
+        if (sourceEntity.typeId === "clingy_cats:test") {
+          handleSpawnTestCats(sourceEntity);
+          return;
+        }
+        handleWildSpawn(sourceEntity);
+      }, 3);
       return;
     }
     if (id === "clingycats:conception") {

@@ -1,5 +1,5 @@
 import { Entity } from "@minecraft/server";
-import { TextureData, BREED_TEXTURES, EYE_COLORS, EYE_SHAPES, WHISKERS } from "../configs/catsbreed";
+import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
 
 // ============================================================
 // HELPERS
@@ -163,8 +163,7 @@ export function handleGiveBirth(mother: Entity): void {
               .find(e => e.id !== mother.id && e.id !== baby.id && !e.hasComponent("minecraft:is_baby"))
         : undefined;
 
-    assignInheritedAppearance(baby, parentA, parentBEntity);
-    assignInheritedEyesAndWhiskers(baby, parentA, parentBEntity);
+    handleInheritedSpawn(baby, parentA, parentBEntity);
 }
 
 /** Read baked traits directly from a parent entity's properties. */
@@ -238,6 +237,48 @@ export function applyTextureData(cat: Entity, idx: number, data: TextureData): v
     cat.setProperty("clingy_cats:color",   data.color);
 }
 
+export function applyEyesData(cat: Entity, idx: number, data: EyesData): void {
+    cat.setProperty("clingy_cats:eye_shape", data.shape);
+    cat.setProperty("clingy_cats:eye_color", data.color);
+    cat.setProperty("clingy_cats:eye_index", idx);
+}
+
+export function applyWhiskerData(cat: Entity, idx: number, data: WhiskerData): void {
+    cat.setProperty("clingy_cats:whiskers", data.length);
+    cat.setProperty("clingy_cats:whisker_index", idx);
+}
+
+export function logCatProperties(cat: Entity): void {
+    const props = [
+        "clingy_cats:sub_variant",
+        "clingy_cats:pattern",
+        "clingy_cats:color",
+        "clingy_cats:hairs",
+        "clingy_cats:tail",
+        "clingy_cats:snout",
+        "clingy_cats:head",
+        "clingy_cats:eye_shape",
+        "clingy_cats:eye_color",
+        "clingy_cats:eye_index",
+        "clingy_cats:whiskers",
+        "clingy_cats:whisker_index",
+        "clingy_cats:behavior_trait",
+        "clingy_cats:personality",
+        "clingy_cats:state",
+        "clingy_cats:emotion",
+        "clingy_cats:sound_variant",
+        "clingy_cats:favorite_food",
+        "clingy_cats:favorite_block",
+        "clingy_cats:affection_level",
+        "clingy_cats:trust_level",
+    ] as const;
+
+    console.log(`[ClingyCats] === ${cat.typeId} (${cat.id}) ===`);
+    for (const key of props) {
+        console.log(`[ClingyCats]   ${key.replace("clingy_cats:", "")}: ${cat.getProperty(key)}`);
+    }
+}
+
 export function assignRandomAppearance(cat: Entity): void {
     const catalog = BREED_TEXTURES[cat.typeId];
     const maxIdx = Object.keys(catalog).length - 1;
@@ -270,29 +311,27 @@ export function assignInheritedAppearance(baby: Entity, parentA: Entity, parentB
 }
 
 export function assignRandomEyesAndWhiskers(cat: Entity): void {
-    
+    const shape  = randomFrom(EYE_SHAPES);
+    const color  = randomFrom(EYE_COLORS);
+    const whisker = randomFrom(WHISKERS);
 
-    const shape = randomFrom(EYE_SHAPES);
-    const color = randomFrom(EYE_COLORS);
-    
-    cat.setProperty("clingy_cats:whiskers",   randomFrom(WHISKERS));
+    const shapeIdx  = EYE_SHAPES.indexOf(shape);
+    const colorIdx  = EYE_COLORS.indexOf(color);
+    const whiskerIdx = WHISKERS.indexOf(whisker);
 
-    cat.setProperty("clingy_cats:eye_shape",  shape);
-    cat.setProperty("clingy_cats:eye_color",  color);
-    
-    const shapeIdx = EYE_SHAPES.indexOf(shape);
-    const colorIdx = EYE_COLORS.indexOf(color);
-    cat.setProperty("clingy_cats:eye_index", shapeIdx * 8 + colorIdx);
+    applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape, color });
+    applyWhiskerData(cat, whiskerIdx, { length: whisker });
 }
 
 export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, parentB?: Entity): void {
     // Eye color — 50/50 which parent, then 90% exact inherit, 9% random non-hetero, 1% heterochromia
     const sourceEyeColor = (parentB && Math.random() < 0.5) ? parentB : parentA;
-    const inheritedColor = sourceEyeColor.getProperty("clingy_cats:eye_color") as string;
+    const inheritedColor = sourceEyeColor.getProperty("clingy_cats:eye_color") as typeof EYE_COLORS[number];
     const colorRoll = Math.random();
-    if (colorRoll < 0.90)      baby.setProperty("clingy_cats:eye_color", inheritedColor);
-    else if (colorRoll < 0.99) baby.setProperty("clingy_cats:eye_color", randomFrom(EYE_COLORS.filter(c => c !== "heterochromia1" && c !== "heterochromia2" && c !== "heterochromia3")));
-    else                       baby.setProperty("clingy_cats:eye_color", randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]));
+    let finalColor: typeof EYE_COLORS[number];
+     if (colorRoll < 0.90)      finalColor = inheritedColor;
+    else if (colorRoll < 0.99) finalColor = randomFrom(EYE_COLORS.filter(c => !c.startsWith("heterochromia")));
+    else                       finalColor = randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]);
 
     // Eye shape — 50/50 which parent, then drift ±1 from that parent's shape
     const sourceEyeShape = (parentB && Math.random() < 0.5) ? parentB : parentA;
@@ -300,7 +339,11 @@ export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, pa
     const shapeDrift = Math.random() < 0.85
         ? Math.max(0, Math.min(EYE_SHAPES.length - 1, inheritedShapeIdx + Math.floor(Math.random() * 3) - 1))
         : Math.floor(Math.random() * EYE_SHAPES.length);
-    baby.setProperty("clingy_cats:eye_shape", EYE_SHAPES[shapeDrift]);
+
+    const idx = shapeDrift * EYE_COLORS.length + EYE_COLORS.indexOf(finalColor);
+    const eyedata = { shape: EYE_SHAPES[shapeDrift], color: finalColor };
+
+    applyEyesData(baby, idx, eyedata);
 
     // Whiskers — 50/50 which parent, then drift ±1 from that parent's whiskers
     const sourceWhiskers = (parentB && Math.random() < 0.5) ? parentB : parentA;
@@ -308,5 +351,36 @@ export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, pa
     const whiskerDrift = Math.random() < 0.90
         ? Math.max(0, Math.min(WHISKERS.length - 1, inheritedWhiskerIdx + Math.floor(Math.random() * 3) - 1))
         : Math.floor(Math.random() * WHISKERS.length);
-    baby.setProperty("clingy_cats:whiskers", WHISKERS[whiskerDrift]);
+
+    applyWhiskerData(baby, whiskerDrift, { length: WHISKERS[whiskerDrift] });
+}
+
+// ============================================================
+// GROUPED SPAWN HANDLERS
+// ============================================================
+
+/** Test entity spawn — picks a random breed catalog and applies a random flat-indexed texture. */
+export function handleSpawnTestCats(cat: Entity): void {
+    const breedIds = Object.keys(BREED_OFFSETS);
+    const chosenBreed = randomFrom(breedIds);
+    const catalog = BREED_TEXTURES[chosenBreed];
+    const localIdx = Number(randomFrom(Object.keys(catalog)));
+    const flatIdx = BREED_OFFSETS[chosenBreed] + localIdx;
+    applyTextureData(cat, flatIdx, catalog[localIdx]);
+    assignRandomEyesAndWhiskers(cat);
+    logCatProperties(cat);
+}
+
+/** Wild spawn — full random appearance + eyes + whiskers. */
+export function handleWildSpawn(cat: Entity): void {
+    assignRandomAppearance(cat);
+    assignRandomEyesAndWhiskers(cat);
+    logCatProperties(cat);
+}
+
+/** Inherited spawn — appearance + eyes + whiskers from parents. */
+export function handleInheritedSpawn(baby: Entity, parentA: Entity, parentB?: Entity): void {
+    assignInheritedAppearance(baby, parentA, parentB);
+    assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+    logCatProperties(baby);
 }
