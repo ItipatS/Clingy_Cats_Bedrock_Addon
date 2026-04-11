@@ -169,6 +169,7 @@
         "jellie22": "textures/entity/cat/jellie22",
         "jellie23": "textures/entity/cat/jellie23",
         "jellie24": "textures/entity/cat/jellie24",
+        "ocelot": "textures/entity/cat/ocelot",
         "all_black": "textures/entity/cat/all_black",
         "all_black2": "textures/entity/cat/all_black2",
         "all_black3": "textures/entity/cat/all_black3",
@@ -226,6 +227,7 @@
         "eyes32": "textures/entity/cat/cat_eyes32",
         "eyes33": "textures/entity/cat/cat_eyes33",
         "eyes34": "textures/entity/cat/cat_eyes34",
+        "whiskers1": "textures/entity/cat/whiskers1",
         "whiskers2": "textures/entity/cat/whiskers2",
         "whiskers3": "textures/entity/cat/whiskers3",
         "whiskers4": "textures/entity/cat/whiskers4",
@@ -233,38 +235,34 @@
         "whiskers6": "textures/entity/cat/whiskers6"
       },
       "geometry": {
-        "default":  "geometry.clingy_cats.cats",
-        "eyes":     "geometry.clingy_cats.eyes",
-        "whiskers": "geometry.clingy_cats.whiskers"
+        "default":  "geometry.clingy_cats.cats"
       },
       "scripts": {
-        "scale": "query.is_baby ? (1 / 0.4) : 1.0",
-        "pre_animation": [
-          "variable.state = 0.0;",
-          "variable.liedownamount = 0.0;",
-          "variable.liedownamounttail = 0.0;",
-          "variable.lieonplayer = 0.0;"
-        ]
+        "scale": "query.is_baby ? (1 / 0.2) : 1.0"
       },
       "animations": {
-        "sneak": "animation.cat.sneak",
-        "walk": "animation.cat.walk",
-        "sprint": "animation.cat.sprint",
-        "sit": "animation.cat.sit",
+        "walk":           "animation.clingy_cats.walk",
+        "sneak":          "animation.clingy_cats.hunting",
+        "sit":            "animation.clingy_cats.sit",
+        "lie_down":       "animation.clingy_cats.sleep",
         "look_at_target": "animation.common.look_at_target",
-        "baby_transform": "animation.cat.baby_transform",
-        "lie_down": "animation.cat.lie_down",
-        "baby_lie_down": "animation.cat.baby_lie_down",
-        "baby_sit": "animation.cat.baby_sit"
+        "lick_stand":     "animation.clingy_cats.lick_stand",
+        "lick_stand2":    "animation.clingy_cats.lick_stand2",
+        "sleep":          "animation.clingy_cats.sleep",
+        "sleep2":         "animation.clingy_cats.sleep2",
+        "sleep3":         "animation.clingy_cats.sleep3",
+        "hunt":           "animation.clingy_cats.hunting",
+        "angry":          "animation.clingy_cats.angry",
+        "rub":            "animation.clingy_cats.rub"
+
       },
       "animation_controllers": [
-        { "look_at_target": "controller.animation.cat.look_at_target" },
-        { "move":           "controller.animation.cat.move" }
+        { "look_at_target": "controller.animation.clingy_cats.look_at_target" },
+        { "state":          "controller.animation.clingy_cats.state" },
+        { "locomotion":     "controller.animation.clingy_cats.locomotion" }
       ],
       "render_controllers": [
-        "controller.render.clingy_cats.cats",
-        "controller.render.clingy_cats.eyes",
-        "controller.render.clingy_cats.whiskers"
+        "controller.render.clingy_cats.cats"
       ],
       "spawn_egg": {
         "texture": "test_spawn_egg",

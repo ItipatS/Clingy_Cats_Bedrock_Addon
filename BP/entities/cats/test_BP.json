@@ -168,6 +168,8 @@
 					"causes_pregnancy": true,
 					"environment_requirements": {
 						"blocks" : [ 
+							"wool",
+							"carpet",
 							"bed",
 							"furnace",
 							"campfire",
@@ -381,6 +383,8 @@
 				"minecraft:behavior.move_to_block": {
 					"priority": 1,
 					"target_blocks": [
+						"wool",
+						"carpet",
 						"furnace",
 						"bed",
 						"campfire",
