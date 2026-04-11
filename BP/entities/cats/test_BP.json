@@ -1296,6 +1296,15 @@
 				"remove": {
 					"component_groups": ["clingy_cats:gift_for_owner"]
 				}
+			},
+			"clingy_cats:idle_tick": {
+				"randomize": [
+					{ "weight": 4, "set_property": { "clingy_cats:state": "idle" } },
+					{ "weight": 3, "set_property": { "clingy_cats:state": "sitting" } },
+					{ "weight": 2, "set_property": { "clingy_cats:state": "grooming" } },
+					{ "weight": 1, "set_property": { "clingy_cats:state": "sleeping" } },
+					{ "weight": 1, "set_property": { "clingy_cats:state": "stretching" } }
+				]
 			}
 		}
 	}
