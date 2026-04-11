@@ -313,8 +313,8 @@ export const BREED_OFFSETS: Record<string, number> = {
     "clingy_cats:jellie":    160,
 };
 
-// config — all randomize pools in one place
-const TRAIT_POOL = [
+
+export const TRAIT_POOL = [
     { weight: 1, trait: "lazy",        group: "clingy_cats:trait_lazy" },
     { weight: 1, trait: "active",      group: "clingy_cats:trait_active" },
     { weight: 1, trait: "curious",     group: "clingy_cats:trait_curious" },
@@ -323,7 +323,7 @@ const TRAIT_POOL = [
     { weight: 1, trait: "independent", group: "clingy_cats:trait_independent" },
 ] as const;
 
-const PERSONALITY_POOL = [
+export const PERSONALITY_POOL = [
     { weight: 1, personality: "affectionate", group: "clingy_cats:personality_affectionate" },
     { weight: 1, personality: "aloof",        group: "clingy_cats:personality_aloof" },
     { weight: 1, personality: "playful",      group: "clingy_cats:personality_playful" },
@@ -332,7 +332,7 @@ const PERSONALITY_POOL = [
     { weight: 1, personality: "confident",    group: "clingy_cats:personality_confident" },
 ] as const;
 
-const FAVORITE_FOOD_POOL = [
+export const FAVORITE_FOOD_POOL = [
     { weight: 3, food: "cod",        group: "clingy_cats:favorite_food_cod" },
     { weight: 3, food: "salmon",     group: "clingy_cats:favorite_food_salmon" },
     { weight: 2, food: "tropical",   group: "clingy_cats:favorite_food_tropical" },
@@ -344,7 +344,7 @@ const FAVORITE_FOOD_POOL = [
     { weight: 1, food: "treat_fancy",group: "clingy_cats:favorite_food_treat_fancy" },
 ] as const;
 
-const FAVORITE_BLOCK_POOL = [
+export const FAVORITE_BLOCK_POOL = [
     { weight: 1, block: "bed",   group: "clingy_cats:favorite_block_bed" },
     { weight: 1, block: "soft",  group: "clingy_cats:favorite_block_soft" },
     { weight: 1, block: "warm",  group: "clingy_cats:favorite_block_warm" },

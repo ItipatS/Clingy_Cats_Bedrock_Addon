@@ -1,5 +1,7 @@
 import { Entity } from "@minecraft/server";
-import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
+import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS 
+    , TRAIT_POOL, PERSONALITY_POOL, FAVORITE_FOOD_POOL, FAVORITE_BLOCK_POOL
+} from '../configs/catsbreed';
 
 // ============================================================
 // HELPERS
@@ -322,6 +324,35 @@ export function assignInheritedEyesAndWhiskers(baby: Entity, parentA: Entity, pa
         : Math.floor(Math.random() * WHISKERS.length);
 
     applyWhiskerData(baby, whiskerDrift, { length: WHISKERS[whiskerDrift] });
+}
+
+function weightedRandom<T extends { weight: number }>(pool: readonly T[]): T {
+    const total = pool.reduce((sum, e) => sum + e.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of pool) {
+        roll -= entry.weight;
+        if (roll <= 0) return entry;
+    }
+    return pool[pool.length - 1];
+}
+
+export function assignRandomPersonality(cat: Entity): void {
+    const trait       = weightedRandom(TRAIT_POOL);
+    const personality = weightedRandom(PERSONALITY_POOL);
+    const food        = weightedRandom(FAVORITE_FOOD_POOL);
+    const block       = weightedRandom(FAVORITE_BLOCK_POOL);
+
+    // Script triggers the specific group event directly
+    cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
+    cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
+    cat.triggerEvent(`clingy_cats:set_food_${food.food}`);
+    cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
+
+    // And set properties directly
+    cat.setProperty("clingy_cats:behavior_trait", trait.trait);
+    cat.setProperty("clingy_cats:personality",    personality.personality);
+    cat.setProperty("clingy_cats:favorite_food",  food.food);
+    cat.setProperty("clingy_cats:favorite_block", block.block);;
 }
 
 // ============================================================

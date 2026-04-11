@@ -468,6 +468,474 @@
 						}
 					]
 				}
+			},
+
+			"clingy_cats:trait_lazy": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [180, 400],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 3,
+					"max_look_count": 8,
+					"min_look_time": 80,
+					"max_look_time": 200,
+					"min_angle_of_view_horizontal": 20.0,
+					"max_angle_of_view_horizontal": 40.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 120
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 0.4,
+					"interval": 240
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.4,
+					"within_radius": 8,
+					"can_get_scared": true,
+					"items": ["fish", "salmon", "tropical_fish"]
+				}
+			},
+
+			"clingy_cats:trait_active": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [20, 80],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 1,
+					"max_look_count": 3,
+					"min_look_time": 20,
+					"max_look_time": 60,
+					"min_angle_of_view_horizontal": 30.0,
+					"max_angle_of_view_horizontal": 90.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 30
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 1.1,
+					"interval": 30
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.8,
+					"within_radius": 24,
+					"can_get_scared": true,
+					"items": ["fish", "salmon", "tropical_fish"]
+				},
+				"minecraft:behavior.nearest_prioritized_attackable_target": {
+					"priority": 2,
+					"reselect_targets": true,
+					"within_radius": 16.0,
+					"entity_types": [
+						{
+							"filters": {
+								"test": "is_family",
+								"subject": "other",
+								"value": "rabbit"
+							},
+							"max_dist": 8
+						},
+						{
+							"filters": {
+								"all_of": [
+									{ "test": "is_family", "subject": "other", "value": "baby_turtle" },
+									{ "test": "in_water", "subject": "other", "operator": "!=", "value": true }
+								]
+							},
+							"max_dist": 8
+						}
+					]
+				}
+			},
+
+			"clingy_cats:trait_curious": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [40, 120],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 3,
+					"max_look_count": 6,
+					"min_look_time": 30,
+					"max_look_time": 80,
+					"min_angle_of_view_horizontal": 45.0,
+					"max_angle_of_view_horizontal": 120.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 40
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 0.8,
+					"interval": 80
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.6,
+					"within_radius": 16,
+					"can_get_scared": false,
+					"items": ["fish", "salmon", "tropical_fish"]
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 10.0,
+					"probability": 0.08,
+					"min_look_time": 40,
+					"max_look_time": 120
+				}
+			},
+
+			"clingy_cats:trait_shy": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [80, 200],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 2,
+					"max_look_count": 4,
+					"min_look_time": 60,
+					"max_look_time": 120,
+					"min_angle_of_view_horizontal": 20.0,
+					"max_angle_of_view_horizontal": 50.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 80
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 0.6,
+					"interval": 160
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.5,
+					"within_radius": 8,
+					"can_get_scared": true,
+					"items": ["fish", "salmon", "tropical_fish"]
+				},
+				"minecraft:behavior.avoid_mob_type": {
+					"priority": 4,
+					"ignore_visibility": false,
+					"sprint_distance": 10,
+					"avoid_mob_sound": "entity.cat.hiss",
+					"control_flags": ["jump", "move"],
+					"on_escape_event": {
+						"event": "clingy_cats:scared_by_player",
+						"target": "self"
+					},
+					"sound_interval": [8, 3],
+					"entity_types": [
+						{
+							"filters": {
+								"all_of": [
+									{ "test": "is_family", "subject": "other", "value": "player" },
+									{ "test": "is_sneaking", "subject": "other", "value": false }
+								]
+							},
+							"max_dist": 16,
+							"max_flee": 24,
+							"sprint_speed_multiplier": 1.8,
+							"walk_speed_multiplier": 1.0
+						}
+					]
+				}
+			},
+
+			"clingy_cats:trait_friendly": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [40, 120],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 2,
+					"max_look_count": 5,
+					"min_look_time": 30,
+					"max_look_time": 80,
+					"min_angle_of_view_horizontal": 30.0,
+					"max_angle_of_view_horizontal": 80.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 40
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 0.7,
+					"interval": 80
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.7,
+					"within_radius": 24,
+					"can_get_scared": false,
+					"items": ["fish", "salmon", "tropical_fish"]
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 12.0,
+					"probability": 0.12,
+					"min_look_time": 60,
+					"max_look_time": 180
+				}
+			},
+
+			"clingy_cats:trait_independent": {
+				"minecraft:timer": {
+					"looping": true,
+					"time": [80, 200],
+					"time_down_event": {
+						"event": "clingy_cats:idle_tick",
+						"target": "self"
+					}
+				},
+				"minecraft:behavior.random_look_around_and_sit": {
+					"continue_if_leashed": true,
+					"continue_sitting_on_reload": true,
+					"priority": 9,
+					"min_look_count": 2,
+					"max_look_count": 4,
+					"min_look_time": 60,
+					"max_look_time": 120,
+					"min_angle_of_view_horizontal": 30.0,
+					"max_angle_of_view_horizontal": 60.0,
+					"probability": 0.02,
+					"random_look_around_cooldown": 80
+				},
+				"minecraft:behavior.random_stroll": {
+					"priority": 10,
+					"speed_multiplier": 0.9,
+					"interval": 120
+				},
+				"minecraft:behavior.tempt": {
+					"priority": 5,
+					"speed_multiplier": 0.5,
+					"within_radius": 10,
+					"can_get_scared": true,
+					"items": ["fish", "salmon", "tropical_fish"]
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 6.0,
+					"probability": 0.01
+				},
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 0.8,
+					"start_distance": 20,
+					"stop_distance": 8
+				}
+			},
+
+			"clingy_cats:personality_affectionate": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 1.1,
+					"start_distance": 6,
+					"stop_distance": 1.5
+				},
+				"minecraft:behavior.pet_sleep_with_owner": {
+					"priority": 2,
+					"speed_multiplier": 1.2,
+					"search_radius": 10,
+					"search_height": 10,
+					"goal_radius": 1.0
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 8.0,
+					"probability": 0.1,
+					"min_look_time": 60,
+					"max_look_time": 160
+				}
+			},
+
+			"clingy_cats:personality_aloof": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 0.8,
+					"start_distance": 20,
+					"stop_distance": 6
+				},
+				"minecraft:behavior.stay_while_sitting": {
+					"priority": 3
+				},
+				"minecraft:behavior.ocelot_sit_on_block": {
+					"priority": 8,
+					"speed_multiplier": 1.0
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 6.0,
+					"probability": 0.02,
+					"look_time": [
+						20,
+						60
+					]
+				}
+			},
+
+			"clingy_cats:personality_playful": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 1.0,
+					"start_distance": 10,
+					"stop_distance": 3
+				},
+				"minecraft:behavior.ocelot_sit_on_block": {
+					"priority": 8,
+					"speed_multiplier": 1.0
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 10.0,
+					"probability": 0.1,
+					"look_time": [
+						20,
+						60
+					]
+				}
+			},
+
+			"clingy_cats:personality_calm": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 0.9,
+					"start_distance": 12,
+					"stop_distance": 3
+				},
+				"minecraft:behavior.panic": {
+					"priority": 1,
+					"speed_multiplier": 0.8,
+					"damage_sources": [
+						"lava",
+						"lightning",
+						"freezing"
+					],
+					"ignore_mob_damage": true
+				},
+				"minecraft:behavior.stay_while_sitting": {
+					"priority": 3
+				}
+			},
+
+			"clingy_cats:personality_anxious": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 1.0,
+					"start_distance": 8,
+					"stop_distance": 2
+				},
+				"minecraft:behavior.panic": {
+					"priority": 1,
+					"speed_multiplier": 1.8,
+					"damage_sources": [
+						"campfire",
+						"fire",
+						"fire_tick",
+						"freezing",
+						"lightning",
+						"lava",
+						"magma",
+						"temperature",
+						"soul_campfire",
+						"drowning",
+						"thorns",
+						"wither"
+					],
+					"ignore_mob_damage": true
+				},
+				"minecraft:behavior.avoid_mob_type": {
+					"priority": 4,
+					"ignore_visibility": false,
+					"sprint_distance": 16,
+					"avoid_mob_sound": "entity.cat.hiss",
+					"control_flags": ["jump", "move"],
+					"on_escape_event": {
+						"event": "clingy_cats:scared_by_player",
+						"target": "self"
+					},
+					"sound_interval": [4, 2],
+					"entity_types": [
+						{
+							"filters": {
+								"all_of": [
+									{ "test": "is_family", "subject": "other", "value": "player" },
+									{ "test": "is_sneaking", "subject": "other", "value": false }
+								]
+							},
+							"max_dist": 20,
+							"max_flee": 30,
+							"sprint_speed_multiplier": 2.0,
+							"walk_speed_multiplier": 1.2
+						}
+					]
+				}
+			},
+
+			"clingy_cats:personality_confident": {
+				"minecraft:behavior.follow_owner": {
+					"priority": 4,
+					"speed_multiplier": 1.0,
+					"start_distance": 10,
+					"stop_distance": 2
+				},
+				"minecraft:behavior.panic": {
+					"priority": 1,
+					"speed_multiplier": 0.6,
+					"damage_sources": [
+						"lava",
+						"lightning"
+					],
+					"ignore_mob_damage": true
+				},
+				"minecraft:behavior.avoid_mob_type": {
+					"priority": 4,
+					"entity_types": []
+				},
+				"minecraft:behavior.look_at_player": {
+					"priority": 11,
+					"target_distance": 16.0,
+					"probability": 0.15,
+					"look_time": [
+						20,
+						60
+					]
+				}
 			}
 		},
 		"components": {
@@ -651,9 +1119,18 @@
 				"sprint_speed_multiplier": 1.33,
 				"walk_speed_multiplier": 0.8
 			},
-			"minecraft:behavior.random_stroll": {
-				"priority": 8,
-				"speed_multiplier": 0.8
+			"minecraft:behavior.random_look_around_and_sit": {
+				"continue_if_leashed": true,
+				"continue_sitting_on_reload": true,
+				"priority": 9,
+				"min_look_count": 2,
+				"max_look_count": 5,
+				"min_look_time": 40,
+				"max_look_time": 100,
+				"min_angle_of_view_horizontal": 30.0,
+				"max_angle_of_view_horizontal": 60.0,
+				"probability": 0.02,
+				"random_look_around_cooldown": 60
 			},
 			"minecraft:behavior.look_at_player": {
 				"priority": 9
@@ -670,6 +1147,12 @@
 			}
 		},
 		"events": {
+			"clingy_cats:set_trait_lazy":        { "add": { "component_groups": ["clingy_cats:trait_lazy"] } },
+			"clingy_cats:set_trait_active":      { "add": { "component_groups": ["clingy_cats:trait_active"] } },
+			"clingy_cats:set_trait_curious":     { "add": { "component_groups": ["clingy_cats:trait_curious"] } },
+			"clingy_cats:set_trait_shy":         { "add": { "component_groups": ["clingy_cats:trait_shy"] } },
+			"clingy_cats:set_trait_friendly":    { "add": { "component_groups": ["clingy_cats:trait_friendly"] } },
+			"clingy_cats:set_trait_independent": { "add": { "component_groups": ["clingy_cats:trait_independent"] } },
 			"clingy_cats:visible": {
 				"add": {
 					"component_groups": ["clingy_cats:visible"]
@@ -691,18 +1174,9 @@
 				"sequence": [
 					{ "remove": { "component_groups": ["clingy_cats:adult", "clingy_cats:wild"] } },
 					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:tamed"] } },
-					{ "trigger": "clingy_cats:randomize_behavior_trait" },
-					{ "trigger": "clingy_cats:randomize_personality" },
-					{ "trigger": "clingy_cats:randomize_favorite_food" },
-					{ "trigger": "clingy_cats:randomize_favorite_block" },
 					{ "trigger": "clingy_cats:randomize_sound_variant" }
 				]
 			},
-
-			"clingy_cats:randomize_behavior_trait": {},
-			"clingy_cats:randomize_personality": {},
-			"clingy_cats:randomize_favorite_food": {},
-			"clingy_cats:randomize_favorite_block": {},
 			"clingy_cats:randomize_sound_variant": {
 				"randomize": [
 					{
@@ -716,14 +1190,7 @@
 				]
 			},
 			"clingy_cats:spawn": {
-				"sequence": [
-						{ "trigger": "clingy_cats:randomize_behavior_trait" }, 
-						{ "trigger": "clingy_cats:randomize_personality" },
-						{ "trigger": "clingy_cats:randomize_favorite_food" },
-						{ "trigger": "clingy_cats:randomize_favorite_block" },
-						{ "trigger": "clingy_cats:randomize_sound_variant" },
-						{ "queue_command": { "command": "scriptevent clingycats:catspawn" }}
-				]
+				"queue_command": { "command": "scriptevent clingycats:catspawn" }
 			},
 			"minecraft:entity_spawned": {
 					"sequence": [
