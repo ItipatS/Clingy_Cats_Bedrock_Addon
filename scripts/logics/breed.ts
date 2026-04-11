@@ -343,10 +343,12 @@ export function handleSpawnTestCats(cat: Entity): void {
 export function handleWildSpawn(cat: Entity): void {
     assignRandomAppearance(cat);
     assignRandomEyesAndWhiskers(cat);
+    cat.triggerEvent("clingy_cats:visible");
 }
 
 /** Inherited spawn — appearance + eyes + whiskers from parents. */
 export function handleInheritedSpawn(baby: Entity, parentA: Entity, parentB?: Entity): void {
     assignInheritedAppearance(baby, parentA, parentB);
     assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+    baby.triggerEvent("clingy_cats:visible");
 }

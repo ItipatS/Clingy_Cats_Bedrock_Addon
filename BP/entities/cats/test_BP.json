@@ -125,6 +125,11 @@
 			}
 		},
 		"component_groups": {
+			"clingy_cats:visible": {
+				"minecraft:scale": {
+					"value": 1
+				}
+			},
 			"clingy_cats:baby": {
 				"minecraft:is_baby": {},
 				"minecraft:scale": {
@@ -380,26 +385,28 @@
 				}
 			},
 			"clingy_cats:pregnant": {
-				"minecraft:behavior.move_to_block": {
-					"priority": 1,
-					"target_blocks": [
-						"wool",
-						"carpet",
-						"furnace",
-						"bed",
-						"campfire",
-						"bed"
-					],
-					"target_selection_method": "nearest",
-					"search_range": 16,
-					"search_height": 4,
-					"goal_radius": 1.0,
-					"stay_duration": 3.0,
-					"on_stay_completed": {
+				"minecraft:behavior.lay_egg": {
+					"priority": 0,
+					"egg_type": "minecraft:air",
+					"goal_radius": 0.5,
+					"lay_egg_sound": "purr",
+					"lay_seconds": 5,
+					"on_lay": {
 						"event": "clingy_cats:give_birth",
 						"target": "self"
-					}
-				}
+					},
+					"search_height": 2,
+					"search_range": 10,
+					"speed_multiplier": 1,
+					"target_blocks": [
+						"bed",
+						"wool",
+						"carpet"
+					],
+					"target_materials_above_block": [
+						"Air"
+					]
+			}
 			},
 			"clingy_cats:gift_for_owner": {
 				"minecraft:behavior.drop_item_for": {
@@ -464,6 +471,9 @@
 			}
 		},
 		"components": {
+			"minecraft:scale": {
+				"value": 0
+			},
 			"minecraft:type_family": { "family": ["cat", "mob", "animal"] },
 			"minecraft:collision_box": { "width": 0.6, "height": 0.7 },
 			"minecraft:leashable": {},
@@ -507,7 +517,7 @@
 			"minecraft:movement": {
 				"value": 0.3
 			},
-			"minecraft:movement.amphibious": { "max_turn": 30 },
+			"minecraft:movement.basic": { "max_turn": 30 },
 			"minecraft:navigation.walk": {
 				"can_float": true,
 				"can_path_over_water": true,
@@ -660,6 +670,11 @@
 			}
 		},
 		"events": {
+			"clingy_cats:visible": {
+				"add": {
+					"component_groups": ["clingy_cats:visible"]
+				}
+			},
 			"clingy_cats:become_pregnant": {
 				"sequence": [
 					{ "add": { "component_groups": ["clingy_cats:pregnant"] } },
@@ -707,8 +722,7 @@
 						{ "trigger": "clingy_cats:randomize_favorite_food" },
 						{ "trigger": "clingy_cats:randomize_favorite_block" },
 						{ "trigger": "clingy_cats:randomize_sound_variant" },
-						{ "queue_command": { "command": "scriptevent clingycats:catspawn" } 
-					}
+						{ "queue_command": { "command": "scriptevent clingycats:catspawn" }}
 				]
 			},
 			"minecraft:entity_spawned": {

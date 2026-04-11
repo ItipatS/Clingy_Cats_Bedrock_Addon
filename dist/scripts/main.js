@@ -665,10 +665,12 @@ function handleSpawnTestCats(cat) {
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
+  cat.triggerEvent("clingy_cats:visible");
 }
 function handleInheritedSpawn(baby, parentA, parentB) {
   assignInheritedAppearance(baby, parentA, parentB);
   assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+  baby.triggerEvent("clingy_cats:visible");
 }
 
 // scripts/events/breedevent.ts
