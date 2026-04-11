@@ -313,6 +313,46 @@ export const BREED_OFFSETS: Record<string, number> = {
     "clingy_cats:jellie":    160,
 };
 
+// config — all randomize pools in one place
+const TRAIT_POOL = [
+    { weight: 1, trait: "lazy",        group: "clingy_cats:trait_lazy" },
+    { weight: 1, trait: "active",      group: "clingy_cats:trait_active" },
+    { weight: 1, trait: "curious",     group: "clingy_cats:trait_curious" },
+    { weight: 1, trait: "shy",         group: "clingy_cats:trait_shy" },
+    { weight: 1, trait: "friendly",    group: "clingy_cats:trait_friendly" },
+    { weight: 1, trait: "independent", group: "clingy_cats:trait_independent" },
+] as const;
+
+const PERSONALITY_POOL = [
+    { weight: 1, personality: "affectionate", group: "clingy_cats:personality_affectionate" },
+    { weight: 1, personality: "aloof",        group: "clingy_cats:personality_aloof" },
+    { weight: 1, personality: "playful",      group: "clingy_cats:personality_playful" },
+    { weight: 1, personality: "calm",         group: "clingy_cats:personality_calm" },
+    { weight: 1, personality: "anxious",      group: "clingy_cats:personality_anxious" },
+    { weight: 1, personality: "confident",    group: "clingy_cats:personality_confident" },
+] as const;
+
+const FAVORITE_FOOD_POOL = [
+    { weight: 3, food: "cod",        group: "clingy_cats:favorite_food_cod" },
+    { weight: 3, food: "salmon",     group: "clingy_cats:favorite_food_salmon" },
+    { weight: 2, food: "tropical",   group: "clingy_cats:favorite_food_tropical" },
+    { weight: 1, food: "puffer",     group: "clingy_cats:favorite_food_puffer" },
+    { weight: 2, food: "rabbit",     group: "clingy_cats:favorite_food_rabbit" },
+    { weight: 2, food: "chicken",    group: "clingy_cats:favorite_food_chicken" },
+    { weight: 2, food: "treat_fish", group: "clingy_cats:favorite_food_treat_fish" },
+    { weight: 2, food: "treat_meat", group: "clingy_cats:favorite_food_treat_meat" },
+    { weight: 1, food: "treat_fancy",group: "clingy_cats:favorite_food_treat_fancy" },
+] as const;
+
+const FAVORITE_BLOCK_POOL = [
+    { weight: 1, block: "bed",   group: "clingy_cats:favorite_block_bed" },
+    { weight: 1, block: "soft",  group: "clingy_cats:favorite_block_soft" },
+    { weight: 1, block: "warm",  group: "clingy_cats:favorite_block_warm" },
+    { weight: 1, block: "high",  group: "clingy_cats:favorite_block_high" },
+    { weight: 1, block: "owner", group: "clingy_cats:favorite_block_owner" },
+    { weight: 1, block: "sun",   group: "clingy_cats:favorite_block_sun" },
+] as const;
+
 // Flat texture map for test entity — built after BREED_TEXTURES and BREED_OFFSETS
 export const TEST_TEXTURES: Record<number, TextureData> = Object.fromEntries(
     Object.entries(BREED_OFFSETS).flatMap(([breedId, offset]) =>
