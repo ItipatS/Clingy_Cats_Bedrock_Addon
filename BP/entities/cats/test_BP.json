@@ -649,7 +649,7 @@
 					"priority": 4,
 					"ignore_visibility": false,
 					"sprint_distance": 10,
-					"avoid_mob_sound": "entity.cat.hiss",
+					"avoid_mob_sound": "mob.cat.hiss",
 					"control_flags": ["jump", "move"],
 					"on_escape_event": {
 						"event": "clingy_cats:scared_by_player",
@@ -889,7 +889,7 @@
 					"priority": 4,
 					"ignore_visibility": false,
 					"sprint_distance": 16,
-					"avoid_mob_sound": "entity.cat.hiss",
+					"avoid_mob_sound": "mob.cat.hiss",
 					"control_flags": ["jump", "move"],
 					"on_escape_event": {
 						"event": "clingy_cats:scared_by_player",
@@ -940,6 +940,329 @@
 					"look_time": [
 						20,
 						60
+					]
+				}
+			},
+
+			"clingy_cats:favorite_block_bed": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["bed"],
+						"count": 1,
+						"radius": 8
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				},
+				"minecraft:behavior.move_to_block": {
+					"priority": 6,
+					"target_blocks": ["bed"],
+					"target_selection_method": "nearest",
+					"search_range": 16,
+					"search_height": 4,
+					"goal_radius": 1.0,
+					"stay_duration": 10.0,
+					"on_stay_completed": {
+						"event": "clingy_cats:on_sleeping",
+						"target": "self"
+					}
+				}
+			},
+
+			"clingy_cats:favorite_block_soft": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["wool", "carpet", "moss_block", "clingy_cats:cardboard_box"],
+						"count": 3,
+						"radius": 8
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				},
+				"minecraft:behavior.move_to_block": {
+					"priority": 6,
+					"target_blocks": ["wool", "carpet", "moss_block", "clingy_cats:cardboard_box"],
+					"target_selection_method": "nearest",
+					"search_range": 16,
+					"search_height": 4,
+					"goal_radius": 1.0,
+					"stay_duration": 8.0,
+					"on_stay_completed": {
+						"event": "clingy_cats:on_sitting",
+						"target": "self"
+					}
+				}
+			},
+
+			"clingy_cats:favorite_block_warm": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["furnace", "lit_furnace", "campfire", "soul_campfire"],
+						"count": 1,
+						"radius": 8
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				},
+				"minecraft:behavior.move_to_block": {
+					"priority": 6,
+					"target_blocks": ["furnace", "lit_furnace", "campfire", "soul_campfire"],
+					"target_selection_method": "nearest",
+					"search_range": 16,
+					"search_height": 4,
+					"goal_radius": 1.5,
+					"stay_duration": 12.0,
+					"on_stay_completed": {
+						"event": "clingy_cats:on_purring",
+						"target": "self"
+					}
+				}
+			},
+
+			"clingy_cats:favorite_block_high": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["wool", "carpet", "bed", "furnace", "campfire", "clingy_cats:cardboard_box"],
+						"count": 3,
+						"radius": 16
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				}
+				// no move_to_block — Script handles height check via scriptevent
+			},
+
+			"clingy_cats:favorite_block_owner": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["wool", "carpet", "bed", "furnace", "campfire", "clingy_cats:cardboard_box"],
+						"count": 3,
+						"radius": 16
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				},
+				"minecraft:behavior.follow_owner": {
+					"priority": 3,
+					"speed_multiplier": 1.1,
+					"start_distance": 4,
+					"stop_distance": 1.0
+				}
+				// no move_to_block — owner IS the destination, tighter follow covers it
+			},
+
+			"clingy_cats:favorite_block_sun": {
+				"minecraft:breedable": {
+					"require_tame": true,
+					"require_full_health": false,
+					"allow_sitting": false,
+					"breed_items": ["fish", "salmon"],
+					"breeds_with": [
+						{ "mate_type": "clingy_cats:british",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:siamese",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:persian",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:white",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:all_black", "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:calico",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:tabby",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:black",     "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:jellie",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:red",       "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ocelot",    "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "mate_type": "clingy_cats:ragdoll",   "breed_event": { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
+					"causes_pregnancy": true,
+					"environment_requirements": {
+						"blocks": ["grass_block", "sand", "dirt"],
+						"count": 3,
+						"radius": 8
+					},
+					"extra_baby_chance": 0.5,
+					"love_filters": {
+						"all_of": [
+							{
+								"any_of": [
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "affectionate" },
+									{ "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "playful" }
+								]
+							},
+							{ "test": "is_family", "subject": "other", "value": "cat" }
+						]
+					},
+					"inherit_tamed": true
+				},
+				"minecraft:behavior.move_to_block": {
+					"priority": 6,
+					"target_blocks": ["grass_block", "sand", "dirt"],
+					"target_selection_method": "nearest",
+					"search_range": 16,
+					"search_height": 2,
+					"goal_radius": 1.0,
+					"stay_duration": 15.0,
+					"on_stay_completed": {
+						"event": "clingy_cats:on_sitting",
+						"target": "self"
+					}
+				},
+				"minecraft:environment_sensor": {
+					"triggers": [
+						{
+							"filters": {
+								"test": "is_daytime",
+								"value": false
+							},
+							"event": "clingy_cats:on_idle"
+						}
 					]
 				}
 			}
@@ -1305,7 +1628,30 @@
 					{ "weight": 1, "set_property": { "clingy_cats:state": "sleeping" } },
 					{ "weight": 1, "set_property": { "clingy_cats:state": "stretching" } }
 				]
-			}
+			},
+			"clingy_cats:set_personality_affectionate": { "add": { "component_groups": ["clingy_cats:personality_affectionate"] } },
+			"clingy_cats:set_personality_aloof":        { "add": { "component_groups": ["clingy_cats:personality_aloof"] } },
+			"clingy_cats:set_personality_playful":      { "add": { "component_groups": ["clingy_cats:personality_playful"] } },
+			"clingy_cats:set_personality_calm":         { "add": { "component_groups": ["clingy_cats:personality_calm"] } },
+			"clingy_cats:set_personality_anxious":      { "add": { "component_groups": ["clingy_cats:personality_anxious"] } },
+			"clingy_cats:set_personality_confident":    { "add": { "component_groups": ["clingy_cats:personality_confident"] } },
+
+			"clingy_cats:set_food_cod":        { "add": { "component_groups": ["clingy_cats:favorite_food_cod"] } },
+			"clingy_cats:set_food_salmon":     { "add": { "component_groups": ["clingy_cats:favorite_food_salmon"] } },
+			"clingy_cats:set_food_tropical":   { "add": { "component_groups": ["clingy_cats:favorite_food_tropical"] } },
+			"clingy_cats:set_food_puffer":     { "add": { "component_groups": ["clingy_cats:favorite_food_puffer"] } },
+			"clingy_cats:set_food_rabbit":     { "add": { "component_groups": ["clingy_cats:favorite_food_rabbit"] } },
+			"clingy_cats:set_food_chicken":    { "add": { "component_groups": ["clingy_cats:favorite_food_chicken"] } },
+			"clingy_cats:set_food_treat_fish": { "add": { "component_groups": ["clingy_cats:favorite_food_treat_fish"] } },
+			"clingy_cats:set_food_treat_meat": { "add": { "component_groups": ["clingy_cats:favorite_food_treat_meat"] } },
+			"clingy_cats:set_food_treat_fancy":{ "add": { "component_groups": ["clingy_cats:favorite_food_treat_fancy"] } },
+
+			"clingy_cats:set_block_bed":   { "add": { "component_groups": ["clingy_cats:favorite_block_bed"] } },
+			"clingy_cats:set_block_soft":  { "add": { "component_groups": ["clingy_cats:favorite_block_soft"] } },
+			"clingy_cats:set_block_warm":  { "add": { "component_groups": ["clingy_cats:favorite_block_warm"] } },
+			"clingy_cats:set_block_high":  { "add": { "component_groups": ["clingy_cats:favorite_block_high"] } },
+			"clingy_cats:set_block_owner": { "add": { "component_groups": ["clingy_cats:favorite_block_owner"] } },
+			"clingy_cats:set_block_sun":   { "add": { "component_groups": ["clingy_cats:favorite_block_sun"] } }
 		}
 	}
 }
