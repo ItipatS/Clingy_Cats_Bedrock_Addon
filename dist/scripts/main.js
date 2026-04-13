@@ -1,8 +1,11 @@
 // scripts/main.ts
-import { world as world3, system as system3 } from "@minecraft/server";
+import { world as world4, system as system4 } from "@minecraft/server";
 
 // scripts/events/breedevent.ts
-import { world, system } from "@minecraft/server";
+import { world as world2, system as system2 } from "@minecraft/server";
+
+// scripts/logics/breed.ts
+import { world } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -458,6 +461,45 @@ var BREED_OFFSETS = {
   "clingy_cats:all_black": 136,
   "clingy_cats:jellie": 160
 };
+var TRAIT_POOL = [
+  { weight: 1, trait: "lazy" },
+  { weight: 1, trait: "active" },
+  { weight: 1, trait: "curious" },
+  { weight: 1, trait: "shy" },
+  { weight: 1, trait: "friendly" },
+  { weight: 1, trait: "independent" }
+];
+var PERSONALITY_POOL = [
+  { weight: 1, personality: "affectionate" },
+  { weight: 1, personality: "aloof" },
+  { weight: 1, personality: "playful" },
+  { weight: 1, personality: "calm" },
+  { weight: 1, personality: "anxious" },
+  { weight: 1, personality: "confident" }
+];
+var FAVORITE_FOOD_POOL = [
+  { weight: 1, food: "carrot" },
+  { weight: 1, food: "spider_eye" },
+  { weight: 3, food: "beef" },
+  { weight: 3, food: "porkchop" },
+  { weight: 3, food: "cod" },
+  { weight: 3, food: "salmon" },
+  { weight: 2, food: "tropical" },
+  { weight: 1, food: "puffer" },
+  { weight: 2, food: "rabbit" },
+  { weight: 3, food: "chicken" }
+  /*{ weight: 2, food: "treat_fish"},
+  { weight: 2, food: "treat_meat"},
+  { weight: 1, food: "treat_fancy"},*/
+];
+var FAVORITE_BLOCK_POOL = [
+  { weight: 1, block: "bed" },
+  { weight: 1, block: "soft" },
+  { weight: 1, block: "warm" },
+  { weight: 1, block: "high" },
+  { weight: 1, block: "owner" },
+  { weight: 1, block: "sun" }
+];
 var TEST_TEXTURES = Object.fromEntries(
   Object.entries(BREED_OFFSETS).flatMap(
     ([breedId, offset]) => Object.entries(BREED_TEXTURES[breedId]).map(([localIdx, data]) => [
@@ -653,6 +695,34 @@ function assignInheritedEyesAndWhiskers(baby, parentA, parentB) {
   const whiskerDrift = Math.random() < 0.9 ? Math.max(0, Math.min(WHISKERS.length - 1, inheritedWhiskerIdx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * WHISKERS.length);
   applyWhiskerData(baby, whiskerDrift, { length: WHISKERS[whiskerDrift] });
 }
+function weightedRandom(pool) {
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let roll = Math.random() * total;
+  for (const entry of pool) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry;
+  }
+  return pool[pool.length - 1];
+}
+function assignRandomPersonality(cat) {
+  const trait = weightedRandom(TRAIT_POOL);
+  const personality = weightedRandom(PERSONALITY_POOL);
+  const food = weightedRandom(FAVORITE_FOOD_POOL);
+  const block = weightedRandom(FAVORITE_BLOCK_POOL);
+  world.sendMessage("trait: " + trait.trait);
+  world.sendMessage("personality: " + personality.personality);
+  world.sendMessage("food: " + food.food);
+  world.sendMessage("block: " + block.block);
+  cat.setProperty("clingy_cats:behavior_trait", trait.trait);
+  cat.setProperty("clingy_cats:personality", personality.personality);
+  cat.setProperty("clingy_cats:favorite_food", food.food);
+  cat.setProperty("clingy_cats:favorite_block", block.block);
+  cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
+  cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
+  if (block.block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
+    cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
+  }
+}
 function handleSpawnTestCats(cat) {
   const breedIds = Object.keys(BREED_OFFSETS);
   const chosenBreed = randomFrom(breedIds);
@@ -665,30 +735,32 @@ function handleSpawnTestCats(cat) {
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
+  assignRandomPersonality(cat);
   cat.triggerEvent("clingy_cats:visible");
 }
 function handleInheritedSpawn(baby, parentA, parentB) {
   assignInheritedAppearance(baby, parentA, parentB);
   assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+  assignRandomPersonality(baby);
   baby.triggerEvent("clingy_cats:visible");
 }
 
 // scripts/events/breedevent.ts
 function registerCatSpawnSubscriber() {
-  system.afterEvents.scriptEventReceive.subscribe((ev) => {
+  system2.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
-    world.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+    world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
-      system.runTimeout(() => {
+      system2.runTimeout(() => {
         if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
           sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          world2.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
           return;
         }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
-          world.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+          world2.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
         }
         handleWildSpawn(sourceEntity);
@@ -697,25 +769,28 @@ function registerCatSpawnSubscriber() {
     }
     if (id === "clingycats:conception") {
       handleConception(sourceEntity);
-      world.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
+      world2.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
       handleGiveBirth(sourceEntity);
-      world.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      world2.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      return;
+    }
+    if (id === "clingycats:interact") {
       return;
     }
   });
-  world.sendMessage("\xA7a[ClingyCats] subscriber registered");
+  world2.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/debug/catdebug.ts
-import { world as world2, system as system2, EquipmentSlot } from "@minecraft/server";
+import { world as world3, system as system3, EquipmentSlot } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
-  system2.runInterval(() => {
-    for (const player of world2.getAllPlayers()) {
+  system3.runInterval(() => {
+    for (const player of world3.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
@@ -732,7 +807,8 @@ function registerDebugRaycast() {
         `\xA77eye_shape:\xA7f${cat.getProperty("clingy_cats:eye_shape")} \xA77eye_color:\xA7f${cat.getProperty("clingy_cats:eye_color")} \xA77eye_idx:\xA7f${cat.getProperty("clingy_cats:eye_index")} \xA77whisker_idx:\xA7f${cat.getProperty("clingy_cats:whisker_index")}`,
         `\xA77trait:\xA7f${cat.getProperty("clingy_cats:behavior_trait")} \xA77personality:\xA7f${cat.getProperty("clingy_cats:personality")} \xA77sound:\xA7f${cat.getProperty("clingy_cats:sound_variant")}`,
         `\xA77food:\xA7f${cat.getProperty("clingy_cats:favorite_food")} \xA77block:\xA7f${cat.getProperty("clingy_cats:favorite_block")}`,
-        `\xA77baby:\xA7f${cat.hasComponent("minecraft:is_baby")} \xA77tamed:\xA7f${cat.hasComponent("minecraft:is_tamed")} \xA77tags:\xA7f${cat.getTags().join(",") || "none"}`
+        `\xA77baby:\xA7f${cat.hasComponent("minecraft:is_baby")} \xA77tamed:\xA7f${cat.hasComponent("minecraft:is_tamed")} \xA77tags:\xA7f${cat.getTags().join(",") || "none"}`,
+        `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`
       ].join("\n");
       player.onScreenDisplay.setActionBar(lines);
     }
@@ -740,10 +816,10 @@ function registerDebugRaycast() {
 }
 
 // scripts/main.ts
-system3.run(() => {
+system4.run(() => {
   registerCatSpawnSubscriber();
   registerDebugRaycast();
-  world3.sendMessage("ClingyCats script loaded!");
+  world4.sendMessage("ClingyCats script loaded!");
 });
 
 //# sourceMappingURL=../debug/main.js.map

@@ -1,53 +1,120 @@
 {
   "format_version": "1.10.0",
   "animation_controllers": {
-    "controller.animation.clingy_cats.look_at_target": {
-        "initial_state": "default",
-        "states": {
-            "default": {
-            "animations": [ "look_at_target" ]
-            }
-        }
-    },
     "controller.animation.clingy_cats.state": {
-      "initial_state": "idle",
+      "initial_state": "wait_idle",
       "states": {
-        "idle": {
+        "wait_idle": {
           "on_entry": [
-            "variable.idle_var = math.floor(math.random(0, 6));",
-            "variable.sleep_var = math.floor(math.random(0, 2));"
+            "variable.idle_pick = math.floor(math.random(0, 9));",
+            "variable.idle_time = math.random(10.0, 20.0);"
           ],
-          "animations": [
-            { "sit":         "variable.idle_var == 0" },
-            { "lick_stand":  "variable.idle_var == 1" },
-            { "lick_stand2": "variable.idle_var == 2" },
-            { "rub":         "variable.idle_var == 3" },
-            { "sleep3":      "variable.idle_var == 4 && q.anim_time < 0.75" },
-            { "sleep":       "variable.idle_var == 4 && q.anim_time >= 0.75 && variable.sleep_var == 0" },
-            { "sleep2":      "variable.idle_var == 4 && q.anim_time >= 0.75 && variable.sleep_var == 1" },
-            { "hunt":      "variable.idle_var == 5" }
-          ],
-          "blend_transition": 0.2,
+          "blend_transition": 0.4,
           "transitions": [
-            { "walking":  "q.modified_move_speed > 0.1" },
-            { "sleeping": "q.property('clingy_cats:state') == 'sleeping'" },
-            { "sitting":  "q.property('clingy_cats:state') == 'sitting'" },
-            { "hunting":  "q.property('clingy_cats:state') == 'hunting'" },
-            { "hissing":  "q.property('clingy_cats:state') == 'hissing'" },
-            { "grooming": "q.property('clingy_cats:state') == 'grooming'" },
-            { "purring":  "q.property('clingy_cats:state') == 'purring'" }
+            { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
+            { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
+            { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
+            { "hissing":  "query.property('clingy_cats:state') == 'hissing'" },
+            { "grooming": "query.property('clingy_cats:state') == 'grooming'" },
+            { "purring":  "query.property('clingy_cats:state') == 'purring'" },
+            { "walking":  "query.modified_move_speed > 0.01" },
+
+            { "idle_sleep": "query.property('clingy_cats:state') == 'idle' && variable.idle_pick <= 2" },
+            { "idle_groom": "query.property('clingy_cats:state') == 'idle' && variable.idle_pick == 3" },
+            { "idle_rub":   "query.property('clingy_cats:state') == 'idle' && variable.idle_pick == 4" },
+            { "idle_sit":   "query.property('clingy_cats:state') == 'idle' && variable.idle_pick >= 5" }
           ]
         },
 
-        "walking": {
+        "idle_sit": {
           "animations": [
-            { "walk": "1.0" }
+            { "sit": "1.0" }
+          ],
+          "blend_transition": 1.2,
+          "transitions": [
+            { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
+            { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
+            { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
+            { "hissing":  "query.property('clingy_cats:state') == 'hissing'" },
+            { "grooming": "query.property('clingy_cats:state') == 'grooming'" },
+            { "purring":  "query.property('clingy_cats:state') == 'purring'" },
+            { "walking":  "query.modified_move_speed > 0.01" },
+
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
+          ]
+        },
+
+        "idle_sleep": {
+          "on_entry": [
+            "variable.sleep_pick = math.floor(math.random(0, 3));"
+          ],
+          "animations": [
+            { "sleep":  "variable.sleep_pick == 0" },
+            { "sleep2": "variable.sleep_pick == 1" },
+            { "sleep3": "variable.sleep_pick == 2" }
+          ],
+          "blend_transition": 1.2,
+          "transitions": [
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
+          ]
+        },
+
+        "idle_groom": {
+          "on_entry": [
+            "variable.groom_pick = math.floor(math.random(0, 2));"
+          ],
+          "animations": [
+            { "lick_stand":  "variable.groom_pick == 0" },
+            { "lick_stand2": "variable.groom_pick == 1" }
+          ],
+          "blend_transition": 1.2,
+          "transitions": [
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
+          ]
+        },
+
+        "idle_rub": {
+          "animations": [
+            { "rub": "1.0" }
+          ],
+          "blend_transition": 1.2,
+          "transitions": [
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
+          ]
+        },
+        "walking": {
+          "variables": {
+            "move_speed": {
+              "input": "query.modified_move_speed",
+              "remap_curve": {
+                "0.0": 1.4,
+                "0.45": 1.0,
+                "0.75": 0.0,
+                "1.0": 0.0
+              }
+            },
+            "run_speed": {
+              "input": "query.modified_move_speed",
+              "remap_curve": {
+                "0.0": 0.0,
+                "0.45": 0.0,
+                "0.75": 1.0,
+                "1.0": 1.0
+              }
+            }
+          },
+          "animations": [
+            { "walk": "query.modified_move_speed * variable.move_speed" },
+            { "run":  "query.modified_move_speed * variable.run_speed" }
           ],
           "blend_transition": 0.15,
           "transitions": [
-            { "hunting":  "q.property('clingy_cats:state') == 'hunting'" },
-            { "sitting":  "q.property('clingy_cats:state') == 'sitting' && q.modified_move_speed < 0.1" },
-            { "idle":     "q.modified_move_speed < 0.1" }
+            { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
+            { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
+            { "wait_idle": "query.modified_move_speed <= 0.01 && query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
@@ -57,25 +124,25 @@
           ],
           "blend_transition": 0.3,
           "transitions": [
-            { "sleeping": "q.property('clingy_cats:state') == 'sleeping'" },
-            { "walking":  "q.modified_move_speed > 0.1" },
-            { "idle":     "q.property('clingy_cats:state') == 'idle'" }
+            { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
+            { "walking":  "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
         "sleeping": {
           "on_entry": [
-            "variable.sleep_var = math.floor(math.random(0, 2));"
+            "variable.sleep_var = math.floor(math.random(0, 3));"
           ],
           "animations": [
-            { "sleep3": "q.anim_time < 0.75" },
-            { "sleep":  "q.anim_time >= 0.75 && variable.sleep_var == 0" },
-            { "sleep2": "q.anim_time >= 0.75 && variable.sleep_var == 1" }
+            { "sleep":  "variable.sleep_var == 0" },
+            { "sleep2": "variable.sleep_var == 1" },
+            { "sleep3": "variable.sleep_var == 2" }
           ],
           "blend_transition": 0.5,
           "transitions": [
-            { "walking": "q.modified_move_speed > 0.1" },
-            { "idle":    "q.property('clingy_cats:state') == 'idle'" }
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
@@ -89,8 +156,8 @@
           ],
           "blend_transition": 0.1,
           "transitions": [
-            { "walking": "q.modified_move_speed > 0.1" },
-            { "idle":    "q.property('clingy_cats:state') == 'idle'" }
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
@@ -100,8 +167,8 @@
           ],
           "blend_transition": 0.2,
           "transitions": [
-            { "walking": "q.modified_move_speed > 0.1" },
-            { "idle":    "q.property('clingy_cats:state') == 'idle'" }
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
@@ -111,43 +178,32 @@
           ],
           "blend_transition": 0.1,
           "transitions": [
-            { "hunting": "q.property('clingy_cats:state') == 'hunting'" },
-            { "walking": "q.modified_move_speed > 0.1" },
-            { "idle":    "q.property('clingy_cats:state') == 'idle'" }
+            { "hunting": "query.property('clingy_cats:state') == 'hunting'" },
+            { "walking": "query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
           ]
         },
 
         "hunting": {
+          "variables": {
+            "hunt_speed": {
+              "input": "query.modified_move_speed",
+              "remap_curve": {
+                "0.0": 0.4,
+                "0.35": 0.7,
+                "0.7": 1.0,
+                "1.0": 1.15
+              }
+            }
+          },
           "animations": [
-            { "hunt": "1.0" }
+            { "hunt": "query.modified_move_speed * variable.hunt_speed" }
           ],
           "blend_transition": 0.15,
           "transitions": [
-            { "hissing": "q.property('clingy_cats:state') == 'hissing'" },
-            { "idle":    "q.property('clingy_cats:state') == 'idle' && q.modified_move_speed < 0.1" },
-            { "walking": "q.property('clingy_cats:state') == 'idle' && q.modified_move_speed > 0.1" }
-          ]
-        },
-
-        "stub": {
-          "animations": [
-            { "sit": "1.0" }
-          ],
-          "blend_transition": 0.2,
-          "transitions": [
-            { "idle": "q.property('clingy_cats:state') == 'idle'" },
-            { "walking": "q.modified_move_speed > 0.1" }
-          ]
-        }
-      }
-    },
-
-    "controller.animation.clingy_cats.locomotion": {
-      "initial_state": "default",
-      "states": {
-        "default": {
-          "animations": [
-            { "walk": "q.modified_move_speed" }
+            { "hissing": "query.property('clingy_cats:state') == 'hissing'" },
+            { "walking": "query.property('clingy_cats:state') == 'idle' && query.modified_move_speed > 0.01" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && query.modified_move_speed <= 0.01" }
           ]
         }
       }

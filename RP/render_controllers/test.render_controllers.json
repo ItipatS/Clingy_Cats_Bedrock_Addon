@@ -1,7 +1,7 @@
 {
-  "format_version": "1.8.0",
+  "format_version": "1.10.0",
   "render_controllers": {
-    "controller.render.clingy_cats.test": {
+    "controller.render.clingy_cats_base": {
       "arrays": {
         "textures": {
           "Array.skins": [
@@ -189,9 +189,19 @@
             "Texture.jellie22",
             "Texture.jellie23",
             "Texture.jellie24"
-          ],
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [
+        "Array.skins[q.property('clingy_cats:sub_variant')]"
+      ]
+    },
+    "controller.render.clingy_cats_eyes": {
+      "arrays": {
+        "textures": {
           "Array.eyes": [
-            "Texture.eyes",
             "Texture.eyes2",
             "Texture.eyes3",
             "Texture.eyes4",
@@ -225,29 +235,32 @@
             "Texture.eyes32",
             "Texture.eyes33",
             "Texture.eyes34"
-          ],
-          "Array.whiskers": [
-            "Texture.whiskers",
-            "Texture.whiskers2",
-            "Texture.whiskers3",
-            "Texture.whiskers4",
-            "Texture.whiskers5",
-            "Texture.whiskers6",
-            "Texture.whiskers7",
-            "Texture.whiskers8",
-            "Texture.whiskers9",
-            "Texture.whiskers10",
-            "Texture.whiskers11"
           ]
         }
       },
       "geometry": "Geometry.default",
       "materials": [ { "*": "Material.default" } ],
       "textures": [
-        "Array.skins[q.property('clingy_cats:sub_variant')]",
-        "Array.eyes[q.property('clingy_cats:eye_index')]",
-        "Array.whiskers[q.property('clingy_cats:whiskers')]",
-        "query.is_tamed ? Texture.collar : Texture.none"
+        "Array.eyes[q.property('clingy_cats:eye_index')]"
+      ]
+    },
+    "controller.render.clingy_cats_whiskers": {
+      "arrays": {
+        "textures": {
+          "Array.whiskers": [
+            "Texture.whiskers1",
+            "Texture.whiskers2",
+            "Texture.whiskers3",
+            "Texture.whiskers4",
+            "Texture.whiskers5",
+            "Texture.whiskers6"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [
+        "Array.whiskers[q.property('clingy_cats:whisker_index')]"
       ]
     }
   }
