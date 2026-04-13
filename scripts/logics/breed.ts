@@ -1,4 +1,4 @@
-import { Entity } from "@minecraft/server";
+import { world, Entity, system } from '@minecraft/server';
 import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, BREED_OFFSETS, EYE_COLORS, EYE_SHAPES, WHISKERS 
     , TRAIT_POOL, PERSONALITY_POOL, FAVORITE_FOOD_POOL, FAVORITE_BLOCK_POOL
 } from '../configs/catsbreed';
@@ -337,22 +337,32 @@ function weightedRandom<T extends { weight: number }>(pool: readonly T[]): T {
 }
 
 export function assignRandomPersonality(cat: Entity): void {
+
     const trait       = weightedRandom(TRAIT_POOL);
     const personality = weightedRandom(PERSONALITY_POOL);
     const food        = weightedRandom(FAVORITE_FOOD_POOL);
     const block       = weightedRandom(FAVORITE_BLOCK_POOL);
 
-    // Script triggers the specific group event directly
-    cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
-    cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
-    cat.triggerEvent(`clingy_cats:set_food_${food.food}`);
-    cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
+    world.sendMessage("trait: " + trait.trait);
+    world.sendMessage("personality: " + personality.personality);
+    world.sendMessage("food: " + food.food);
+    world.sendMessage("block: " + block.block);
 
     // And set properties directly
     cat.setProperty("clingy_cats:behavior_trait", trait.trait);
     cat.setProperty("clingy_cats:personality",    personality.personality);
     cat.setProperty("clingy_cats:favorite_food",  food.food);
-    cat.setProperty("clingy_cats:favorite_block", block.block);;
+    cat.setProperty("clingy_cats:favorite_block", block.block);
+
+        // Script triggers the specific group event directly
+    cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
+    cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
+
+    // Block — add for all except "owner" when wild
+    if (block.block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
+        cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
+    }
+
 }
 
 // ============================================================
@@ -374,6 +384,7 @@ export function handleSpawnTestCats(cat: Entity): void {
 export function handleWildSpawn(cat: Entity): void {
     assignRandomAppearance(cat);
     assignRandomEyesAndWhiskers(cat);
+    assignRandomPersonality(cat);
     cat.triggerEvent("clingy_cats:visible");
 }
 
@@ -381,5 +392,6 @@ export function handleWildSpawn(cat: Entity): void {
 export function handleInheritedSpawn(baby: Entity, parentA: Entity, parentB?: Entity): void {
     assignInheritedAppearance(baby, parentA, parentB);
     assignInheritedEyesAndWhiskers(baby, parentA, parentB);
+    assignRandomPersonality(baby);
     baby.triggerEvent("clingy_cats:visible");
 }

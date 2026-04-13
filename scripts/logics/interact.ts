@@ -1,0 +1,1 @@
+import { Entity, Player, EquipmentSlot } from "@minecraft/server";

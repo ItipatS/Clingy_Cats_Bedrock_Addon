@@ -6,6 +6,7 @@ import {
     handleGiveBirth,
 } from "../logics/breed";
 
+import {} from "../logics/breed"
 
 export function registerCatSpawnSubscriber(): void {
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -43,7 +44,11 @@ export function registerCatSpawnSubscriber(): void {
             world.sendMessage(`§c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
             return;
         }
+
+        if (id === "clingycats:interact") {
+            return;
+        }
+
     });
      world.sendMessage("§a[ClingyCats] subscriber registered");
 }
-
