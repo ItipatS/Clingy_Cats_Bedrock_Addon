@@ -144,6 +144,11 @@
 					"value": 1
 				}
 			},
+			"clingy_cats:invisible": {
+				"minecraft:scale": {
+					"value": 0
+				}
+			},
 			"clingy_cats:baby": {
 				"minecraft:is_baby": {},
 				"minecraft:scale": {
@@ -1280,6 +1285,11 @@
 					"component_groups": ["clingy_cats:visible"]
 				}
 			},
+			"clingy_cats:invisible": {
+				"add": {
+					"component_groups": ["clingy_cats:invisible"]
+				}
+			},
 			"clingy_cats:become_pregnant": {
 				"sequence": [
 					{ "add": { "component_groups": ["clingy_cats:pregnant"] } },
@@ -1296,7 +1306,8 @@
 				"sequence": [
 					{ "remove": { "component_groups": ["clingy_cats:adult", "clingy_cats:wild"] } },
 					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:tamed"] } },
-					{ "trigger": "clingy_cats:randomize_sound_variant" }
+					{ "trigger": "clingy_cats:randomize_sound_variant" },
+					{ "trigger": "clingy_cats:invisible" }
 				]
 			},
 			"clingy_cats:randomize_sound_variant": {
@@ -1314,7 +1325,8 @@
 			"clingy_cats:spawn": {
 				"sequence": [
 					{ "queue_command": { "command": "scriptevent clingycats:catspawn" }},
-					{"trigger": "clingy_cats:randomize_sound_variant"}
+					{"trigger": "clingy_cats:randomize_sound_variant"},
+					{ "trigger": "clingy_cats:invisible" }
 				]
 			},
 			"minecraft:entity_spawned": {

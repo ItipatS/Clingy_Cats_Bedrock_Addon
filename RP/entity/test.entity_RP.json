@@ -262,8 +262,11 @@
 
       "scripts": {
         "initialize": [
-          "v.move_speed = 0;",
-          "v.run_speed = 0;",
+          "v.update_time_moving = 0;",
+          "v.idle_pick = 0;",
+          "v.idle_time = 0;",
+          "v.run_speed = 1;",
+          "v.move_speed = 1;",
           "v.hunt_speed = 0;"
         ],
         "scale": "query.is_baby ? (1/0.5) : 1",

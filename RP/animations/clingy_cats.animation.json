@@ -404,6 +404,7 @@
 		"animation.clingy_cats.walk": {
 			"loop": true,
 			"animation_length": 1.5,
+			"anim_time_update": "v.update_time_moving",
 			"bones": {
 				"body": {
 					"rotation": {

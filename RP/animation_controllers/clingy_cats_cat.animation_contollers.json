@@ -9,7 +9,7 @@
             "variable.idle_pick = math.floor(math.random(0, 9));",
             "variable.idle_time = math.random(10.0, 20.0);"
           ],
-          "blend_transition": 0.4,
+          "blend_transition": 0.5,
           "transitions": [
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
             { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
@@ -30,7 +30,7 @@
           "animations": [
             { "sit": "1.0" }
           ],
-          "blend_transition": 1.2,
+          "blend_transition": 0.5,
           "transitions": [
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
             { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
@@ -53,7 +53,7 @@
             { "sleep2": "variable.sleep_pick == 1" },
             { "sleep3": "variable.sleep_pick == 2" }
           ],
-          "blend_transition": 1.2,
+          "blend_transition": 0.5,
           "transitions": [
             { "walking": "query.modified_move_speed > 0.01" },
             { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
@@ -68,7 +68,7 @@
             { "lick_stand":  "variable.groom_pick == 0" },
             { "lick_stand2": "variable.groom_pick == 1" }
           ],
-          "blend_transition": 1.2,
+          "blend_transition": 0.5,
           "transitions": [
             { "walking": "query.modified_move_speed > 0.01" },
             { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
@@ -79,7 +79,7 @@
           "animations": [
             { "rub": "1.0" }
           ],
-          "blend_transition": 1.2,
+          "blend_transition": 0.5,
           "transitions": [
             { "walking": "query.modified_move_speed > 0.01" },
             { "wait_idle": "query.property('clingy_cats:state') == 'idle' &&  query.state_time > variable.idle_time" }
@@ -104,6 +104,9 @@
                 "0.75": 1.0,
                 "1.0": 1.0
               }
+            },
+            "update_time_moving": {
+              "input": "q.delta_time * 0.5 + q.modified_move_speed * 4"
             }
           },
           "animations": [

@@ -343,10 +343,8 @@ export function assignRandomPersonality(cat: Entity): void {
     const food        = weightedRandom(FAVORITE_FOOD_POOL);
     const block       = weightedRandom(FAVORITE_BLOCK_POOL);
 
-    world.sendMessage("trait: " + trait.trait);
-    world.sendMessage("personality: " + personality.personality);
-    world.sendMessage("food: " + food.food);
-    world.sendMessage("block: " + block.block);
+    const lines = [`§7state:§f${cat.getProperty("clingy_cats:state")}`, `§7trait:§f${trait.trait}`, `§7personality:§f${personality.personality}`, `§7food:§f${food.food}`, `§7block:§f${block.block}`].join("\n");
+    world.sendMessage(lines);
 
     // And set properties directly
     cat.setProperty("clingy_cats:behavior_trait", trait.trait);
@@ -378,6 +376,8 @@ export function handleSpawnTestCats(cat: Entity): void {
     const flatIdx = BREED_OFFSETS[chosenBreed] + localIdx;
     applyTextureData(cat, flatIdx, catalog[localIdx]);
     assignRandomEyesAndWhiskers(cat);
+    assignRandomPersonality(cat);
+    cat.triggerEvent("clingy_cats:visible");
 }
 
 /** Wild spawn — full random appearance + eyes + whiskers. */

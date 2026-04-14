@@ -709,10 +709,8 @@ function assignRandomPersonality(cat) {
   const personality = weightedRandom(PERSONALITY_POOL);
   const food = weightedRandom(FAVORITE_FOOD_POOL);
   const block = weightedRandom(FAVORITE_BLOCK_POOL);
-  world.sendMessage("trait: " + trait.trait);
-  world.sendMessage("personality: " + personality.personality);
-  world.sendMessage("food: " + food.food);
-  world.sendMessage("block: " + block.block);
+  const lines = [`\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`, `\xA77trait:\xA7f${trait.trait}`, `\xA77personality:\xA7f${personality.personality}`, `\xA77food:\xA7f${food.food}`, `\xA77block:\xA7f${block.block}`].join("\n");
+  world.sendMessage(lines);
   cat.setProperty("clingy_cats:behavior_trait", trait.trait);
   cat.setProperty("clingy_cats:personality", personality.personality);
   cat.setProperty("clingy_cats:favorite_food", food.food);
@@ -731,6 +729,8 @@ function handleSpawnTestCats(cat) {
   const flatIdx = BREED_OFFSETS[chosenBreed] + localIdx;
   applyTextureData(cat, flatIdx, catalog[localIdx]);
   assignRandomEyesAndWhiskers(cat);
+  assignRandomPersonality(cat);
+  cat.triggerEvent("clingy_cats:visible");
 }
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
