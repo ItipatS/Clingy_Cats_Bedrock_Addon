@@ -1136,6 +1136,11 @@
 					]
 				},
 				{
+					"name": "rightItem",
+					"parent": "head",
+					"pivot": [-2, 7.5, -8]
+				},
+				{
 					"name": "body2",
 					"parent": "body",
 					"pivot": [0, 12, -10],

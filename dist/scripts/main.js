@@ -1,11 +1,8 @@
 // scripts/main.ts
-import { world as world4, system as system4 } from "@minecraft/server";
+import { world as world5, system as system4 } from "@minecraft/server";
 
-// scripts/events/breedevent.ts
-import { world as world2, system as system2 } from "@minecraft/server";
-
-// scripts/logics/breed.ts
-import { world } from "@minecraft/server";
+// scripts/events/eventRegister.ts
+import { world as world3, system as system2 } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -402,6 +399,79 @@ var WHITE_TEXTURES = {
   3: { pattern: "sphinx", color: "gray", hairs: "none", tail: "normal", snout: "normal", head: "flat" }
   // white4
 };
+var PATTERN_DRIFT = {
+  // Solid: cleanest coat, white spotting can develop → bicolor
+  // recessive agouti can surface → tabby (rare)
+  "solid": [
+    "solid",
+    "solid",
+    "solid",
+    "bicolor",
+    "tabby"
+  ],
+  // Bicolor: white spotting active, can intensify → tuxedo
+  // or reduce → solid, or gain color complexity → tortoiseshell
+  "bicolor": [
+    "bicolor",
+    "bicolor",
+    "solid",
+    "tuxedo",
+    "tortoiseshell"
+  ],
+  // Tuxedo: high-contrast bicolor, very stable
+  "tuxedo": [
+    "tuxedo",
+    "tuxedo",
+    "tuxedo",
+    "bicolor",
+    "solid"
+  ],
+  // Tabby: agouti gene dominant, very heritable
+  // can mute → solid, gain color complexity → tortoiseshell
+  "tabby": [
+    "tabby",
+    "tabby",
+    "tabby",
+    "solid",
+    "tortoiseshell"
+  ],
+  // Tortoiseshell: tabby + orange gene, can gain white → calico
+  // or lose complexity → tabby/solid
+  "tortoiseshell": [
+    "tortoiseshell",
+    "tortoiseshell",
+    "calico",
+    "tabby",
+    "solid"
+  ],
+  // Calico: tortoiseshell + white base (color is always white in catalog)
+  // loses white → tortoiseshell, loses patches → bicolor
+  "calico": [
+    "calico",
+    "calico",
+    "tortoiseshell",
+    "bicolor",
+    "solid"
+  ],
+  // Pointed: breed-locked (siamese/ragdoll), extremely stable
+  "pointed": [
+    "pointed",
+    "pointed",
+    "pointed",
+    "pointed",
+    "solid"
+  ],
+  // Sphinx: structural/hairless — nearly fully locked
+  // color varies freely (skin showing), pattern itself almost never drifts
+  "sphinx": [
+    "sphinx",
+    "sphinx",
+    "sphinx",
+    "sphinx",
+    "sphinx",
+    "solid"
+  ]
+};
 var EYE_COLORS = [
   "emerald",
   "green",
@@ -510,7 +580,7 @@ var TEST_TEXTURES = Object.fromEntries(
 );
 BREED_TEXTURES["clingy_cats:test"] = TEST_TEXTURES;
 
-// scripts/logics/breed.ts
+// scripts/logics/utils.ts
 function distanceSq(a, b) {
   const dx = a.location.x - b.location.x;
   const dy = a.location.y - b.location.y;
@@ -523,18 +593,53 @@ function randomFrom(arr) {
 function uniqueValues(catalog, key) {
   return [...new Set(Object.values(catalog).map((d) => d[key]))];
 }
-var pregnancyMap = /* @__PURE__ */ new Map();
-function captureGenes(entity) {
-  return {
-    typeId: entity.typeId,
-    traits: getParentTraits(entity),
-    eyeColor: entity.getProperty("clingy_cats:eye_color"),
-    eyeShape: entity.getProperty("clingy_cats:eye_shape"),
-    whiskers: entity.getProperty("clingy_cats:whiskers")
-  };
+function weightedRandom(pool) {
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let roll = Math.random() * total;
+  for (const entry of pool) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry;
+  }
+  return pool[pool.length - 1];
 }
-function findFather(mother) {
-  return mother.dimension.getEntities({ location: mother.location, maxDistance: 6, families: ["cat"] }).filter((e) => e.id !== mother.id && !e.hasComponent("minecraft:is_baby")).sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
+
+// scripts/logics/genetics.ts
+function inheritTrait(traitA, traitB, inheritRate, validValues) {
+  const source = Math.random() < 0.5 ? traitA : traitB;
+  return Math.random() < inheritRate ? source : randomFrom(validValues);
+}
+function inheritPattern(patternA, patternB, colorResult, inheritRate, validValues) {
+  const source = Math.random() < 0.5 ? patternA : patternB;
+  const applyColorGate = (pool) => {
+    if (source === "sphinx") return pool;
+    return colorResult === "white" ? pool.filter((p) => p !== "tortoiseshell") : pool.filter((p) => p !== "calico");
+  };
+  const fallback = (pool) => pool.length > 0 ? pool : ["bicolor", "solid", "tabby"].filter((p) => validValues.includes(p)).length > 0 ? ["bicolor", "solid", "tabby"].filter((p) => validValues.includes(p)) : validValues;
+  if (Math.random() < inheritRate) {
+    const driftPool = fallback(
+      applyColorGate((PATTERN_DRIFT[source] ?? [source]).filter((p) => validValues.includes(p)))
+    );
+    return randomFrom(driftPool);
+  }
+  return randomFrom(fallback(applyColorGate(validValues)));
+}
+function pickTexture(catalog, target) {
+  const entries = Object.entries(catalog).map(([i, d]) => ({ idx: Number(i), data: d }));
+  const exact = entries.filter(
+    (e) => Object.entries(target).every(([k, v]) => e.data[k] === v)
+  );
+  if (exact.length > 0) return randomFrom(exact).idx;
+  const { color: _c, ...noColor } = target;
+  const relaxed = entries.filter(
+    (e) => Object.entries(noColor).every(([k, v]) => e.data[k] === v)
+  );
+  if (relaxed.length > 0) return randomFrom(relaxed).idx;
+  const { hairs: _h, ...structural } = noColor;
+  const minimal = entries.filter(
+    (e) => Object.entries(structural).every(([k, v]) => e.data[k] === v)
+  );
+  if (minimal.length > 0) return randomFrom(minimal).idx;
+  return randomFrom(entries).idx;
 }
 function findMutationBreed(motherTypeId, fatherTypeId) {
   const parentBreeds = /* @__PURE__ */ new Set([motherTypeId, fatherTypeId]);
@@ -565,63 +670,8 @@ function determineBabyBreed(mother, father) {
   if (roll < 0.9) return father.typeId;
   return findMutationBreed(mother.typeId, father.typeId);
 }
-function handleConception(mother) {
-  const fatherEntity = findFather(mother);
-  const record = {
-    mother: captureGenes(mother),
-    father: fatherEntity ? captureGenes(fatherEntity) : void 0
-  };
-  pregnancyMap.set(mother.id, record);
-  mother.setDynamicProperty("clingy_cats:conception_data", JSON.stringify(record));
-}
-function handleGiveBirth(mother) {
-  const record = pregnancyMap.get(mother.id) ?? (() => {
-    const raw = mother.getDynamicProperty("clingy_cats:conception_data");
-    return raw ? JSON.parse(raw) : void 0;
-  })();
-  pregnancyMap.delete(mother.id);
-  mother.setDynamicProperty("clingy_cats:conception_data", void 0);
-  const { mother: momGenes, father: dadGenes } = record ?? { mother: captureGenes(mother), father: void 0 };
-  const babyBreed = determineBabyBreed(momGenes, dadGenes);
-  const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
-  baby.addTag("clingy_cats:not_wild_spawn");
-  baby.triggerEvent("clingy_cats:born");
-  const parentA = mother;
-  const parentBEntity = dadGenes ? mother.dimension.getEntities({ location: mother.location, maxDistance: 12, families: ["cat"] }).find((e) => e.id !== mother.id && e.id !== baby.id && !e.hasComponent("minecraft:is_baby")) : void 0;
-  handleInheritedSpawn(baby, parentA, parentBEntity);
-}
-function getParentTraits(parent) {
-  return {
-    pattern: parent.getProperty("clingy_cats:pattern"),
-    color: parent.getProperty("clingy_cats:color"),
-    hairs: parent.getProperty("clingy_cats:hairs"),
-    tail: parent.getProperty("clingy_cats:tail"),
-    snout: parent.getProperty("clingy_cats:snout"),
-    head: parent.getProperty("clingy_cats:head")
-  };
-}
-function inheritTrait(traitA, traitB, inheritRate, validValues) {
-  const source = Math.random() < 0.5 ? traitA : traitB;
-  return Math.random() < inheritRate ? source : randomFrom(validValues);
-}
-function pickTexture(catalog, target) {
-  const entries = Object.entries(catalog).map(([i, d]) => ({ idx: Number(i), data: d }));
-  const exact = entries.filter(
-    (e) => Object.entries(target).every(([k, v]) => e.data[k] === v)
-  );
-  if (exact.length > 0) return randomFrom(exact).idx;
-  const { color: _c, ...noColor } = target;
-  const relaxed = entries.filter(
-    (e) => Object.entries(noColor).every(([k, v]) => e.data[k] === v)
-  );
-  if (relaxed.length > 0) return randomFrom(relaxed).idx;
-  const { hairs: _h, ...structural } = noColor;
-  const minimal = entries.filter(
-    (e) => Object.entries(structural).every(([k, v]) => e.data[k] === v)
-  );
-  if (minimal.length > 0) return randomFrom(minimal).idx;
-  return randomFrom(entries).idx;
-}
+
+// scripts/logics/appearance.ts
 function applyTextureData(cat, idx, data) {
   cat.setProperty("clingy_cats:sub_variant", idx);
   cat.setProperty("clingy_cats:hairs", data.hairs);
@@ -646,12 +696,22 @@ function assignRandomAppearance(cat) {
   const idx = Math.floor(Math.random() * (maxIdx + 1));
   applyTextureData(cat, idx, catalog[idx]);
 }
-function assignInheritedAppearance(baby, parentA, parentB) {
+function assignRandomEyesAndWhiskers(cat) {
+  const shape = randomFrom(EYE_SHAPES);
+  const color = randomFrom(EYE_COLORS);
+  const whisker = randomFrom(WHISKERS);
+  const shapeIdx = EYE_SHAPES.indexOf(shape);
+  const colorIdx = EYE_COLORS.indexOf(color);
+  const whiskerIdx = WHISKERS.indexOf(whisker);
+  applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape, color });
+  applyWhiskerData(cat, whiskerIdx, { length: whisker });
+}
+function assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes) {
   const catalog = BREED_TEXTURES[baby.typeId];
-  const traitsA = getParentTraits(parentA);
-  const traitsB = parentB ? getParentTraits(parentB) : traitsA;
-  const targetPattern = inheritTrait(traitsA.pattern, traitsB.pattern, 0.85, uniqueValues(catalog, "pattern"));
+  const traitsA = momGenes.traits;
+  const traitsB = dadGenes?.traits ?? traitsA;
   const targetColor = inheritTrait(traitsA.color, traitsB.color, 0.85, uniqueValues(catalog, "color"));
+  const targetPattern = inheritPattern(traitsA.pattern, traitsB.pattern, targetColor, 0.85, uniqueValues(catalog, "pattern"));
   const targetHairs = inheritTrait(traitsA.hairs, traitsB.hairs, 0.8, uniqueValues(catalog, "hairs"));
   const targetTail = inheritTrait(traitsA.tail, traitsB.tail, 0.95, uniqueValues(catalog, "tail"));
   const targetSnout = inheritTrait(traitsA.snout, traitsB.snout, 0.95, uniqueValues(catalog, "snout"));
@@ -666,51 +726,41 @@ function assignInheritedAppearance(baby, parentA, parentB) {
   });
   applyTextureData(baby, idx, catalog[idx]);
 }
-function assignRandomEyesAndWhiskers(cat) {
-  const shape = randomFrom(EYE_SHAPES);
-  const color = randomFrom(EYE_COLORS);
-  const whisker = randomFrom(WHISKERS);
-  const shapeIdx = EYE_SHAPES.indexOf(shape);
-  const colorIdx = EYE_COLORS.indexOf(color);
-  const whiskerIdx = WHISKERS.indexOf(whisker);
-  applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape, color });
-  applyWhiskerData(cat, whiskerIdx, { length: whisker });
-}
-function assignInheritedEyesAndWhiskers(baby, parentA, parentB) {
-  const sourceEyeColor = parentB && Math.random() < 0.5 ? parentB : parentA;
-  const inheritedColor = sourceEyeColor.getProperty("clingy_cats:eye_color");
+function assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes) {
+  const sourceColor = dadGenes && Math.random() < 0.5 ? dadGenes : momGenes;
+  const inheritedColor = sourceColor.eyeColor;
   const colorRoll = Math.random();
   let finalColor;
   if (colorRoll < 0.9) finalColor = inheritedColor;
   else if (colorRoll < 0.99) finalColor = randomFrom(EYE_COLORS.filter((c) => !c.startsWith("heterochromia")));
   else finalColor = randomFrom(["heterochromia1", "heterochromia2", "heterochromia3"]);
-  const sourceEyeShape = parentB && Math.random() < 0.5 ? parentB : parentA;
-  const inheritedShapeIdx = EYE_SHAPES.indexOf(sourceEyeShape.getProperty("clingy_cats:eye_shape"));
+  const sourceShape = dadGenes && Math.random() < 0.5 ? dadGenes : momGenes;
+  const inheritedShapeIdx = EYE_SHAPES.indexOf(sourceShape.eyeShape);
   const shapeDrift = Math.random() < 0.85 ? Math.max(0, Math.min(EYE_SHAPES.length - 1, inheritedShapeIdx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * EYE_SHAPES.length);
-  const idx = shapeDrift * EYE_COLORS.length + EYE_COLORS.indexOf(finalColor);
-  const eyedata = { shape: EYE_SHAPES[shapeDrift], color: finalColor };
-  applyEyesData(baby, idx, eyedata);
-  const sourceWhiskers = parentB && Math.random() < 0.5 ? parentB : parentA;
-  const inheritedWhiskerIdx = WHISKERS.indexOf(sourceWhiskers.getProperty("clingy_cats:whiskers"));
+  applyEyesData(baby, shapeDrift * EYE_COLORS.length + EYE_COLORS.indexOf(finalColor), {
+    shape: EYE_SHAPES[shapeDrift],
+    color: finalColor
+  });
+  const sourceWhisker = dadGenes && Math.random() < 0.5 ? dadGenes : momGenes;
+  const inheritedWhiskerIdx = WHISKERS.indexOf(sourceWhisker.whiskers);
   const whiskerDrift = Math.random() < 0.9 ? Math.max(0, Math.min(WHISKERS.length - 1, inheritedWhiskerIdx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * WHISKERS.length);
   applyWhiskerData(baby, whiskerDrift, { length: WHISKERS[whiskerDrift] });
 }
-function weightedRandom(pool) {
-  const total = pool.reduce((sum, e) => sum + e.weight, 0);
-  let roll = Math.random() * total;
-  for (const entry of pool) {
-    roll -= entry.weight;
-    if (roll <= 0) return entry;
-  }
-  return pool[pool.length - 1];
-}
+
+// scripts/logics/personality.ts
+import { world } from "@minecraft/server";
 function assignRandomPersonality(cat) {
   const trait = weightedRandom(TRAIT_POOL);
   const personality = weightedRandom(PERSONALITY_POOL);
   const food = weightedRandom(FAVORITE_FOOD_POOL);
   const block = weightedRandom(FAVORITE_BLOCK_POOL);
-  const lines = [`\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`, `\xA77trait:\xA7f${trait.trait}`, `\xA77personality:\xA7f${personality.personality}`, `\xA77food:\xA7f${food.food}`, `\xA77block:\xA7f${block.block}`].join("\n");
-  world.sendMessage(lines);
+  world.sendMessage([
+    `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
+    `\xA77trait:\xA7f${trait.trait}`,
+    `\xA77personality:\xA7f${personality.personality}`,
+    `\xA77food:\xA7f${food.food}`,
+    `\xA77block:\xA7f${block.block}`
+  ].join("\n"));
   cat.setProperty("clingy_cats:behavior_trait", trait.trait);
   cat.setProperty("clingy_cats:personality", personality.personality);
   cat.setProperty("clingy_cats:favorite_food", food.food);
@@ -721,6 +771,8 @@ function assignRandomPersonality(cat) {
     cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
   }
 }
+
+// scripts/logics/breed.ts
 function handleSpawnTestCats(cat) {
   const breedIds = Object.keys(BREED_OFFSETS);
   const chosenBreed = randomFrom(breedIds);
@@ -738,29 +790,101 @@ function handleWildSpawn(cat) {
   assignRandomPersonality(cat);
   cat.triggerEvent("clingy_cats:visible");
 }
-function handleInheritedSpawn(baby, parentA, parentB) {
-  assignInheritedAppearance(baby, parentA, parentB);
-  assignInheritedEyesAndWhiskers(baby, parentA, parentB);
-  assignRandomPersonality(baby);
-  baby.triggerEvent("clingy_cats:visible");
+
+// scripts/logics/pregnancy.ts
+function getParentTraits(parent) {
+  return {
+    pattern: parent.getProperty("clingy_cats:pattern"),
+    color: parent.getProperty("clingy_cats:color"),
+    hairs: parent.getProperty("clingy_cats:hairs"),
+    tail: parent.getProperty("clingy_cats:tail"),
+    snout: parent.getProperty("clingy_cats:snout"),
+    head: parent.getProperty("clingy_cats:head")
+  };
+}
+function captureGenes(entity) {
+  return {
+    typeId: entity.typeId,
+    traits: getParentTraits(entity),
+    eyeColor: entity.getProperty("clingy_cats:eye_color"),
+    eyeShape: entity.getProperty("clingy_cats:eye_shape"),
+    whiskers: entity.getProperty("clingy_cats:whiskers")
+  };
+}
+function findFather(mother) {
+  return mother.dimension.getEntities({ location: mother.location, maxDistance: 6, families: ["cat"] }).filter((e) => e.id !== mother.id && !e.hasComponent("minecraft:is_baby")).sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
+}
+var pregnancyMap = /* @__PURE__ */ new Map();
+var LITTER_WEIGHTS = [40, 30, 15, 8, 5, 2];
+function rollLitterSize() {
+  const total = LITTER_WEIGHTS.reduce((s, w) => s + w, 0);
+  let roll = Math.random() * total;
+  for (let i = 0; i < LITTER_WEIGHTS.length; i++) {
+    roll -= LITTER_WEIGHTS[i];
+    if (roll <= 0) return i + 1;
+  }
+  return 1;
+}
+function handleConception(mother) {
+  const fatherEntity = findFather(mother);
+  const record = {
+    mother: captureGenes(mother),
+    father: fatherEntity ? captureGenes(fatherEntity) : void 0,
+    babyCount: rollLitterSize()
+  };
+  pregnancyMap.set(mother.id, record);
+  mother.setDynamicProperty("clingy_cats:conception_data", JSON.stringify(record));
+}
+function handleGiveBirth(mother) {
+  const record = pregnancyMap.get(mother.id) ?? (() => {
+    const raw = mother.getDynamicProperty("clingy_cats:conception_data");
+    return raw ? JSON.parse(raw) : void 0;
+  })();
+  pregnancyMap.delete(mother.id);
+  mother.setDynamicProperty("clingy_cats:conception_data", void 0);
+  const { mother: momGenes, father: dadGenes, babyCount = 1 } = record ?? { mother: captureGenes(mother), father: void 0, babyCount: 1 };
+  for (let i = 0; i < babyCount; i++) {
+    const babyBreed = determineBabyBreed(momGenes, dadGenes);
+    const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
+    baby.addTag("clingy_cats:not_wild_spawn");
+    baby.triggerEvent("clingy_cats:born");
+    assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
+    assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
+    assignRandomPersonality(baby);
+    baby.triggerEvent("clingy_cats:visible");
+  }
 }
 
-// scripts/events/breedevent.ts
+// scripts/logics/states.ts
+import { world as world2 } from "@minecraft/server";
+function restoreIdentity(cat) {
+  if (!cat.isValid) return;
+  const trait = cat.getProperty("clingy_cats:behavior_trait");
+  const personality = cat.getProperty("clingy_cats:personality");
+  const block = cat.getProperty("clingy_cats:favorite_block");
+  if (!trait || !personality || !block) return;
+  cat.triggerEvent("clingy_cats:on_idle");
+  cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
+  cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+  cat.triggerEvent(`clingy_cats:set_block_${block}`);
+}
+
+// scripts/events/eventRegister.ts
 function registerCatSpawnSubscriber() {
   system2.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
-    world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       system2.runTimeout(() => {
         if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
           sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world2.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          world3.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
           return;
         }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
-          world2.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+          world3.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
         }
         handleWildSpawn(sourceEntity);
@@ -768,29 +892,35 @@ function registerCatSpawnSubscriber() {
       return;
     }
     if (id === "clingycats:conception") {
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleConception(sourceEntity);
-      world2.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
+      world3.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleGiveBirth(sourceEntity);
-      world2.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      world3.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:interact") {
       return;
     }
+    if (id === "clingycats:restore_identity") {
+      restoreIdentity(sourceEntity);
+      return;
+    }
   });
-  world2.sendMessage("\xA7a[ClingyCats] subscriber registered");
+  world3.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/debug/catdebug.ts
-import { world as world3, system as system3, EquipmentSlot } from "@minecraft/server";
+import { world as world4, system as system3, EquipmentSlot } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
   system3.runInterval(() => {
-    for (const player of world3.getAllPlayers()) {
+    for (const player of world4.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
@@ -800,6 +930,10 @@ function registerDebugRaycast() {
       if (!hit?.entity) continue;
       const cat = hit.entity;
       if (!cat.typeId.startsWith("clingy_cats:")) continue;
+      const mainhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot.Mainhand);
+      const offhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot.Offhand);
+      const inv = cat.getComponent("minecraft:inventory")?.container;
+      const invStr = inv ? Array.from({ length: inv.size }, (_, i) => inv.getItem(i)?.typeId ?? "_").join(",") : "no_inv";
       const lines = [
         `\xA7e${cat.typeId.replace("clingy_cats:", "")} \xA77[${cat.id.slice(-6)}]`,
         `\xA77sub:\xA7f${cat.getProperty("clingy_cats:sub_variant")} \xA77pattern:\xA7f${cat.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${cat.getProperty("clingy_cats:color")}`,
@@ -808,7 +942,10 @@ function registerDebugRaycast() {
         `\xA77trait:\xA7f${cat.getProperty("clingy_cats:behavior_trait")} \xA77personality:\xA7f${cat.getProperty("clingy_cats:personality")} \xA77sound:\xA7f${cat.getProperty("clingy_cats:sound_variant")}`,
         `\xA77food:\xA7f${cat.getProperty("clingy_cats:favorite_food")} \xA77block:\xA7f${cat.getProperty("clingy_cats:favorite_block")}`,
         `\xA77baby:\xA7f${cat.hasComponent("minecraft:is_baby")} \xA77tamed:\xA7f${cat.hasComponent("minecraft:is_tamed")} \xA77tags:\xA7f${cat.getTags().join(",") || "none"}`,
-        `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`
+        `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
+        `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
+        `\xA77pregnant:\xA7f${cat.hasComponent("minecraft:is_pregnant")}\xA77clingy_pregnant:\xA7f${cat.getProperty("clingy_cats:pregnant")}`,
+        `\xA77want_to_lay_eggs?:\xA7f${cat.hasComponent("minecraft:behavior.lay_egg")}`
       ].join("\n");
       player.onScreenDisplay.setActionBar(lines);
     }
@@ -819,7 +956,7 @@ function registerDebugRaycast() {
 system4.run(() => {
   registerCatSpawnSubscriber();
   registerDebugRaycast();
-  world4.sendMessage("ClingyCats script loaded!");
+  world5.sendMessage("ClingyCats script loaded!");
 });
 
 //# sourceMappingURL=../debug/main.js.map

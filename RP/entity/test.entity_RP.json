@@ -1,5 +1,5 @@
 {
-  "format_version": "1.10.0",
+  "format_version": "1.26.10",
   "minecraft:client_entity": {
     "description": {
       "identifier": "clingy_cats:test",
@@ -265,11 +265,8 @@
           "v.update_time_moving = 0;",
           "v.idle_pick = 0;",
           "v.idle_time = 0;",
-          "v.run_speed = 1;",
-          "v.move_speed = 1;",
           "v.hunt_speed = 0;"
         ],
-        "scale": "query.is_baby ? (1/0.5) : 1",
         "animate": [
           "lookat",
           "ac.state"
@@ -285,7 +282,9 @@
       "spawn_egg": {
         "texture": "test_spawn_egg",
         "texture_index": 0
-      }
+      },
+      "held_item_ignores_lighting": true,
+      "held_item_scale": 0.5
     }
   }
 }
