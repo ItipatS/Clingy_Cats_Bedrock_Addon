@@ -237,6 +237,72 @@ export const WHITE_TEXTURES: Record<number, TextureData> = {
     3: { pattern: "sphinx", color: "gray",      hairs: "none", tail: "normal", snout: "normal", head: "flat" }, // white4
 };
 
+export const PATTERN_DRIFT: Partial<Record<string, string[]>> = {
+
+    // Solid: cleanest coat, white spotting can develop → bicolor
+    // recessive agouti can surface → tabby (rare)
+    "solid": [
+        "solid", "solid", "solid",
+        "bicolor",
+        "tabby",
+    ],
+
+    // Bicolor: white spotting active, can intensify → tuxedo
+    // or reduce → solid, or gain color complexity → tortoiseshell
+    "bicolor": [
+        "bicolor", "bicolor",
+        "solid",
+        "tuxedo",
+        "tortoiseshell",
+    ],
+
+    // Tuxedo: high-contrast bicolor, very stable
+    "tuxedo": [
+        "tuxedo", "tuxedo", "tuxedo",
+        "bicolor",
+        "solid",
+    ],
+
+    // Tabby: agouti gene dominant, very heritable
+    // can mute → solid, gain color complexity → tortoiseshell
+    "tabby": [
+        "tabby", "tabby", "tabby",
+        "solid",
+        "tortoiseshell",
+    ],
+
+    // Tortoiseshell: tabby + orange gene, can gain white → calico
+    // or lose complexity → tabby/solid
+    "tortoiseshell": [
+        "tortoiseshell", "tortoiseshell",
+        "calico",
+        "tabby",
+        "solid",
+    ],
+
+    // Calico: tortoiseshell + white base (color is always white in catalog)
+    // loses white → tortoiseshell, loses patches → bicolor
+    "calico": [
+        "calico", "calico",
+        "tortoiseshell",
+        "bicolor",
+        "solid",
+    ],
+
+    // Pointed: breed-locked (siamese/ragdoll), extremely stable
+    "pointed": [
+        "pointed", "pointed", "pointed", "pointed",
+        "solid",
+    ],
+
+    // Sphinx: structural/hairless — nearly fully locked
+    // color varies freely (skin showing), pattern itself almost never drifts
+    "sphinx": [
+        "sphinx", "sphinx", "sphinx", "sphinx", "sphinx",
+        "solid",
+    ],
+};
+
 // ============================================================
 // EYE & WHISKER OPTIONS
 // ============================================================
