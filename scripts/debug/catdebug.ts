@@ -1,6 +1,7 @@
-import { world, system, EquipmentSlot } from "@minecraft/server";
+import { world, system, EquipmentSlot, EntityComponent } from "@minecraft/server";
 
 const DEBUG = true;
+EntityComponent
 
 export function registerDebugRaycast(): void {
     if (!DEBUG) return;
@@ -40,8 +41,10 @@ export function registerDebugRaycast(): void {
                 `§7food:§f${cat.getProperty("clingy_cats:favorite_food")} §7block:§f${cat.getProperty("clingy_cats:favorite_block")}`,
                 `§7baby:§f${cat.hasComponent("minecraft:is_baby")} §7tamed:§f${cat.hasComponent("minecraft:is_tamed")} §7tags:§f${cat.getTags().join(",")||"none"}`,
                 `§7state:§f${cat.getProperty("clingy_cats:state")}`, `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
-                `§7pregnant:§f${cat.hasComponent("minecraft:is_pregnant")}` + `§7clingy_pregnant:§f${cat.getProperty("clingy_cats:pregnant")}`,
+                `§7pregnant:§f${cat.hasComponent("minecraft:is_pregnant")}`,
                 `§7want_to_lay_eggs?:§f${cat.hasComponent("minecraft:behavior.lay_egg")}`,
+                `§7has mount components?:§f${cat.hasComponent("minecraft:behavior.find_mount")}`,
+                `§7scale???:§f${cat.hasComponent("minecraft:scale_by_age")}`,
             ].join("\n");
 
             player.onScreenDisplay.setActionBar(lines);

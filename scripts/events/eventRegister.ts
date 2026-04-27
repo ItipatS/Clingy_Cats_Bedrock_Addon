@@ -1,10 +1,11 @@
 import { world, system } from "@minecraft/server";
 import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
+import { handleRequestShoulderMount, handleAnchorDetached, handleDropOffCat } from "../logics/shoulderAnchor";
 
 import { restoreIdentity } from "../logics/states";
 
-export function registerCatSpawnSubscriber(): void {
+export function registerSubscriber(): void {
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
         const { id, message, sourceEntity } = ev;
 
@@ -49,6 +50,21 @@ export function registerCatSpawnSubscriber(): void {
 
         if (id === "clingycats:restore_identity") {
             restoreIdentity(sourceEntity);
+            return;
+        }
+        
+        if (id === "clingycats:request_shoulder_mount") { 
+             handleRequestShoulderMount(sourceEntity);
+            return;
+        }
+
+        if (id === "clingycats:anchor_detached") {
+            handleAnchorDetached(sourceEntity);
+            return;
+        } 
+
+        if (id === "clingycats:drop_off_cat") {
+            handleDropOffCat(sourceEntity);
             return;
         }
 

@@ -1,8 +1,8 @@
 // scripts/main.ts
-import { world as world5, system as system4 } from "@minecraft/server";
+import { world as world6, system as system6 } from "@minecraft/server";
 
 // scripts/events/eventRegister.ts
-import { world as world3, system as system2 } from "@minecraft/server";
+import { world as world4, system as system4 } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -754,13 +754,6 @@ function assignRandomPersonality(cat) {
   const personality = weightedRandom(PERSONALITY_POOL);
   const food = weightedRandom(FAVORITE_FOOD_POOL);
   const block = weightedRandom(FAVORITE_BLOCK_POOL);
-  world.sendMessage([
-    `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
-    `\xA77trait:\xA7f${trait.trait}`,
-    `\xA77personality:\xA7f${personality.personality}`,
-    `\xA77food:\xA7f${food.food}`,
-    `\xA77block:\xA7f${block.block}`
-  ].join("\n"));
   cat.setProperty("clingy_cats:behavior_trait", trait.trait);
   cat.setProperty("clingy_cats:personality", personality.personality);
   cat.setProperty("clingy_cats:favorite_food", food.food);
@@ -770,6 +763,14 @@ function assignRandomPersonality(cat) {
   if (block.block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
     cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
   }
+  world.sendMessage([
+    `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
+    `\xA77trait:\xA7f${trait.trait}`,
+    `\xA77personality:\xA7f${personality.personality}`,
+    `\xA77food:\xA7f${food.food}`,
+    `\xA77block:\xA7f${block.block}`,
+    `\xA77has mount components?:\xA7f${cat.hasComponent("minecraft:behavior.find_mount")}`
+  ].join("\n"));
 }
 
 // scripts/logics/breed.ts
@@ -782,13 +783,13 @@ function handleSpawnTestCats(cat) {
   applyTextureData(cat, flatIdx, catalog[localIdx]);
   assignRandomEyesAndWhiskers(cat);
   assignRandomPersonality(cat);
-  cat.triggerEvent("clingy_cats:visible");
+  cat.triggerEvent("clingy_cats:visible_event");
 }
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
   assignRandomPersonality(cat);
-  cat.triggerEvent("clingy_cats:visible");
+  cat.triggerEvent("clingy_cats:visible_event");
 }
 
 // scripts/logics/pregnancy.ts
@@ -851,12 +852,110 @@ function handleGiveBirth(mother) {
     assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
     assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
     assignRandomPersonality(baby);
-    baby.triggerEvent("clingy_cats:visible");
+    baby.triggerEvent("clingy_cats:visible_event");
   }
 }
 
+// scripts/logics/shoulderAnchor.ts
+import { world as world2, system as system2 } from "@minecraft/server";
+var ANCHOR_TYPE = "clingy_cats:shoulder_anchor";
+var MOUNT_CHANCE = 0.6;
+var SLOT_DP = {
+  left: "clingy_cats:anchor_left",
+  right: "clingy_cats:anchor_right"
+};
+function getOwnerNearCat(cat) {
+  return cat.dimension.getPlayers({
+    location: cat.location,
+    maxDistance: 8
+  }).find((player) => player.isSneaking);
+}
+function getAnchorById(player, anchorId) {
+  if (!anchorId) return void 0;
+  return player.dimension.getEntities({ type: ANCHOR_TYPE }).find((e) => e.id === anchorId && e.isValid);
+}
+function ensureAnchor(player, slot) {
+  const dpKey = SLOT_DP[slot];
+  const storedId = player.getDynamicProperty(dpKey);
+  const existing = getAnchorById(player, storedId);
+  if (existing) return existing;
+  const anchor = player.dimension.spawnEntity(ANCHOR_TYPE, player.location);
+  anchor.setDynamicProperty("clingy_cats:owner_id", player.id);
+  anchor.setDynamicProperty("clingy_cats:slot", slot);
+  player.setDynamicProperty(dpKey, anchor.id);
+  world2.sendMessage(`\xA78[ClingyCats] spawned ${slot} anchor for ${player.name}`);
+  return anchor;
+}
+function getFreeAnchorSlot(player) {
+  for (const slot of ["left", "right"]) {
+    const storedId = player.getDynamicProperty(SLOT_DP[slot]);
+    const anchor = getAnchorById(player, storedId);
+    if (!anchor) return slot;
+    const occupiedBy = anchor.getDynamicProperty("clingy_cats:occupied_by");
+    if (!occupiedBy) return slot;
+  }
+  return void 0;
+}
+function handleRequestShoulderMount(cat) {
+  if (Math.random() > MOUNT_CHANCE) {
+    world2.sendMessage(`\xA78[ClingyCats] mount chance failed`);
+    return;
+  }
+  const player = getOwnerNearCat(cat);
+  if (!player) {
+    world2.sendMessage("\xA78[ClingyCats] no nearby sneaking owner found");
+    return;
+  }
+  const freeSlot = getFreeAnchorSlot(player);
+  if (!freeSlot) {
+    world2.sendMessage(`\xA78[ClingyCats] no free anchor slot for ${player.name}`);
+    return;
+  }
+  const anchor = ensureAnchor(player, freeSlot);
+  if (!anchor.isValid) return;
+  anchor.setDynamicProperty("clingy_cats:occupied_by", cat.id);
+  cat.setDynamicProperty("clingy_cats:anchor_slot", freeSlot);
+  cat.setDynamicProperty("clingy_cats:anchor_id", anchor.id);
+  system2.runTimeout(() => {
+    if (!cat.isValid || !anchor.isValid) return;
+    cat.triggerEvent("clingy_cats:add_can_mount");
+  }, 2);
+  world2.sendMessage(`\xA7b[ClingyCats] ${cat.typeId} assigned to ${freeSlot} anchor`);
+}
+function handleDropOffCat(cat) {
+  const anchorId = cat.getDynamicProperty("clingy_cats:anchor_id");
+  if (!anchorId) return;
+  const anchor = cat.dimension.getEntities({ location: cat.location, maxDistance: 16, type: ANCHOR_TYPE }).find((e) => e.id === anchorId);
+  if (anchor?.isValid) {
+    const ownerId = anchor.getDynamicProperty("clingy_cats:owner_id");
+    const slot = anchor.getDynamicProperty("clingy_cats:slot");
+    if (ownerId && slot) {
+      cat.dimension.getPlayers({ location: cat.location, maxDistance: 32 }).find((p) => p.id === ownerId)?.setDynamicProperty(SLOT_DP[slot], void 0);
+    }
+    anchor.setDynamicProperty("clingy_cats:occupied_by", void 0);
+    system2.runTimeout(() => {
+      if (anchor.isValid) anchor.remove();
+    }, 1);
+  }
+  cat.setDynamicProperty("clingy_cats:anchor_slot", void 0);
+  cat.setDynamicProperty("clingy_cats:anchor_id", void 0);
+  world2.sendMessage("\xA78[ClingyCats] cat dropped off shoulder");
+}
+function handleAnchorDetached(anchor) {
+  if (!anchor.isValid) return;
+  const occupiedBy = anchor.getDynamicProperty("clingy_cats:occupied_by");
+  if (occupiedBy) {
+    anchor.dimension.getEntities({ location: anchor.location, maxDistance: 32 }).find((e) => e.id === occupiedBy)?.setDynamicProperty("clingy_cats:anchor_slot", void 0);
+  }
+  anchor.setDynamicProperty("clingy_cats:occupied_by", void 0);
+  system2.runTimeout(() => {
+    if (anchor.isValid) anchor.remove();
+  }, 1);
+  world2.sendMessage("\xA78[ClingyCats] anchor detached externally");
+}
+
 // scripts/logics/states.ts
-import { world as world2 } from "@minecraft/server";
+import { world as world3 } from "@minecraft/server";
 function restoreIdentity(cat) {
   if (!cat.isValid) return;
   const trait = cat.getProperty("clingy_cats:behavior_trait");
@@ -866,25 +965,27 @@ function restoreIdentity(cat) {
   cat.triggerEvent("clingy_cats:on_idle");
   cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
   cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
-  cat.triggerEvent(`clingy_cats:set_block_${block}`);
+  if (block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
+    cat.triggerEvent(`clingy_cats:set_block_${block}`);
+  }
 }
 
 // scripts/events/eventRegister.ts
-function registerCatSpawnSubscriber() {
-  system2.afterEvents.scriptEventReceive.subscribe((ev) => {
+function registerSubscriber() {
+  system4.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
-      system2.runTimeout(() => {
+      world4.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      system4.runTimeout(() => {
         if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
           sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world3.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          world4.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
           return;
         }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
-          world3.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+          world4.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
         }
         handleWildSpawn(sourceEntity);
@@ -892,15 +993,15 @@ function registerCatSpawnSubscriber() {
       return;
     }
     if (id === "clingycats:conception") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world4.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleConception(sourceEntity);
-      world3.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
+      world4.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world4.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleGiveBirth(sourceEntity);
-      world3.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      world4.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:interact") {
@@ -910,17 +1011,29 @@ function registerCatSpawnSubscriber() {
       restoreIdentity(sourceEntity);
       return;
     }
+    if (id === "clingycats:request_shoulder_mount") {
+      handleRequestShoulderMount(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:anchor_detached") {
+      handleAnchorDetached(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:drop_off_cat") {
+      handleDropOffCat(sourceEntity);
+      return;
+    }
   });
-  world3.sendMessage("\xA7a[ClingyCats] subscriber registered");
+  world4.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/debug/catdebug.ts
-import { world as world4, system as system3, EquipmentSlot } from "@minecraft/server";
+import { world as world5, system as system5, EquipmentSlot, EntityComponent } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
-  system3.runInterval(() => {
-    for (const player of world4.getAllPlayers()) {
+  system5.runInterval(() => {
+    for (const player of world5.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
@@ -944,8 +1057,10 @@ function registerDebugRaycast() {
         `\xA77baby:\xA7f${cat.hasComponent("minecraft:is_baby")} \xA77tamed:\xA7f${cat.hasComponent("minecraft:is_tamed")} \xA77tags:\xA7f${cat.getTags().join(",") || "none"}`,
         `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
         `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
-        `\xA77pregnant:\xA7f${cat.hasComponent("minecraft:is_pregnant")}\xA77clingy_pregnant:\xA7f${cat.getProperty("clingy_cats:pregnant")}`,
-        `\xA77want_to_lay_eggs?:\xA7f${cat.hasComponent("minecraft:behavior.lay_egg")}`
+        `\xA77pregnant:\xA7f${cat.hasComponent("minecraft:is_pregnant")}`,
+        `\xA77want_to_lay_eggs?:\xA7f${cat.hasComponent("minecraft:behavior.lay_egg")}`,
+        `\xA77has mount components?:\xA7f${cat.hasComponent("minecraft:behavior.find_mount")}`,
+        `\xA77scale???:\xA7f${cat.hasComponent("minecraft:scale_by_age")}`
       ].join("\n");
       player.onScreenDisplay.setActionBar(lines);
     }
@@ -953,10 +1068,10 @@ function registerDebugRaycast() {
 }
 
 // scripts/main.ts
-system4.run(() => {
-  registerCatSpawnSubscriber();
+system6.run(() => {
+  registerSubscriber();
   registerDebugRaycast();
-  world5.sendMessage("ClingyCats script loaded!");
+  world6.sendMessage("ClingyCats script loaded!");
 });
 
 //# sourceMappingURL=../debug/main.js.map

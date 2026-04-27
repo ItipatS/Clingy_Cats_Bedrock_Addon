@@ -14,7 +14,7 @@ export function handleSpawnTestCats(cat: Entity): void {
     applyTextureData(cat, flatIdx, catalog[localIdx]);
     assignRandomEyesAndWhiskers(cat);
     assignRandomPersonality(cat);
-    cat.triggerEvent("clingy_cats:visible");
+    cat.triggerEvent("clingy_cats:visible_event");
 }
 
 /** Wild spawn — full random appearance + eyes + whiskers + personality. */
@@ -22,5 +22,5 @@ export function handleWildSpawn(cat: Entity): void {
     assignRandomAppearance(cat);
     assignRandomEyesAndWhiskers(cat);
     assignRandomPersonality(cat);
-    cat.triggerEvent("clingy_cats:visible");
+    cat.triggerEvent("clingy_cats:visible_event");
 }

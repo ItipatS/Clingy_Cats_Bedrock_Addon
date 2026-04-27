@@ -1,1617 +1,878 @@
 {
-	"format_version": "1.26.10",
-	"minecraft:entity": {
-		"description": {
-			"identifier": "clingy_cats:test",
-			"spawn_category": "creature",
-			"is_spawnable": true,
-			"is_summonable": true,
-			"is_experimental": false,
-			"properties": {
-				"clingy_cats:sub_variant":{ "type": "int", "range": [0,300], "default": 0, "client_sync": true},
-				"clingy_cats:sound_variant": { "type": "enum", "values": ["default", "royal"], "default": "default", "client_sync": true},
-				"clingy_cats:state": {
-					"type": "enum",
-					"values": [
-						"idle",
-						"sitting",
-						"purring",
-						"sleeping",
-						"playing",
-						"hunting",
-						"grooming",
-						"fleeing"
-					],
-					"default": "idle",
-					"client_sync": true
-				},
-				"clingy_cats:emotion": {
-					"type": "enum",
-					"values": [
-						"happy",
-						"sad",
-						"angry",
-						"scared",
-						"curious",
-						"playful"
-					],
-					"default": "happy",
-					"client_sync": true
-				},
-				"clingy_cats:behavior_trait": {
-					"type": "enum",
-					"values": [
-						"lazy",
-						"active",
-						"curious",
-						"shy",
-						"friendly",
-						"independent"
-					],
-					"default": "lazy",
-					"client_sync": true
-				},
-				"clingy_cats:personality": {
-					"type": "enum",
-					"values": [
-						"affectionate",
-						"aloof",
-						"playful",
-						"calm",
-						"anxious",
-						"confident"
-					],
-					"default": "affectionate",
-					"client_sync": true
-				},
-				"clingy_cats:hairs": { "type": "enum", "values": [ "short", "fluffy", "none" ], "default": "short", "client_sync": true},
-				"clingy_cats:tail": { "type": "enum", "values": [ "normal", "bobtail" ], "default": "normal", "client_sync": true},
-				"clingy_cats:snout": { "type": "enum", "values": [ "normal", "short" ], "default": "normal", "client_sync": true },
-				"clingy_cats:whiskers": { "type": "enum", "values": [ "short_white","short_black", "medium_white","medium_black", "long_white","long_black" ], "default": "medium_black", "client_sync": true },
-				"clingy_cats:eye_shape": { "type": "enum", "values": ["almond", "narrow", "round"  ], "default": "narrow", "client_sync": true },
-				"clingy_cats:eye_color": {
-					"type": "enum",
-					"values": [
-						"emerald", "green", "yellow", "orange", "teal", "blue", "gray", "brown", "heterochromia1", "heterochromia2", "heterochromia3"
-					],
-					"default": "teal",
-					"client_sync": true
-				},
-				"clingy_cats:color": {
-					"type": "enum",
-					"values": ["black", "white", "gray", "brown", "orange", "chocolate", "cream"],
-					"default": "black",
-					"client_sync": true
-				},
-				"clingy_cats:pattern": {
-					"type": "enum",
-					"values": [
-						"solid",
-						"tabby",
-						"tuxedo",
-						"bicolor",
-						"calico",
-						"tortoiseshell",
-						"pointed",
-						"sphinx"
-					],
-					"default": "solid",
-					"client_sync": true
-				},
-				"clingy_cats:head": { "type": "enum", "values": [ "round", "flat" ], "default": "round", "client_sync": true},
-				"clingy_cats:favorite_food": {
-					"type": "enum",
-					"values": [
-					"porkchop",
-					"beef",
-					"spider_eye",
-					"carrot",
-					"cod",
-					"salmon",
-					"tropical",
-					"puffer",
-					"rabbit",
-					"chicken",
-					"treat_fish",
-					"treat_meat",
-					"treat_fancy"
-					],
-					"default": "cod",
-					"client_sync": false
-				},
-				"clingy_cats:favorite_block": {
-					"type": "enum", 
-					"values": ["bed","soft","warm","high","owner","sun"],
-					"default": "soft",
-					"client_sync": false
-				},
-				"clingy_cats:whisker_index": { "type": "int", "range": [0, 5], "default": 0, "client_sync": true },
-				"clingy_cats:eye_index": { "type": "int", "range": [0, 33], "default": 0, "client_sync": true },
-				"clingy_cats:affection_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
-				"clingy_cats:trust_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
-				"clingy_cats:frequency": {"type": "int", "range": [0,100], "default": 50, "client_sync": false}
-			}
-		},
-		"component_groups": {
-			"clingy_cats:visible_baby": {
-				"minecraft:scale": {
-					"value": 0.4
-				}
-			},
-			"clingy_cats:visible_adult": {
-				"minecraft:scale": {
-					"value": 0.8
-				}
-			},
-			"clingy_cats:baby": {
-				"minecraft:is_baby": {},
-				"minecraft:scale_by_age": {
-					"end_scale": 0.8,
-					"start_scale": 0.4
-				},
-				"minecraft:ageable": {
-					"duration": 1200,
-					"feed_items": [
-						"minecraft:cooked_cod",
-						"minecraft:cooked_salmon"
-					],
-					"pause_growth_items": ["golden_dandelion"],
-					"reset_growth_items": ["golden_dandelion"],
-					"grow_up": {
-						"event": "clingy_cats:ageable_grow_up",
-						"target": "self"
-					},
-					"interact_filters": []
-				}
-			},
-			"clingy_cats:adult": {
-				"minecraft:experience_reward": {
-					"on_bred": "Math.Random(1,7)",
-					"on_death": "query.last_hit_by_player ? Math.Random(1,3) : 0"
-				},
-				"minecraft:loot": {
-					"table": "loot_tables/empty.json"
-				},
-				"minecraft:leashable_to": {},
-				"minecraft:breedable": {
-					"require_tame": true,
-					"require_full_health": false,
-					"allow_sitting": true,
-					"breed_items": ["fish", "salmon"],
-					"breeds_with": { "clingy_cats:test": {"event": "clingy_cats:become_pregnant", "target": "self" } },
-					"causes_pregnancy": true
-				},
-				"minecraft:behavior.breed": {
-					"priority": 3,
-					"speed_multiplier": 0.5
-				}
-			},
-			"clingy_cats:wild": {
-				"minecraft:health": {
-					"max": 20,
-					"value": 20
-				},
-				"minecraft:tameable": {
-					"probability": 0.33,
-					"tame_items": ["fish", "salmon"],
-					"tame_event": {
-						"event": "clingy_cats:on_tame",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 1,
-					"reselect_targets": true,
-					"within_radius": 16.0,
-					"entity_types": [
-						{
-						"filters": {
-							"test": "is_family",
-							"subject": "other",
-							"value": "rabbit"
-						},
-						"max_dist": 8
-						},
-						{
-						"filters": {
-							"all_of": [
-							{
-								"test": "is_family",
-								"subject": "other",
-								"value": "baby_turtle"
-							},
-							{
-								"test": "in_water",
-								"subject": "other",
-								"operator": "!=",
-								"value": true
-							}
-							]
-						},
-						"max_dist": 8
-						}
-					]
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.5,
-					"within_radius": 16,
-					"can_get_scared": true,
-					"tempt_sound": "tempt",
-					"sound_interval": {"max":100,"min":50},
-					"items": ["fish", "salmon"]
-					},
-				"minecraft:behavior.avoid_mob_type": {
-					"avoid_mob_sound": "screech",
-					"priority": 4,
-					"ignore_visibility": false,
-					"sprint_distance": 10,
-					"entity_types": [
-						{
-							"filters": {
-								"all_of": [
-									{
-										"test": "is_family",
-										"subject": "other",
-										"value": "player"
-									},
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:behavior_trait",
-										"subject": "self",
-										"value": "shy"
-									},
+    "format_version": "1.26.10",
+    "minecraft:entity": {
+        "description": {
+            "identifier": "clingy_cats:test",
+            "spawn_category": "creature",
+            "is_spawnable": true,
+            "is_summonable": true,
+            "is_experimental": false,
+            "properties": {
+                "clingy_cats:sub_variant":     { "type": "int",  "range": [0, 300], "default": 0,   "client_sync": true },
+                "clingy_cats:sound_variant":   { "type": "enum", "values": ["default","royal"],      "default": "default", "client_sync": true },
+                "clingy_cats:state": {
+                    "type": "enum",
+                    "values": ["idle","sitting","sleeping","grooming","hunting","purring","fleeing"],
+                    "default": "idle",
+                    "client_sync": true
+                },
+                "clingy_cats:sub_state":       { "type": "int",  "range": [0, 5],   "default": 0,   "client_sync": true },
+                "clingy_cats:emotion": {
+                    "type": "enum",
+                    "values": ["happy","sad","angry","scared","curious","playful"],
+                    "default": "happy",
+                    "client_sync": true
+                },
+                "clingy_cats:behavior_trait": {
+                    "type": "enum",
+                    "values": ["lazy","active","curious","shy","friendly","independent"],
+                    "default": "lazy",
+                    "client_sync": true
+                },
+                "clingy_cats:personality": {
+                    "type": "enum",
+                    "values": ["affectionate","aloof","playful","calm","anxious","confident"],
+                    "default": "affectionate",
+                    "client_sync": true
+                },
+                "clingy_cats:hairs":      { "type": "enum", "values": ["short","fluffy","none"],                                                    "default": "short",        "client_sync": true },
+                "clingy_cats:tail":       { "type": "enum", "values": ["normal","bobtail"],                                                         "default": "normal",       "client_sync": true },
+                "clingy_cats:snout":      { "type": "enum", "values": ["normal","short"],                                                           "default": "normal",       "client_sync": true },
+                "clingy_cats:head":       { "type": "enum", "values": ["round","flat"],                                                             "default": "round",        "client_sync": true },
+                "clingy_cats:whiskers":   { "type": "enum", "values": ["short_white","short_black","medium_white","medium_black","long_white","long_black"], "default": "medium_black", "client_sync": true },
+                "clingy_cats:eye_shape":  { "type": "enum", "values": ["almond","narrow","round"],                                                  "default": "narrow",       "client_sync": true },
+                "clingy_cats:eye_color":  { "type": "enum", "values": ["emerald","green","yellow","orange","teal","blue","gray","brown","heterochromia1","heterochromia2","heterochromia3"], "default": "teal", "client_sync": true },
+                "clingy_cats:color":      { "type": "enum", "values": ["black","white","gray","brown","orange","chocolate","cream"],                 "default": "black",        "client_sync": true },
+                "clingy_cats:pattern":    { "type": "enum", "values": ["solid","tabby","tuxedo","bicolor","calico","tortoiseshell","pointed","sphinx"], "default": "solid",     "client_sync": true },
+                "clingy_cats:favorite_food": {
+                    "type": "enum",
+                    "values": ["cod","salmon","tropical","puffer","rabbit","chicken","treat_fish","treat_meat","treat_fancy"],
+                    "default": "cod",
+                    "client_sync": false
+                },
+                "clingy_cats:favorite_block": {
+                    "type": "enum",
+                    "values": ["bed","soft","warm","high","owner","sun"],
+                    "default": "soft",
+                    "client_sync": false
+                },
+                "clingy_cats:whisker_index":   { "type": "int", "range": [0, 5],    "default": 0, "client_sync": true },
+                "clingy_cats:eye_index":       { "type": "int", "range": [0, 33],   "default": 0, "client_sync": true },
+                "clingy_cats:affection_level": { "type": "int", "range": [0, 1000], "default": 0, "client_sync": false },
+                "clingy_cats:trust_level":     { "type": "int", "range": [0, 1000], "default": 0, "client_sync": false },
+                "clingy_cats:frequency":       { "type": "int", "range": [0, 100],  "default": 50,"client_sync": false }
+            }
+        },
 
-									{
-										"test": "is_sneaking",
-										"subject": "other",
-										"value": false
-									}
-								]
-							},
-							"max_dist": 24,
-							"max_flee": 32,
-							"sprint_speed_multiplier": 1.8,
-							"walk_speed_multiplier": 1.0,
-							"must_see": true
-						},
-						{
-							"filters": {
-								"all_of": [
-									{
-										"test": "is_family",
-										"subject": "other",
-										"value": "player"
-									},
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:behavior_trait",
-										"subject": "self",
-										"operator": "!=",
-										"value": "shy"
-									},
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:behavior_trait",
-										"subject": "self",
-										"operator": "!=",
-										"value": "friendly"
-									},
-									{
-										"test": "is_sneaking",
-										"subject": "other",
-										"value": false
-									}
-								]
-							},
-							"max_dist": 16,
-							"max_flee": 20,
-							"sprint_speed_multiplier": 1.5,
-							"walk_speed_multiplier": 1.0,
-							"must_see": true
-						}
-					]
-				},
-				"minecraft:behavior.move_towards_dwelling_restriction": {
-					"priority": 7
-				}
-				
-			},
-			"clingy_cats:tamed": {
-        		"minecraft:is_tamed": {},
-				"minecraft:health": {
-				"value": 40,
-				"max": 40
-				},
-				"minecraft:is_dyeable": {
-				"interact_text": "action.interact.dye"
-				},
-				"minecraft:on_wake_with_owner": {
-				"event": "clingy_cats:pet_slept_with_owner",
-				"target": "self"
-				},
-				"minecraft:behavior.pet_sleep_with_owner": {
-				"priority": 2,
-				"speed_multiplier": 1.2,
-				"search_radius": 10,
-				"search_height": 10,
-				"goal_radius": 1.0
-				},
-				"minecraft:behavior.follow_owner": {
-				"priority": 4,
-				"speed_multiplier": 1.0,
-				"start_distance": 10,
-				"stop_distance": 2
-				},
-				"minecraft:behavior.tempt": {
-				"priority": 5,
-				"speed_multiplier": 0.5,
-				"within_radius": 16,
-				"items": ["fish", "salmon"]
-				},
-				"minecraft:behavior.ocelot_sit_on_block": {
-				"priority": 7,
-				"speed_multiplier": 1.0
-				}
-			},
-			"pregnant": {
-				"minecraft:is_pregnant": {},
-				"minecraft:behavior.lay_egg": {
-					"priority": 0,
-					"egg_type": "minecraft:air",
-					"goal_radius": 3,
-					"lay_egg_sound": "purr",
-					"lay_seconds": 5,
-					"on_lay": {
-						"event": "clingy_cats:give_birth",
-						"target": "self"
-					},
-					"search_height": 2,
-					"search_range": 10,
-					"speed_multiplier": 1,
-					"target_blocks": [
-						"minecraft:bed",
-						"minecraft:brown_wool",
-						"minecraft:yellow_wool",
-						"minecraft:orange_wool",
-						"minecraft:red_wool",
-						"minecraft:purple_wool",
-						"minecraft:pink_wool",
-						"minecraft:lime_wool",
-						"minecraft:light_gray_wool",
-						"minecraft:magenta_wool",
-						"minecraft:light_blue_wool",
-						"minecraft:green_wool",
-						"minecraft:gray_wool",
-						"minecraft:cyan_wool",
-						"minecraft:blue_wool",
-						"minecraft:black_wool",
-						"minecraft:white_wool",
-						"minecraft:hay_block",
-						"minecraft:moss_block"
-					],
-					"target_materials_above_block": [
-						"Air"
-					]
-			}
-			},
-			"clingy_cats:gift_for_owner": {
-				"minecraft:behavior.drop_item_for": {
-				"priority": 1,
-				"seconds_before_pickup": 0.0,
-				"cooldown": 0.25,
-				"drop_item_chance": 0.7,
-				"offering_distance": 5.0,
-				"minimum_teleport_distance": 2.0,
-				"max_head_look_at_height": 10.0,
-				"target_range": [5.0, 5.0, 5.0],
-				"teleport_offset": [0.0, 1.0, 0.0],
-				"time_of_day_range": {
-					"min": 0.74999,
-					"max": 0.8
-				},
-				"speed_multiplier": 1.0,
-				"search_range": 5,
-				"search_height": 2,
-				"search_count": 0,
-				"goal_radius": 1.0,
-				"entity_types": [
-					{
-					"filters": {
-						"test": "is_family",
-						"subject": "other",
-						"value": "player"
-					},
-					"max_dist": 6
-					}
-				],
-				"loot_table": "loot_tables/entities/clingy_cat_gift.json",
-				"on_drop_attempt": {
-					"event": "clingy_cats:gifted_owner",
-					"target": "self"
-				}
-				}
-			},
-			"clingy_cats:aggressive": {
-				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 2,
-					"reselect_targets": true,
-					"entity_types": [
-						{
-							"filters": {
-								"test": "is_family",
-								"subject": "other",
-								"value": "player"
-							},
-							"max_dist": 10
-						},
-						{
-							"filters": {
-								"test": "is_family",
-								"subject": "other",
-								"value": "mob"
-							},
-							"max_dist": 10
-						}
-					]
-				},
-				"minecraft:behavior.owner_hurt_by_target": {
-				"priority": 1
-				},"minecraft:behavior.owner_hurt_target": {
-				"priority": 2
-				}
-			},
+        "component_groups": {
 
-			"clingy_cats:trait_lazy": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [180, 400],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 3,
-					"max_look_count": 8,
-					"min_look_time": 80,
-					"max_look_time": 200,
-					"min_angle_of_view_horizontal": 20.0,
-					"max_angle_of_view_horizontal": 40.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 120
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.4,
-					"interval": 240
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.4,
-					"within_radius": 8,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
-				}
-			},
+            "clingy_cats:baby": {
+                "minecraft:is_baby": {},
+                "minecraft:scale_by_age": { "start_scale": 0.4, "end_scale": 0.8 },
+                "minecraft:ageable": {
+                    "duration": 1200,
+                    "feed_items": ["minecraft:cooked_cod","minecraft:cooked_salmon"],
+                    "pause_growth_items": ["golden_dandelion"],
+                    "reset_growth_items": ["golden_dandelion"],
+                    "grow_up": { "event": "clingy_cats:ageable_grow_up", "target": "self" }
+                }
+            },
 
-			"clingy_cats:trait_active": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [20, 80],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 1,
-					"max_look_count": 3,
-					"min_look_time": 20,
-					"max_look_time": 60,
-					"min_angle_of_view_horizontal": 30.0,
-					"max_angle_of_view_horizontal": 90.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 30
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 1.1,
-					"interval": 30
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.8,
-					"within_radius": 24,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
-				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 2,
-					"reselect_targets": true,
-					"within_radius": 16.0,
-					"entity_types": [
-						{
-							"filters": {
-								"any_of" : [
-									{"test": "is_family",
-									"subject": "other",
-									"value": "rabbit"},
+            "clingy_cats:adult": {
+                "minecraft:experience_reward": {
+                    "on_bred": "Math.Random(1,7)",
+                    "on_death": "query.last_hit_by_player ? Math.Random(1,3) : 0"
+                },
+                "minecraft:loot": { "table": "loot_tables/empty.json" },
+                "minecraft:leashable_to": {},
+                "minecraft:breedable": {
+                    "require_tame": true,
+                    "require_full_health": false,
+                    "allow_sitting": true,
+                    "breed_items": ["fish","salmon"],
+                    "breeds_with": { "clingy_cats:test": { "event": "clingy_cats:become_pregnant", "target": "self" } },
+                    "causes_pregnancy": true
+                },
+                "minecraft:behavior.breed": { "priority": 3, "speed_multiplier": 0.5 }
+            },
 
-									{"test": "is_family",
-									"subject": "other",
-									"value": "tropicalfish"},
+            "clingy_cats:wild": {
+                "minecraft:health": { "value": 20, "max": 20 },
+                "minecraft:tameable": {
+                    "probability": 0.33,
+                    "tame_items": ["fish","salmon"],
+                    "tame_event": { "event": "clingy_cats:on_tame", "target": "self" }
+                },
+                "minecraft:behavior.avoid_mob_type": {
+                    "priority": 4,
+                    "avoid_mob_sound": "screech",
+                    "ignore_visibility": false,
+                    "sprint_distance": 10,
+                    "entity_types": [
+                        {
+                            "filters": {
+                                "all_of": [
+                                    { "test": "is_family", "subject": "other", "value": "player" },
+                                    { "test": "enum_property", "domain": "clingy_cats:behavior_trait", "subject": "self", "operator": "!=", "value": "friendly" },
+                                    { "test": "is_sneaking", "subject": "other", "value": false }
+                                ]
+                            },
+                            "max_dist": 16, "max_flee": 20,
+                            "sprint_speed_multiplier": 1.5,
+                            "walk_speed_multiplier": 1.0,
+                            "must_see": true
+                        },
+                        {
+                            "filters": {
+                                "all_of": [
+                                    { "test": "is_family", "subject": "other", "value": "player" },
+                                    { "test": "enum_property", "domain": "clingy_cats:behavior_trait", "subject": "self", "value": "shy" },
+                                    { "test": "is_sneaking", "subject": "other", "value": false }
+                                ]
+                            },
+                            "max_dist": 24, "max_flee": 32,
+                            "sprint_speed_multiplier": 1.8,
+                            "walk_speed_multiplier": 1.0,
+                            "must_see": true
+                        }
+                    ]
+                },
+                "minecraft:behavior.tempt": {
+                    "priority": 5,
+                    "speed_multiplier": 0.5,
+                    "within_radius": 16,
+                    "can_get_scared": true,
+                    "tempt_sound": "tempt",
+                    "sound_interval": { "min": 50, "max": 100 },
+                    "items": ["fish","salmon"]
+                },
+                "minecraft:behavior.nearest_prioritized_attackable_target": {
+                    "priority": 6,
+                    "reselect_targets": true,
+                    "within_radius": 16.0,
+                    "entity_types": [
+                        { "filters": { "test": "is_family", "subject": "other", "value": "rabbit" }, "max_dist": 8 },
+                        {
+                            "filters": { "all_of": [
+                                { "test": "is_family", "subject": "other", "value": "baby_turtle" },
+                                { "test": "in_water", "subject": "other", "operator": "!=", "value": true }
+                            ]},
+                            "max_dist": 8
+                        }
+                    ]
+                }
+            },
 
-									{"test": "is_family",
-									"subject": "other",
-									"value": "pufferfish"},
+            "clingy_cats:tamed": {
+                "minecraft:is_tamed": {},
+                "minecraft:health": { "value": 40, "max": 40 },
+                "minecraft:is_dyeable": { "interact_text": "action.interact.dye" },
+                "minecraft:on_wake_with_owner": {}
+            },
 
-									{"test": "is_family",
-									"subject": "other",
-									"value": "turtle"},
+            "clingy_cats:pregnant": {
+                "minecraft:is_pregnant": {},
+                "minecraft:behavior.lay_egg": {
+                    "priority": 0,
+                    "egg_type": "minecraft:air",
+                    "goal_radius": 3,
+                    "lay_egg_sound": "purr",
+                    "lay_seconds": 5,
+                    "on_lay": { "event": "clingy_cats:give_birth", "target": "self" },
+                    "search_height": 2,
+                    "search_range": 10,
+                    "speed_multiplier": 1,
+                    "target_blocks": [
+                        "minecraft:bed",
+                        "minecraft:white_wool","minecraft:orange_wool","minecraft:magenta_wool",
+                        "minecraft:light_blue_wool","minecraft:yellow_wool","minecraft:lime_wool",
+                        "minecraft:pink_wool","minecraft:gray_wool","minecraft:light_gray_wool",
+                        "minecraft:cyan_wool","minecraft:purple_wool","minecraft:blue_wool",
+                        "minecraft:brown_wool","minecraft:green_wool","minecraft:red_wool",
+                        "minecraft:black_wool","minecraft:hay_block","minecraft:moss_block"
+                    ],
+                    "target_materials_above_block": ["Air"]
+                }
+            },
 
-									{"test": "is_family",
-									"subject": "other",
-									"value": "salmon"},
+            "clingy_cats:aggressive": {
+                "minecraft:behavior.nearest_prioritized_attackable_target": {
+                    "priority": 2,
+                    "reselect_targets": true,
+                    "entity_types": [
+                        { "filters": { "test": "is_family", "subject": "other", "value": "player" }, "max_dist": 10 },
+                        { "filters": { "test": "is_family", "subject": "other", "value": "mob" },    "max_dist": 10 }
+                    ]
+                },
+                "minecraft:behavior.owner_hurt_by_target": { "priority": 1 },
+                "minecraft:behavior.owner_hurt_target":    { "priority": 2 }
+            },
 
-									{"test": "is_family",
-									"subject": "other",
-									"value": "cod"}
+            "clingy_cats:find_cover": {
+                "minecraft:behavior.find_cover": {
+                    "priority": 2,
+                    "speed_multiplier": 1.2,
+                    "cooldown_time": 0.0
+                }
+            },
 
-								]
+            "clingy_cats:can_mount": {
+                "minecraft:behavior.find_mount": {
+                    "avoid_water": true,
+                    "mount_distance": 4.0,
+                    "priority": 4,
+                    "start_delay": 100,
+                    "target_needed": false,
+                    "within_radius": 16
+                }
+            },
 
-							},
-							"max_dist": 8
-						},
-						{
-							"filters": {
-								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "baby_turtle" },
-									{ "test": "in_water", "subject": "other", "operator": "!=", "value": true },
-									{
-										"test": "has_component",
-										"subject": "self",
-										"operator": "not",
-										"value": "minecraft:is_tamed" 
-									}
-								]
-							},
-							"max_dist": 8
-						}
-					]
-				}
-			},
+            "clingy_cats:riding_tick": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 8.0,  "max": 15.0 },
+                    "duration_range": { "min": 5.0,  "max": 10.0 },
+                    "on_start": { "event": "clingy_cats:riding_states", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:on_idle",       "target": "self" }
+                }
+            },
 
-			"clingy_cats:trait_curious": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [40, 120],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 3,
-					"max_look_count": 6,
-					"min_look_time": 30,
-					"max_look_time": 80,
-					"min_angle_of_view_horizontal": 45.0,
-					"max_angle_of_view_horizontal": 120.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 40
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.8,
-					"interval": 80
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.6,
-					"within_radius": 16,
-					"can_get_scared": false,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 10,
-					"probability": 0.08,
-					"look_time": {"max":120,"min":40}
-				}
-			},
+            "clingy_cats:state_sleeping": {
+                "minecraft:behavior.timer_flag_1": {
+                    "priority": 9,
+                    "cooldown_range": { "min": 0.0,  "max": 0.0 },
+                    "duration_range": { "min": 8.0,  "max": 18.0 },
+                    "on_end": { "event": "clingy_cats:on_idle", "target": "self" }
+                }
+            },
 
-			"clingy_cats:trait_shy": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [80, 200],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 2,
-					"max_look_count": 4,
-					"min_look_time": 60,
-					"max_look_time": 120,
-					"min_angle_of_view_horizontal": 20.0,
-					"max_angle_of_view_horizontal": 50.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 80
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.6,
-					"interval": 160
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.5,
-					"within_radius": 8,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
-				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
-					"ignore_visibility": false,
-					"sprint_distance": 10,
-					"avoid_mob_sound": "agitated",
-					"control_flags": ["jump", "move"],
-					"on_escape_event": {
-						"event": "clingy_cats:on_flee",
-						"target": "self"
-					},
-					"sound_interval": {"max":8.0,"min":3.0	},
-					"entity_types": [
-						{
-							"filters": {
-								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "player" },
-									{ "test": "is_sneaking", "subject": "other", "value": false }
-								]
-							},
-							"max_dist": 16,
-							"max_flee": 24,
-							"sprint_speed_multiplier": 1.8,
-							"walk_speed_multiplier": 1.0,
-							"must_see": true
-						}
-					]
-				}
-			},
+            "clingy_cats:state_grooming": {
+                "minecraft:behavior.timer_flag_1": {
+                    "priority": 9,
+                    "cooldown_range": { "min": 0.0, "max": 0.0 },
+                    "duration_range": { "min": 4.0, "max": 8.0 },
+                    "on_end": { "event": "clingy_cats:on_idle", "target": "self" }
+                }
+            },
 
-			"clingy_cats:trait_friendly": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [40, 120],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 2,
-					"max_look_count": 5,
-					"min_look_time": 30,
-					"max_look_time": 80,
-					"min_angle_of_view_horizontal": 30.0,
-					"max_angle_of_view_horizontal": 80.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 40
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.7,
-					"interval": 80
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.7,
-					"within_radius": 24,
-					"can_get_scared": false,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 12,
-					"probability": 0.12,
-					"look_time": {"max":180,"min":60}
-				}
-			},
+            "clingy_cats:trait_lazy": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 60.0, "max": 120.0 },
+                    "duration_range": { "min": 10.0, "max": 20.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 3, "max_look_count": 8,
+                    "min_look_time": 200, "max_look_time": 500,
+                    "min_angle_of_view_horizontal": 20.0,
+                    "max_angle_of_view_horizontal": 40.0,
+                    "probability": 0.05,
+                    "random_look_around_cooldown": 200
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 0.4,
+                    "interval": 240
+                }
+            },
 
-			"clingy_cats:trait_independent": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [80, 200],
-					"time_down_event": {
-						"event": "clingy_cats:idle_tick",
-						"target": "self"
-					}
-				},
-				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 2,
-					"max_look_count": 4,
-					"min_look_time": 60,
-					"max_look_time": 120,
-					"min_angle_of_view_horizontal": 30.0,
-					"max_angle_of_view_horizontal": 60.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 80
-				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.9,
-					"interval": 120
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.5,
-					"within_radius": 10,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 6,
-					"probability": 0.01
-				},
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 0.8,
-					"start_distance": 20,
-					"stop_distance": 8
-				}
-			},
+            "clingy_cats:trait_active": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 10.0, "max": 30.0 },
+                    "duration_range": { "min": 8.0,  "max": 15.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 1, "max_look_count": 3,
+                    "min_look_time": 10, "max_look_time": 30,
+                    "min_angle_of_view_horizontal": 30.0,
+                    "max_angle_of_view_horizontal": 90.0,
+                    "probability": 0.01,
+                    "random_look_around_cooldown": 15
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 1.1,
+                    "interval": 30
+                }
+            },
 
-			"clingy_cats:personality_affectionate": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 1.1,
-					"start_distance": 6,
-					"stop_distance": 1.5
-				},
-				"minecraft:behavior.pet_sleep_with_owner": {
-					"priority": 2,
-					"speed_multiplier": 1.2,
-					"search_radius": 10,
-					"search_height": 10,
-					"goal_radius": 1.0
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 8,
-					"probability": 0.1,
-					"look_time": {"max":160,"min":60}
-				}
-			},
+            "clingy_cats:trait_curious": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 20.0, "max": 60.0 },
+                    "duration_range": { "min": 8.0,  "max": 15.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 3, "max_look_count": 6,
+                    "min_look_time": 40, "max_look_time": 100,
+                    "min_angle_of_view_horizontal": 45.0,
+                    "max_angle_of_view_horizontal": 120.0,
+                    "probability": 0.03,
+                    "random_look_around_cooldown": 40
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 0.8,
+                    "interval": 80
+                }
+            },
 
-			"clingy_cats:personality_aloof": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 0.8,
-					"start_distance": 20,
-					"stop_distance": 6
-				},
-				"minecraft:behavior.stay_while_sitting": {
-					"priority": 3
-				},
-				"minecraft:behavior.ocelot_sit_on_block": {
-					"priority": 8,
-					"speed_multiplier": 1.0
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 6,
-					"probability": 0.02,
-					"look_time": {"max":60,"min":20}
-				}
-			},
+            "clingy_cats:trait_shy": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 60.0, "max": 120.0 },
+                    "duration_range": { "min": 5.0,  "max": 10.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 2, "max_look_count": 4,
+                    "min_look_time": 100, "max_look_time": 200,
+                    "min_angle_of_view_horizontal": 20.0,
+                    "max_angle_of_view_horizontal": 50.0,
+                    "probability": 0.02,
+                    "random_look_around_cooldown": 100
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 0.6,
+                    "interval": 160
+                },
+                "minecraft:behavior.avoid_mob_type": {
+                    "priority": 4,
+                    "avoid_mob_sound": "agitated",
+                    "ignore_visibility": false,
+                    "sprint_distance": 10,
+                    "control_flags": ["jump","move"],
+                    "on_escape_event": { "event": "clingy_cats:on_flee", "target": "self" },
+                    "sound_interval": { "min": 3.0, "max": 8.0 },
+                    "entity_types": [
+                        {
+                            "filters": {
+                                "all_of": [
+                                    { "test": "is_owner",    "subject": "other", "value": false },
+                                    { "test": "is_sneaking", "subject": "other", "value": false }
+                                ]
+                            },
+                            "max_dist": 16, "max_flee": 24,
+                            "sprint_speed_multiplier": 1.8,
+                            "walk_speed_multiplier": 1.0,
+                            "must_see": true
+                        }
+                    ]
+                }
+            },
 
-			"clingy_cats:personality_playful": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 1.0,
-					"start_distance": 10,
-					"stop_distance": 3
-				},
-				"minecraft:behavior.ocelot_sit_on_block": {
-					"priority": 8,
-					"speed_multiplier": 1.0
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 10,
-					"probability": 0.1,
-					"look_time": {"max":60,"min":20}
-				}
-			},
+            "clingy_cats:trait_friendly": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 15.0, "max": 40.0 },
+                    "duration_range": { "min": 10.0, "max": 20.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 2, "max_look_count": 5,
+                    "min_look_time": 30, "max_look_time": 80,
+                    "min_angle_of_view_horizontal": 30.0,
+                    "max_angle_of_view_horizontal": 80.0,
+                    "probability": 0.03,
+                    "random_look_around_cooldown": 30
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 0.7,
+                    "interval": 80
+                }
+            },
 
-			"clingy_cats:personality_calm": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 0.9,
-					"start_distance": 12,
-					"stop_distance": 3
-				},
-				"minecraft:behavior.panic": {
-					"priority": 1,
-					"speed_multiplier": 0.8,
-					"damage_sources": [
-						"lava",
-						"lightning",
-						"freezing"
-					],
-					"ignore_mob_damage": true
-				},
-				"minecraft:behavior.stay_while_sitting": {
-					"priority": 3
-				}
-			},
+            "clingy_cats:trait_independent": {
+                "minecraft:behavior.timer_flag_2": {
+                    "priority": 0,
+                    "cooldown_range": { "min": 80.0, "max": 160.0 },
+                    "duration_range": { "min": 5.0,  "max": 10.0 },
+                    "on_start": { "event": "clingy_cats:behavior_tick", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:behavior_end",  "target": "self" }
+                },
+                "minecraft:behavior.random_look_around_and_sit": {
+                    "priority": 9,
+                    "continue_if_leashed": true,
+                    "continue_sitting_on_reload": true,
+                    "min_look_count": 2, "max_look_count": 4,
+                    "min_look_time": 120, "max_look_time": 300,
+                    "min_angle_of_view_horizontal": 30.0,
+                    "max_angle_of_view_horizontal": 60.0,
+                    "probability": 0.02,
+                    "random_look_around_cooldown": 120
+                },
+                "minecraft:behavior.random_stroll": {
+                    "priority": 10,
+                    "speed_multiplier": 0.9,
+                    "interval": 120
+                }
+            },
 
-			"clingy_cats:personality_anxious": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 1.0,
-					"start_distance": 8,
-					"stop_distance": 2
-				},
-				"minecraft:behavior.panic": {
-					"priority": 1,
-					"speed_multiplier": 1.8,
-					"damage_sources": [
-						"campfire",
-						"fire",
-						"fire_tick",
-						"freezing",
-						"lightning",
-						"lava",
-						"magma",
-						"temperature",
-						"soul_campfire",
-						"drowning",
-						"thorns",
-						"wither"
-					],
-					"ignore_mob_damage": true
-				},
-				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
-					"ignore_visibility": false,
-					"sprint_distance": 16,
-					"avoid_mob_sound": "agitated",
-					"control_flags": ["jump", "move"],
-					"on_escape_event": {
-						"event": "clingy_cats:on_flee",
-						"target": "self"
-					},
-					"sound_interval": {"max":4.0,"min":2.0},
-					"entity_types": [
-						{
-							"filters": {
-								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "player" },
-									{ "test": "is_sneaking", "subject": "other", "value": false }
-								]
-							},
-							"max_dist": 20,
-							"max_flee": 30,
-							"sprint_speed_multiplier": 2.0,
-							"walk_speed_multiplier": 1.2,
-							"must_see": true
-						}
-					]
-				}
-			},
+            "clingy_cats:temp_follow_owner_close": {
+                "minecraft:behavior.follow_owner": {
+                    "priority": 3,
+                    "speed_multiplier": 1.1,
+                    "start_distance": 6,
+                    "stop_distance": 1.5,
+                    "can_teleport": false
+                }
+            },
+            "clingy_cats:temp_follow_owner_loose": {
+                "minecraft:behavior.follow_owner": {
+                    "priority": 3,
+                    "speed_multiplier": 0.9,
+                    "start_distance": 14,
+                    "stop_distance": 4,
+                    "can_teleport": false
+                }
+            },
+            "clingy_cats:temp_look_at_player": {
+                "minecraft:behavior.look_at_player": {
+                    "priority": 3,
+                    "look_distance": 10,
+                    "probability": 1.0,
+                    "look_time": { "min": 40, "max": 120 }
+                }
+            },
+            "clingy_cats:temp_stroll_explore": {
+                "minecraft:behavior.random_stroll": {
+                    "priority": 3,
+                    "speed_multiplier": 1.0,
+                    "interval": 1
+                }
+            },
+            "clingy_cats:temp_find_cover": {
+                "minecraft:behavior.find_cover": {
+                    "priority": 3,
+                    "speed_multiplier": 1.2,
+                    "cooldown_time": 0.0
+                }
+            },
+            "clingy_cats:temp_hunt": {
+                "minecraft:behavior.nearest_prioritized_attackable_target": {
+                    "priority": 3,
+                    "reselect_targets": true,
+                    "within_radius": 16.0,
+                    "entity_types": [
+                        { "filters": { "any_of": [
+                            { "test": "is_family", "subject": "other", "value": "rabbit" },
+                            { "test": "is_family", "subject": "other", "value": "tropicalfish" },
+                            { "test": "is_family", "subject": "other", "value": "cod" },
+                            { "test": "is_family", "subject": "other", "value": "salmon" }
+                        ]}, "max_dist": 8 }
+                    ]
+                }
+            },
+            "clingy_cats:temp_move_to_bed": {
+                "minecraft:behavior.move_to_block": {
+                    "priority": 3,
+                    "target_blocks": ["bed"],
+                    "target_selection_method": "nearest",
+                    "search_range": 16, "search_height": 4,
+                    "goal_radius": 2.0, "stay_duration": 0.0
+                }
+            },
+            "clingy_cats:temp_move_to_soft": {
+                "minecraft:behavior.move_to_block": {
+                    "priority": 3,
+                    "target_blocks": ["wool","carpet","moss_block"],
+                    "target_selection_method": "nearest",
+                    "search_range": 16, "search_height": 4,
+                    "goal_radius": 2.0, "stay_duration": 0.0
+                }
+            },
+            "clingy_cats:temp_move_to_warm": {
+                "minecraft:behavior.move_to_block": {
+                    "priority": 3,
+                    "target_blocks": ["furnace","lit_furnace","campfire","soul_campfire"],
+                    "target_selection_method": "nearest",
+                    "search_range": 16, "search_height": 4,
+                    "goal_radius": 2.0, "stay_duration": 0.0
+                }
+            },
+            "clingy_cats:temp_move_to_sun": {
+                "minecraft:behavior.move_to_block": {
+                    "priority": 3,
+                    "target_blocks": ["grass_block","sand","dirt"],
+                    "target_selection_method": "nearest",
+                    "search_range": 16, "search_height": 2,
+                    "goal_radius": 2.0, "stay_duration": 0.0
+                }
+            },
+            "clingy_cats:temp_pet_sleep": {
+                "minecraft:behavior.pet_sleep_with_owner": {
+                    "priority": 3,
+                    "speed_multiplier": 1.2,
+                    "search_radius": 10,
+                    "search_height": 10,
+                    "goal_radius": 1.0
+                }
+            },
+            "clingy_cats:temp_ocelot_sit": {
+                "minecraft:behavior.ocelot_sit_on_block": {
+                    "priority": 3,
+                    "speed_multiplier": 1.0
+                }
+            }
+        },
 
-			"clingy_cats:personality_confident": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 1.0,
-					"start_distance": 10,
-					"stop_distance": 2
-				},
-				"minecraft:behavior.panic": {
-					"priority": 1,
-					"speed_multiplier": 0.6,
-					"damage_sources": [
-						"lava",
-						"lightning"
-					],
-					"ignore_mob_damage": true
-				},
-				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
-					"entity_types": []
-				},
-				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 16,
-					"probability": 0.15,
-					"look_time": {"max":60,"min":20}
-				}
-			},
+        "components": {
+            "minecraft:type_family":   { "family": ["clingy_cats","mob","animal"] },
+            "minecraft:collision_box":  { "width": 0.6, "height": 0.7 },
+            "minecraft:physics": {},
+            "minecraft:pushable_by_entity": {},
+            "minecraft:pushable_by_block": {},
+            "minecraft:conditional_bandwidth_optimization": {},
+            "minecraft:is_hidden_when_invisible": {},
+            "minecraft:nameable": {},
+            "minecraft:persistent": {},
+            "minecraft:leashable": {},
+            "minecraft:balloonable": { "mass": 0.6 },
+            "minecraft:breathable":  { "total_supply": 15, "suffocate_time": 0 },
+            "minecraft:movement":    { "value": 0.3 },
+            "minecraft:movement.basic": { "max_turn": 30 },
+            "minecraft:jump.static": { "jump_power": 0.5 },
+            "minecraft:can_climb": {},
+            "minecraft:navigation.walk": {
+                "can_float": true,
+                "can_path_over_water": true,
+                "avoid_water": true,
+                "avoid_damage_blocks": true,
+                "avoid_portals": true,
+                "can_jump": true,
+                "can_swim": true,
+                "can_breach": true,
+                "can_sink": true
+            },
+            "minecraft:hurt_on_condition": {
+                "damage_conditions": [{
+                    "filters": { "test": "in_lava", "subject": "self", "operator": "==", "value": true },
+                    "cause": "lava",
+                    "damage_per_tick": 4
+                }]
+            },
+            "minecraft:healable": {
+                "items": [
+                    { "item": "fish",   "heal_amount": 2 },
+                    { "item": "salmon", "heal_amount": 2 }
+                ]
+            },
+            "minecraft:despawn": { "despawn_from_distance": {} },
+            "minecraft:attack": { "damage": 2 },
+            "minecraft:ambient_sound_interval": {
+                "event_name": "ambient",
+                "range": 16,
+                "value": 8
+            },
+            "minecraft:on_target_acquired": { "event": "clingy_cats:target_acquired", "target": "self" },
+            "minecraft:on_target_escape":   { "event": "clingy_cats:calm_down",        "target": "self" },
+            "minecraft:environment_sensor": {
+                "triggers": [
+                    { "filters": { "test": "weather_at_position", "value": "precipitation" }, "event": "clingy_cats:on_rain" },
+                    { "filters": { "test": "weather_at_position", "value": "clear" },         "event": "clingy_cats:on_weather_clear" }
+                ]
+            },
+            "minecraft:damage_sensor": {
+                "triggers": [
+                    { "cause": "fall", "deals_damage": "no" },
+                    {
+                        "on_damage": {
+                            "filters": { "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "confident" },
+                            "event": "clingy_cats:on_hurt_confident", "target": "self"
+                        },
+                        "deals_damage": "yes"
+                    },
+                    {
+                        "on_damage": {
+                            "filters": { "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "value": "calm" },
+                            "event": "clingy_cats:on_hurt_calm", "target": "self"
+                        },
+                        "deals_damage": "yes"
+                    },
+                    {
+                        "on_damage": {
+                            "filters": { "all_of": [
+                                { "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "operator": "!=", "value": "confident" },
+                                { "test": "enum_property", "domain": "clingy_cats:personality", "subject": "self", "operator": "!=", "value": "calm" }
+                            ]},
+                            "event": "clingy_cats:on_hurt", "target": "self"
+                        },
+                        "deals_damage": "yes"
+                    },
+                    {
+                        "on_damage": { "filters": { "test": "is_riding", "subject": "self" } },
+                        "deals_damage": "no"
+                    }
+                ]
+            },
+            "minecraft:behavior.float":  { "priority": 0 },
+            "minecraft:behavior.panic": {
+                "priority": 1,
+                "speed_multiplier": 1.25,
+                "damage_sources": ["campfire","fire","fire_tick","freezing","lightning","lava","magma","temperature","soul_campfire"],
+                "ignore_mob_damage": true
+            },
+            "minecraft:behavior.stalk_and_pounce_on_target": {
+                "priority": 5,
+                "stalk_speed": 1.2,
+                "max_stalk_dist": 12.0,
+                "leap_height": 0.9,
+                "leap_dist": 0.8,
+                "pounce_max_dist": 5.0,
+                "interest_time": 2.0,
+                "stuck_time": 2.0,
+                "strike_dist": 2.0
+            },
+            "minecraft:behavior.move_to_land": {
+                "goal_radius": 0.5,
+                "search_count": 80,
+                "search_height": 1,
+                "search_range": 30
+            },
+            "minecraft:behavior.random_look_around": { "priority": 11 },
+            "minecraft:behavior.look_at_player":     { "priority": 11, "look_distance": 6.0, "probability": 0.02 },
+            "minecraft:shareables": {
+                "singular_pickup": true,
+                "all_items": true,
+                "all_items_max_amount": 1,
+                "items": [
+                    { "item": "minecraft:is_food", "max_amount": 1, "want_amount": 1, "surplus_amount": 1, "priority": 0 }
+                ]
+            },
+            "minecraft:behavior.go_and_give_items_to_owner": {
+                "priority": 4,
+                "run_speed": 8,
+                "throw_sound": "purreow"
+            }
+        },
 
-			"clingy_cats:favorite_block_bed": {
-				"minecraft:behavior.move_to_block": {
-					"priority": 6,
-					"target_blocks": ["bed"],
-					"target_selection_method": "nearest",
-					"search_range": 16,
-					"search_height": 4,
-					"goal_radius": 3.0,
-					"stay_duration": 10.0,
-					"on_stay_completed": {
-						"event": "clingy_cats:on_sleeping",
-						"target": "self"
-					}
-				}
-			},
+        "events": {
 
-			"clingy_cats:favorite_block_soft": {
-				"minecraft:behavior.move_to_block": {
-					"priority": 6,
-					"target_blocks": ["wool", "carpet", "moss_block"],
-					"target_selection_method": "nearest",
-					"search_range": 16,
-					"search_height": 4,
-					"goal_radius": 3.0,
-					"stay_duration": 8.0,
-					"on_stay_completed": {
-						"event": "clingy_cats:on_sitting",
-						"target": "self"
-					}
-				}
-			},
+            "minecraft:entity_spawned": {
+                "sequence": [
+                    { "randomize": [
+                        { "weight": 3, "add": { "component_groups": ["clingy_cats:adult","clingy_cats:wild"] } },
+                        { "weight": 1, "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:wild"] } }
+                    ]},
+                    { "trigger": "clingy_cats:spawn" }
+                ]
+            },
 
-			"clingy_cats:favorite_block_warm": {
-				"minecraft:behavior.move_to_block": {
-					"priority": 6,
-					"target_blocks": ["furnace", "lit_furnace", "campfire", "soul_campfire"],
-					"target_selection_method": "nearest",
-					"search_range": 16,
-					"search_height": 4,
-					"goal_radius": 3.0,
-					"stay_duration": 12.0,
-					"on_stay_completed": {
-						"event": "clingy_cats:on_grooming",
-						"target": "self"
-					}
-				}
-			},
+            "clingy_cats:spawn": {
+                "sequence": [
+                    { "trigger": "clingy_cats:randomize_sound_variant" },
+                    { "queue_command": { "command": "scriptevent clingycats:catspawn" } }
+                ]
+            },
 
-			"clingy_cats:favorite_block_high": {
+            "clingy_cats:born": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:adult","clingy_cats:wild"] } },
+                    { "add":    { "component_groups": ["clingy_cats:baby","clingy_cats:tamed"] } },
+                    { "trigger": "clingy_cats:randomize_sound_variant" }
+                ]
+            },
 
-			},
+            "clingy_cats:ageable_grow_up": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:baby"] } },
+                    { "add":    { "component_groups": ["clingy_cats:adult"] } },
+                    { "trigger": "clingy_cats:randomize_sound_variant" },
+                    { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
+                ]
+            },
 
-			"clingy_cats:favorite_block_owner": {
-				"minecraft:behavior.follow_owner": {
-					"priority": 4,
-					"speed_multiplier": 1.1,
-					"start_distance": 4,
-					"stop_distance": 1.0
-				}
-			},
+            "clingy_cats:on_tame": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:wild"] } },
+                    { "add":    { "component_groups": ["clingy_cats:tamed"] } },
+                    { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
+                ]
+            },
 
-			"clingy_cats:favorite_block_sun": {
-				"minecraft:behavior.move_to_block": {
-					"priority": 6,
-					"target_blocks": ["grass_block", "sand", "dirt"],
-					"target_selection_method": "nearest",
-					"search_range": 16,
-					"search_height": 2,
-					"goal_radius": 3.0,
-					"stay_duration": 15.0,
-					"on_stay_completed": {
-						"event": "clingy_cats:on_idle",
-						"target": "self"
-					}
-				},
-				"minecraft:environment_sensor": {
-					"triggers": [
-						{
-							"filters": {
-								"test": "is_daytime",
-								"value": false
-							},
-							"event": "clingy_cats:on_idle"
-						}
-					]
-				}
-			},
+            "clingy_cats:become_pregnant": {
+                "sequence": [
+                    { "add": { "component_groups": ["clingy_cats:pregnant"] } },
+                    { "queue_command": { "command": "scriptevent clingycats:conception" } }
+                ]
+            },
 
-			"clingy_cats:anti_move": {
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.0
-				},
-				"minecraft:behavior.follow_owner": {
-					"priority": 10,
-					"speed_multiplier": 0.0
-				},
-				"minecraft:behavior.move_to_block": {
-					"priority": 10
-				}
-			},
+            "clingy_cats:give_birth": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:pregnant"] } },
+                    { "queue_command": { "command": "scriptevent clingycats:givebirth" } }
+                ]
+            },
 
-			"clingy_cats:state_sitting_lock": {
-				"minecraft:timer": {
-					"looping": false,
-					"time": [5, 10],
-					"time_down_event": {
-					"event": "clingy_cats:unlock_state",
-					"target": "self"
-					}
-				}
-			},
+            "clingy_cats:randomize_sound_variant": {
+                "randomize": [
+                    { "weight": 1, "set_property": { "clingy_cats:sound_variant": "default" } },
+                    { "weight": 1, "set_property": { "clingy_cats:sound_variant": "royal" } }
+                ]
+            },
 
-			"clingy_cats:state_sleeping_lock": {
-				"minecraft:timer": {
-					"looping": false,
-					"time": [8, 18],
-					"time_down_event": {
-					"event": "clingy_cats:unlock_state",
-					"target": "self"
-					}
-				}
-			},
+            "clingy_cats:on_hurt": {
+                "set_property": { "clingy_cats:emotion": "scared" }
+            },
 
-			"clingy_cats:state_grooming_lock": {
-				"minecraft:timer": {
-					"looping": false,
-					"time": [4, 8],
-					"time_down_event": {
-					"event": "clingy_cats:unlock_state",
-					"target": "self"
-					}
-				}
-			}
-		},
-		"components": {
-			"minecraft:ambient_sound_interval": {
-				"event_name": "ambient",
-				"range": 16,
-				"value": 8
-			},
-			"minecraft:scale": {
-				"value": 0
-			},
-			"minecraft:type_family": { "family": ["clingy_cats", "mob", "animal"] },
-			"minecraft:collision_box": { "width": 0.6, "height": 0.7 },
-			"minecraft:leashable": {},
-			"minecraft:balloonable": {
-				"mass": 0.6
-			},
-			"minecraft:is_hidden_when_invisible": {},
-			"minecraft:attack_damage": {
-				"value": 4
-			},
-			"minecraft:breathable": {
-				"total_supply": 15,
-				"suffocate_time": 0
-			},
-			"minecraft:healable": {
-				"items": [
-				{
-					"item": "fish",
-					"heal_amount": 2
-				},
-				{
-					"item": "salmon",
-					"heal_amount": 2
-				}
-				]
-			},
-			"minecraft:hurt_on_condition": {
-				"damage_conditions": [
-				{
-					"filters": {
-					"test": "in_lava",
-					"subject": "self",
-					"operator": "==",
-					"value": true
-					},
-					"cause": "lava",
-					"damage_per_tick": 4
-				}
-				]
-			},
-			"minecraft:movement": {
-				"value": 0.3
-			},
-			"minecraft:movement.basic": { "max_turn": 30 },
-			"minecraft:navigation.walk": {
-				"can_float": true,
-				"can_path_over_water": true,
-				"can_open_doors": false,
-				"avoid_water": true,
-        		"avoid_damage_blocks": true,
-				"avoid_portals": true,
-				"blocks_to_avoid": [],
-				"can_breach":true,
-				"can_jump": true,
-				"can_swim": true,
-				"can_sink": true
-			},
-			"minecraft:jump.static": {},
-			"minecraft:can_climb": {},
-			"minecraft:damage_sensor": {
-				"triggers": [
-					{
-						"cause": "fall",
-						"deals_damage": "no"
-					},
-					{
-						"on_damage": {
-							"filters": {
-								"test": "enum_property",
-								"domain": "clingy_cats:personality",
-								"subject": "self",
-								"value": "confident"
-							},
-							"event": "clingy_cats:on_hurt_confident",
-							"target": "self"
-						},
-						"deals_damage": "yes"
-					},
-					{
-						"on_damage": {
-							"filters": {
-								"test": "enum_property",
-								"domain": "clingy_cats:personality",
-								"subject": "self",
-								"value": "calm"
-							},
-							"event": "clingy_cats:on_hurt_calm",
-							"target": "self"
-						},
-						"deals_damage": "yes"
-					},
-					{
-						"on_damage": {
-							"filters": {
-								"all_of": [
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:personality",
-										"subject": "self",
-										"operator": "!=",
-										"value": "confident"
-									},
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:personality",
-										"subject": "self",
-										"operator": "!=",
-										"value": "calm"
-									}
-								]
-							},
-							"event": "clingy_cats:on_hurt",
-							"target": "self"
-						},
-						"deals_damage": "yes"
-					}
-				]
-			},
-			"minecraft:dweller": {
-				"dwelling_type": "village",
-				"dweller_role": "passive",
-				"update_interval_base": 60,
-				"update_interval_variant": 40,
-				"can_find_poi": false,
-				"can_migrate": true,
-				"first_founding_reward": 0
-			},
-			"minecraft:despawn": {
-				"despawn_from_chance" : false,
-				"despawn_from_distance": {},
-				"despawn_from_inactivity": false,
-				"despawn_from_simulation_edge": false,
-				"filters": [],
-				"remove_child_entities":false
-			},
-			"minecraft:physics": {},
-			"minecraft:pushable_by_entity": {
-			},
-			"minecraft:pushable_by_block": {
-			},
-			"minecraft:conditional_bandwidth_optimization": {},
-			"minecraft:behavior.float": {
-				"priority": 0
-			},
-			"minecraft:behavior.panic": {
-				"priority": 1,
-				"speed_multiplier": 1.25,
-				"damage_sources": [
-					"campfire",
-					"fire",
-					"fire_tick",
-					"freezing",
-					"lightning",
-					"lava",
-					"magma",
-					"temperature",
-					"soul_campfire"
-				],
-				"ignore_mob_damage": true
-			},
-			"minecraft:behavior.leap_at_target": {
-				"priority": 3,
-				"target_dist": 0.3
-			},
-			"minecraft:attack": {
-				"damage": 2
-			},
-			"minecraft:behavior.random_look_around_and_sit": {
-				"continue_if_leashed": true,
-				"continue_sitting_on_reload": true,
-				"priority": 9,
-				"min_look_count": 2,
-				"max_look_count": 5,
-				"min_look_time": 40,
-				"max_look_time": 100,
-				"min_angle_of_view_horizontal": 30.0,
-				"max_angle_of_view_horizontal": 60.0,
-				"probability": 0.02,
-				"random_look_around_cooldown": 60
-			},
-			"minecraft:behavior.look_at_player": {
-				"priority": 9
-			},
-			"minecraft:nameable": {},
-			"minecraft:persistent": {},
-			"minecraft:on_target_acquired": {
-				"event": "clingy_cats:target_acquired",
-				"target": "self"
-			},
-			"minecraft:on_target_escape": {
-				"event": "clingy_cats:calm_down",
-				"target": "self"
-			},
-			"minecraft:equip_item": {
-				"can_wear_armor": false
-			},
-			"minecraft:behavior.equip_item": {
-				"priority": 2
-			},
-			"minecraft:shareables": {
-				"singular_pickup": true,
-				"all_items": true,
-				"all_items_max_amount": 1,
-				"items": [
-					{ "item": "minecraft:is_food",            "max_amount": 1, "want_amount": 1, "surplus_amount": 1, "priority": 0 },
-					{ "item": "wool",         "max_amount": 1, "want_amount": 1, "surplus_amount": 1, "priority": 0 }
-				]
-			},
-			"minecraft:behavior.share_items": {
-				"goal_radius": 0.5,
-				"max_dist": 0,
-				"priority": 2,
-				"entity_types": [
-					{
-						"filters": {
-						"test": "is_owner"
-						}
-					}
-				]
-			},
-			"minecraft:behavior.stalk_and_pounce_on_target": {
-				"priority": 7,
-				"stalk_speed": 1.2,
-				"max_stalk_dist": 12.0,
-				"leap_height": 0.9,
-				"leap_dist": 0.8,
-				"pounce_max_dist": 5.0,
-				"interest_time": 2.0,
-				"stuck_time": 2.0,
-				"strike_dist": 2.0
-			},
-			"minecraft:behavior.pickup_items": {
-				"priority": 11,
-				"max_dist": 3,
-				"goal_radius": 2,
-				"speed_multiplier": 0.5
-			},
-			"minecraft:behavior.eat_carried_item": {
-				"priority": 12,
-				"delay_before_eating": 28
-			}
-		},
+            "clingy_cats:on_hurt_calm": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:emotion": "angry" } },
+                    { "add": { "component_groups": ["clingy_cats:aggressive"] } }
+                ]
+            },
 
-		"events": {
-			"clingy_cats:visible": {
-				"sequence": [
-					{
-						"filters": {
-						"test": "is_baby"
-						},
-					"add": {
-						"component_groups": [
-							"clingy_cats:visible_baby"
-						]
-						}
-					},
-					{
-						"filters": {
-						"test": "is_baby",
-						"value": false
-						},
-					"add": {
-						"component_groups": [
-							"clingy_cats:visible_adult"
-						]
-						}
-					}
-				]
-			},
-			"clingy_cats:set_trait_lazy":        { "add": { "component_groups": ["clingy_cats:trait_lazy"] } },
-			"clingy_cats:set_trait_active":      { "add": { "component_groups": ["clingy_cats:trait_active"] } },
-			"clingy_cats:set_trait_curious":     { "add": { "component_groups": ["clingy_cats:trait_curious"] } },
-			"clingy_cats:set_trait_shy":         { "add": { "component_groups": ["clingy_cats:trait_shy"] } },
-			"clingy_cats:set_trait_friendly":    { "add": { "component_groups": ["clingy_cats:trait_friendly"] } },
-			"clingy_cats:set_trait_independent": { "add": { "component_groups": ["clingy_cats:trait_independent"] } },
-			"clingy_cats:become_pregnant": {
-				"sequence": [
-					{ "add": { "component_groups": ["pregnant"] } },
-					{ "queue_command": { "command": "scriptevent clingycats:conception" } }
-				]
-			},
-			"clingy_cats:give_birth": {
-				"sequence": [
-					{ "remove": { "component_groups": ["pregnant"] } },
-					{ "queue_command": { "command": "scriptevent clingycats:givebirth" } }
-				]
-			},
-			"clingy_cats:born": {
-				"sequence": [
-					{ "remove": { "component_groups": "clingy_cats:adult" } },
-					{ "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:tamed"] } },
-					{ "trigger": "clingy_cats:randomize_sound_variant" }
-				]
-			},
-			"clingy_cats:randomize_sound_variant": {
-				"randomize": [
-					{
-						"weight": 1,
-						"set_property": {	"clingy_cats:sound_variant": "default" }
-					},
-					{
-						"weight": 1,
-						"set_property": {	"clingy_cats:sound_variant": "royal" }
-					}
-				]
-			},
-			"clingy_cats:spawn": {
-				"sequence": [
-					{ "queue_command": { "command": "scriptevent clingycats:catspawn" }},
-					{"trigger": "clingy_cats:randomize_sound_variant"}
-				]
-			},
-			"minecraft:entity_spawned": {
-					"sequence": [
-						{"randomize": [
-							{
-								"weight": 3, 
-								"remove": {},
-								"add": { "component_groups": ["clingy_cats:adult", "clingy_cats:wild"] } 
-							},
-							{
-								"weight": 1, 
-								"remove": {},
-								"add": { "component_groups": ["clingy_cats:baby", "clingy_cats:wild"] } 
-							}
-							]
-						},
-						{
-							"trigger": "clingy_cats:spawn"
-						}
-					]
-				},
-			"minecraft:spawn_from_village": {},
-			"clingy_cats:ageable_grow_up": {
-				"remove": { "component_groups": ["clingy_cats:baby"] },
-				"add": { "component_groups": ["clingy_cats:adult"] },
-				"sequence": [
-					{ "trigger": "clingy_cats:randomize_sound_variant" },
-					{ "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
-				]
-			},
-			"clingy_cats:on_tame": {
-				"sequence": [
-					{
-						"remove": {
-							"component_groups": [
-								"clingy_cats:wild"
-							]
-						}
-					},
-					{
-						"add": {
-							"component_groups": [
-								"clingy_cats:tamed",
-								"clingy_cats:gift_for_owner"
-							]
-						}
-						
-					}
-				]
-			},
-			"clingy_cats:on_hurt": {
-			 "set_property": { "clingy_cats:emotion": "scared" }
-			},
-			"clingy_cats:on_hurt_confident": {
-				"sequence": [
-					{ "set_property": { "clingy_cats:emotion": "angry" } },
-					{ "add": { "component_groups": ["clingy_cats:aggressive"] } }
-				]
-			},
-			"clingy_cats:on_hurt_calm": {
-				"sequence": [
-					{ "set_property": { "clingy_cats:emotion": "angry" } },
-					{
-						"filters": {
-							"test": "enum_property",
-							"domain": "clingy_cats:emotion",
-							"subject": "self",
-							"operator": "!=",
-							"value": "scared"
-						},
-						"add": { "component_groups": ["clingy_cats:aggressive"] }
-					}
-				]
-			},
-			"clingy_cats:target_acquired": {
-				"set_property": { "clingy_cats:state": "hunting" }
-			},
-			"clingy_cats:calm_down": {
-				"sequence": [
-					{ "remove": { "component_groups": ["clingy_cats:aggressive"] } },
-					{ "set_property": { "clingy_cats:emotion": "happy" } },
-					{ "set_property": { "clingy_cats:state": "idle" } }
-				]
-			}
-			,
-			"clingy_cats:pet_slept_with_owner": {
-				"add": {
-					"component_groups": ["clingy_cats:gift_for_owner"]
-				}
-			},
-			"clingy_cats:gifted_owner": {
-				"remove": {
-					"component_groups": ["clingy_cats:gift_for_owner"]
-				}
-			},
-			"clingy_cats:idle_tick": {
-				"randomize": [
-					{
-					"weight": 4,
-					"sequence": [
-						{ "set_property": { "clingy_cats:state": "idle" }},
-						{ "queue_command": { "command": "scriptevent clingycats:lock_idle" }}
-					]
-					},
-					{ "weight": 3, "trigger": "clingy_cats:on_sitting" },
-					{ "weight": 2, "trigger": "clingy_cats:on_grooming" },
-					{ "weight": 1, "trigger": "clingy_cats:on_sleeping" }
-				]
-			},
+            "clingy_cats:target_acquired": {
+                "set_property": { "clingy_cats:state": "hunting" }
+            },
 
-			"clingy_cats:on_sleeping": {
-				"sequence": [
-					{ "remove": { "component_groups": [
-					"clingy_cats:state_sitting_lock",
-					"clingy_cats:state_sleeping_lock",
-					"clingy_cats:state_grooming_lock"
-					]}},
-					{ "set_property": { "clingy_cats:state": "sleeping" }},
-					{ "add": { "component_groups": [
-					"clingy_cats:anti_move",
-					"clingy_cats:state_sleeping_lock"
-					]}}
-				]
-			},
-			"clingy_cats:on_sitting": {
-				"sequence": [
-					{
-					"remove": {
-						"component_groups": [
-						"clingy_cats:state_sitting_lock",
-						"clingy_cats:state_sleeping_lock",
-						"clingy_cats:state_grooming_lock"
-						]
-					}
-					},
-					{ "set_property": { "clingy_cats:state": "sitting" } },
-					{
-					"add": {
-						"component_groups": [
-						"clingy_cats:anti_move",
-						"clingy_cats:state_sitting_lock"
-						]
-					}
-					}
-				]
-			},
-			"clingy_cats:on_grooming": {
-			"sequence": [
-				{ "remove": { "component_groups": [
-				"clingy_cats:state_sitting_lock",
-				"clingy_cats:state_sleeping_lock",
-				"clingy_cats:state_grooming_lock"
-				]}},
-				{ "set_property": { "clingy_cats:state": "grooming" }},
-				{ "add": { "component_groups": [
-				"clingy_cats:anti_move",
-				"clingy_cats:state_grooming_lock"
-				]}}
-			]
-			},
-			"clingy_cats:on_playing": {
-				"set_property": { "clingy_cats:state": "playing" }
-			},
-			"clingy_cats:on_idle": {
-				"set_property": { "clingy_cats:state": "idle" }
-			},
-			"clingy_cats:on_flee": {
-				"set_property": { "clingy_cats:state": "fleeing" }
-			},
-			"clingy_cats:on_purring": {
-				"set_property": { "clingy_cats:state": "purring" }
-			},
+            "clingy_cats:calm_down": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:aggressive"] } },
+                    { "set_property": { "clingy_cats:emotion": "happy" } },
+                    { "set_property": { "clingy_cats:state": "idle" } }
+                ]
+            },
 
-			"clingy_cats:unlock_state": {
-				"sequence": [
-					{
-					"remove": {
-						"component_groups": [
-						"clingy_cats:anti_move",
-						"clingy_cats:state_sitting_lock",
-						"clingy_cats:state_sleeping_lock",
-						"clingy_cats:state_grooming_lock"
-						]
-					}
-					},
-					{ "set_property": { "clingy_cats:state": "idle" } },
-					{
-					"queue_command": {
-						"command": "scriptevent clingycats:restore_identity"
-					}
-					}
-				]
-			},
+            "clingy_cats:on_idle":    { "set_property": { "clingy_cats:state": "idle" } },
+            "clingy_cats:on_flee":    { "set_property": { "clingy_cats:state": "fleeing" } },
+            "clingy_cats:on_purring": { "set_property": { "clingy_cats:state": "purring" } },
 
-			"clingy_cats:set_personality_affectionate": { "add": { "component_groups": ["clingy_cats:personality_affectionate"] } },
-			"clingy_cats:set_personality_aloof":        { "add": { "component_groups": ["clingy_cats:personality_aloof"] } },
-			"clingy_cats:set_personality_playful":      { "add": { "component_groups": ["clingy_cats:personality_playful"] } },
-			"clingy_cats:set_personality_calm":         { "add": { "component_groups": ["clingy_cats:personality_calm"] } },
-			"clingy_cats:set_personality_anxious":      { "add": { "component_groups": ["clingy_cats:personality_anxious"] } },
-			"clingy_cats:set_personality_confident":    { "add": { "component_groups": ["clingy_cats:personality_confident"] } },
+            "clingy_cats:on_sleeping": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:state": "sleeping" } },
+                    { "randomize": [
+                        { "weight": 1, "set_property": { "clingy_cats:sub_state": 0 } },
+                        { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } },
+                        { "weight": 1, "set_property": { "clingy_cats:sub_state": 2 } }
+                    ]},
+                    { "remove": { "component_groups": ["clingy_cats:state_grooming"] } },
+                    { "add":    { "component_groups": ["clingy_cats:state_sleeping"] } }
+                ]
+            },
 
-			"clingy_cats:set_block_bed":   { "add": { "component_groups": ["clingy_cats:favorite_block_bed"] } },
-			"clingy_cats:set_block_soft":  { "add": { "component_groups": ["clingy_cats:favorite_block_soft"] } },
-			"clingy_cats:set_block_warm":  { "add": { "component_groups": ["clingy_cats:favorite_block_warm"] } },
-			"clingy_cats:set_block_high":  { "add": { "component_groups": ["clingy_cats:favorite_block_high"] } },
-			"clingy_cats:set_block_owner": { "add": { "component_groups": ["clingy_cats:favorite_block_owner"] } },
-			"clingy_cats:set_block_sun":   { "add": { "component_groups": ["clingy_cats:favorite_block_sun"] } }
-		}
-	}
+            "clingy_cats:on_grooming": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:state": "grooming" } },
+                    { "randomize": [
+                        { "weight": 1, "set_property": { "clingy_cats:sub_state": 0 } },
+                        { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } }
+                    ]},
+                    { "remove": { "component_groups": ["clingy_cats:state_sleeping"] } },
+                    { "add":    { "component_groups": ["clingy_cats:state_grooming"] } }
+                ]
+            },
+
+            "clingy_cats:idle_tick": {
+                    "filters": { "test": "is_sitting", "subject": "self", "value": true },
+                    "randomize": [
+                        { "weight": 1, "trigger": "clingy_cats:on_sleeping" },
+                        { "weight": 1, "trigger": "clingy_cats:on_grooming" }
+                    ]
+            },
+
+            "clingy_cats:on_rain": {
+                "add": { "component_groups": ["clingy_cats:find_cover"] }
+            },
+
+            "clingy_cats:on_weather_clear": {
+                "remove": { "component_groups": ["clingy_cats:find_cover"] }
+            },
+
+            "clingy_cats:behavior_tick": {
+                
+            },
+            "clingy_cats:behavior_end": {
+
+            },
+
+            "clingy_cats:on_hurt_confident": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:emotion": "angry" } },
+                    { "add": { "component_groups": ["clingy_cats:aggressive"] } }
+                ]
+            },
+
+            "clingy_cats:riding_states": {
+                "randomize": [
+                    { "weight": 3, "set_property": { "clingy_cats:state": "sitting" } },
+                    { "weight": 2, "sequence": [
+                        { "set_property": { "clingy_cats:state": "sleeping" } },
+                        { "randomize": [
+                            { "weight": 1, "set_property": { "clingy_cats:sub_state": 0 } },
+                            { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } },
+                            { "weight": 1, "set_property": { "clingy_cats:sub_state": 2 } }
+                        ]}
+                    ]},
+                    { "weight": 2, "sequence": [
+                        { "set_property": { "clingy_cats:state": "grooming" } },
+                        { "randomize": [
+                            { "weight": 1, "set_property": { "clingy_cats:sub_state": 0 } },
+                            { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } }
+                        ]}
+                    ]},
+                    { "weight": 1, "trigger": "clingy_cats:on_drop_off" }
+                ]
+            },
+
+            "clingy_cats:on_drop_off": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:state": "idle" } },
+                    { "queue_command": { "command": "scriptevent clingycats:drop_off_cat" } }
+                ]
+            },
+
+            "clingy_cats:add_can_mount": {
+                "add": { "component_groups": ["clingy_cats:can_mount"] }
+            },
+
+            "clingy_cats:request_shoulder_mount": {
+                "queue_command": { "command": "scriptevent clingycats:request_shoulder_mount" }
+            },
+
+            "clingy_cats:on_riding_player": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:can_mount"] } },
+                    { "set_property": { "clingy_cats:state": "idle" } },
+                    { "add": { "component_groups": ["clingy_cats:riding_tick"] } }
+                ]
+            },
+
+            "clingy_cats:off_riding_player": {
+                "sequence": [
+                    { "remove": { "component_groups": ["clingy_cats:riding_tick"] } },
+                    { "set_property": { "clingy_cats:state": "idle" } },
+                    { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
+                ]
+            },
+
+            "minecraft:spawn_from_village": {}
+        }
+    }
 }

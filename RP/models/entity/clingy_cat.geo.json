@@ -1138,7 +1138,7 @@
 				{
 					"name": "rightItem",
 					"parent": "head",
-					"pivot": [-2, 7.5, -8]
+					"pivot": [-1, 7.5, -7]
 				},
 				{
 					"name": "body2",

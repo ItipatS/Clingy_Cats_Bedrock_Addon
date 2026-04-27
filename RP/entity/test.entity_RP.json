@@ -242,6 +242,8 @@
       },
 
       "animations": {
+
+        "idle": "animation.clingy_cats.idle",
         "walk": "animation.clingy_cats.walk",
         "run": "animation.clingy_cats.walk",
         "sneak": "animation.clingy_cats.hunting",

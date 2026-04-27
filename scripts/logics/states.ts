@@ -23,11 +23,15 @@ export function restoreIdentity(cat:Entity): void {
     const block = cat.getProperty("clingy_cats:favorite_block") as FavoriteBlock;
 
     if (!trait || !personality || !block) return;
+
     
     cat.triggerEvent("clingy_cats:on_idle");
     cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
     cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
-    cat.triggerEvent(`clingy_cats:set_block_${block}`);
+
+    if (block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {  
+        cat.triggerEvent(`clingy_cats:set_block_${block}`);
+    }
 }
 
 function isItDaytime(): boolean {

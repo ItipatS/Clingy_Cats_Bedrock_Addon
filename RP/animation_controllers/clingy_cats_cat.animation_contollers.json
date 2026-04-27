@@ -5,7 +5,10 @@
       "initial_state": "wait_idle",
       "states": {
         "wait_idle": {
-          "blend_transition": 0.5,
+          "animations": [
+            { "idle": "1.0" }
+          ],
+          "blend_transition": 0.15,
           "transitions": [
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
             { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
@@ -43,7 +46,7 @@
 
         "sleeping": {
           "on_entry": [
-            "variable.sleep_var = math.floor(math.random(0, 3));"
+            "variable.sleep_var = query.property('clingy_cats:sub_state');"
           ],
           "animations": [
             { "sleep":  "variable.sleep_var == 0" },
@@ -60,7 +63,7 @@
 
         "grooming": {
           "on_entry": [
-            "variable.groom_var = math.floor(math.random(0, 2));"
+            "variable.groom_var = query.property('clingy_cats:sub_state');"
           ],
           "animations": [
             { "lick_stand":  "variable.groom_var == 0" },
