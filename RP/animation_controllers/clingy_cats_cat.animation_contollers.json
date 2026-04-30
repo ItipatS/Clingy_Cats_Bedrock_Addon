@@ -5,6 +5,9 @@
       "initial_state": "wait_idle",
       "states": {
         "wait_idle": {
+          "animations": [
+            { "idle": "1.0" }
+          ],
           "blend_transition": 0.5,
           "transitions": [
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },

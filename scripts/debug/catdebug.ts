@@ -42,6 +42,7 @@ export function registerDebugRaycast(): void {
                 `§7state:§f${cat.getProperty("clingy_cats:state")}`, `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
                 `§7pregnant:§f${cat.hasComponent("minecraft:is_pregnant")}` + `§7clingy_pregnant:§f${cat.getProperty("clingy_cats:pregnant")}`,
                 `§7want_to_lay_eggs?:§f${cat.hasComponent("minecraft:behavior.lay_egg")}`,
+
             ].join("\n");
 
             player.onScreenDisplay.setActionBar(lines);

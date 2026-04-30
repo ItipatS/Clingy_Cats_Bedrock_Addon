@@ -1,58 +1,184 @@
-import { Entity, world, system } from "@minecraft/server";
+import { Entity, world } from "@minecraft/server";
 
-export type BehaviorTrait =  "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
-
-export type Personality = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";
-
+export type BehaviorTrait = "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
+export type Personality   = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";
 export type FavoriteBlock = "bed" | "soft" | "warm" | "high" | "owner" | "sun";
 
-export const TOD_BEHAVIOR: Record<BehaviorTrait, { day: string; night: string }> = {
-    lazy:        { day: "lazy_day",        night: "lazy_night" },
-    active:      { day: "active_day",      night: "active_night" },
-    curious:     { day: "curious_day",     night: "curious_night" },
-    shy:         { day: "shy_day",         night: "shy_night" },
-    friendly:    { day: "friendly_day",    night: "friendly_night" },
-    independent: { day: "independent_day", night: "independent_night" }
+export type TempBehavior =
+    | "temp_follow_close"
+    | "temp_follow_loose"
+    | "temp_move_to_bed"
+    | "temp_move_to_soft"
+    | "temp_move_to_warm"
+    | "temp_move_to_sun"
+    | "temp_ocelot_sit"
+    | "temp_play";
+
+const LAST_TEMP = "clingy_cats:last_temp_group";
+
+// ============================================================
+// BEHAVIOR POOLS
+// ============================================================
+
+interface BehaviorEntry {
+    behavior: TempBehavior | "enter_still_state" | null;
+    weight: number;
+}
+
+const TRAIT_POOLS: Record<BehaviorTrait, BehaviorEntry[]> = {
+    lazy: [
+        { behavior: "enter_still_state",  weight: 4 },
+        { behavior: "temp_move_to_soft",  weight: 2 },
+        { behavior: "temp_move_to_warm",  weight: 1 },
+    ],
+    active: [
+        { behavior: "temp_follow_loose",  weight: 2 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+    curious: [
+        { behavior: "temp_follow_loose",  weight: 2 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+    shy: [
+        { behavior: "enter_still_state",  weight: 4 },
+        { behavior: "temp_move_to_soft",  weight: 1 },
+    ],
+    friendly: [
+        { behavior: "temp_follow_close",  weight: 2 },
+        { behavior: "temp_play",          weight: 2 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+    independent: [
+        { behavior: "enter_still_state",  weight: 3 },
+        { behavior: "temp_move_to_sun",   weight: 2 },
+    ],
 };
 
-export function restoreIdentity(cat:Entity): void {
+const PERSONALITY_POOLS: Record<Personality, BehaviorEntry[]> = {
+    affectionate: [
+        { behavior: "temp_follow_close",  weight: 4 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+    aloof: [
+        { behavior: "temp_ocelot_sit",    weight: 2 },
+        { behavior: "temp_follow_loose",  weight: 1 },
+    ],
+    playful: [
+        { behavior: "temp_play",          weight: 3 },
+        { behavior: "temp_follow_loose",  weight: 2 },
+        { behavior: "temp_ocelot_sit",    weight: 1 },
+    ],
+    calm: [
+        { behavior: "temp_follow_loose",  weight: 2 },
+        { behavior: "temp_ocelot_sit",    weight: 1 },
+    ],
+    anxious: [
+        { behavior: "temp_follow_close",  weight: 3 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+    confident: [
+        { behavior: "temp_follow_loose",  weight: 2 },
+        { behavior: "enter_still_state",  weight: 1 },
+    ],
+};
+
+const BLOCK_POOLS: Record<FavoriteBlock, BehaviorEntry[]> = {
+    bed:   [{ behavior: "temp_move_to_bed",  weight: 4 }],
+    soft:  [{ behavior: "temp_move_to_soft", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
+    warm:  [{ behavior: "temp_move_to_warm", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
+    high:  [{ behavior: "temp_ocelot_sit",   weight: 3 }],
+    owner: [{ behavior: "temp_follow_close", weight: 4 }],
+    sun:   [{ behavior: "temp_move_to_sun",  weight: 3 }, { behavior: null,              weight: 1 }],
+};
+
+// ============================================================
+// WEIGHTED RANDOM
+// ============================================================
+
+function weightedRandom(pool: BehaviorEntry[]): BehaviorEntry["behavior"] {
+    const total = pool.reduce((sum, e) => sum + e.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of pool) {
+        roll -= entry.weight;
+        if (roll <= 0) return entry.behavior;
+    }
+    return pool[pool.length - 1].behavior;
+}
+
+function mergePools(...pools: BehaviorEntry[][]): BehaviorEntry[] {
+    const merged: Map<string, BehaviorEntry> = new Map();
+    for (const pool of pools) {
+        for (const entry of pool) {
+            const key = entry.behavior ?? "__null__";
+            const existing = merged.get(key);
+            if (existing) {
+                existing.weight += entry.weight;
+            } else {
+                merged.set(key, { ...entry });
+            }
+        }
+    }
+    return Array.from(merged.values());
+}
+
+// ============================================================
+// BEHAVIOR TICK
+// ============================================================
+
+export function behaviorTick(cat: Entity): void {
+    if (!cat.isValid) return;
+
+    // clean up previous temp
+    const last = cat.getDynamicProperty(LAST_TEMP) as string | undefined;
+    if (last) {
+        cat.triggerEvent(`clingy_cats:remove_${last}`);
+        cat.setDynamicProperty(LAST_TEMP, "");
+    }
+
+    const trait       = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
+    const personality = cat.getProperty("clingy_cats:personality")    as Personality;
+    const block       = cat.getProperty("clingy_cats:favorite_block") as FavoriteBlock;
+
+    if (!trait || !personality || !block) return;
+
+    const pool   = mergePools(
+        TRAIT_POOLS[trait]       ?? [],
+        PERSONALITY_POOLS[personality] ?? [],
+        BLOCK_POOLS[block]       ?? [],
+    );
+    const chosen = weightedRandom(pool);
+
+    if (chosen === "enter_still_state") {
+        cat.triggerEvent("clingy_cats:enter_still_state");
+        cat.setDynamicProperty(LAST_TEMP, "");
+        return;
+    }
+
+    if (chosen === null) {
+        cat.setDynamicProperty(LAST_TEMP, "");
+        return;
+    }
+
+    cat.triggerEvent(`clingy_cats:add_${chosen}`);
+    cat.setDynamicProperty(LAST_TEMP, chosen);
+}
+
+// ============================================================
+// RESTORE IDENTITY
+// ============================================================
+
+export function restoreIdentity(cat: Entity): void {
     if (!cat.isValid) return;
 
     const trait = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
-    const personality = cat.getProperty("clingy_cats:personality") as Personality;
-    const block = cat.getProperty("clingy_cats:favorite_block") as FavoriteBlock;
+    if (!trait) return;
 
-    if (!trait || !personality || !block) return;
-    
-    cat.triggerEvent("clingy_cats:on_idle");
-    cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
-    cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
-    cat.triggerEvent(`clingy_cats:set_block_${block}`);
-}
-
-function isItDaytime(): boolean {
-    const time = world.getDay() % 1; // or however you're reading ticks
-    return time >= 0 && time < 0.5; // 0-12000 ticks = day
-}
-
-function handleTimeOfDay(cat: Entity): void {
-        if (!cat.isValid) return;
-        const trait = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
-        const isDay = isItDaytime();
-        const key = TOD_BEHAVIOR[trait][isDay ? "day" : "night"];
-        cat.triggerEvent("clingy_cats:remove_tod");
-        cat.triggerEvent(`clingy_cats:tod_${key}`);
-}
-
-function getAllCats(): Entity[] {
-    const dims = ["overworld", "nether", "the_end"];
-    return dims.flatMap(d => 
-        world.getDimension(d).getEntities({ families: ["clingy_cats"] })
-    );
-}
-
-/*system.runInterval(() => {
-    for (const cat of getAllCats()) {
-        handleTimeOfDay(cat);
+    // clean up any stuck temp
+    const last = cat.getDynamicProperty(LAST_TEMP) as string | undefined;
+    if (last) {
+        cat.triggerEvent(`clingy_cats:remove_${last}`);
+        cat.setDynamicProperty(LAST_TEMP, "");
     }
-}, 200); // every 10 seconds*/
+
+    cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+}

@@ -95,6 +95,6 @@ export function handleGiveBirth(mother: Entity): void {
         assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
         assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
         assignRandomPersonality(baby);
-        baby.triggerEvent("clingy_cats:visible");
+        baby.triggerEvent("clingy_cats:visible_event");
     }
 }

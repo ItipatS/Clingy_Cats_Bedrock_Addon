@@ -1,8 +1,8 @@
 // scripts/main.ts
-import { world as world5, system as system4 } from "@minecraft/server";
+import { world as world4, system as system3 } from "@minecraft/server";
 
 // scripts/events/eventRegister.ts
-import { world as world3, system as system2 } from "@minecraft/server";
+import { world as world2, system } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -767,9 +767,6 @@ function assignRandomPersonality(cat) {
   cat.setProperty("clingy_cats:favorite_block", block.block);
   cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
   cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
-  if (block.block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
-    cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
-  }
 }
 
 // scripts/logics/breed.ts
@@ -782,13 +779,13 @@ function handleSpawnTestCats(cat) {
   applyTextureData(cat, flatIdx, catalog[localIdx]);
   assignRandomEyesAndWhiskers(cat);
   assignRandomPersonality(cat);
-  cat.triggerEvent("clingy_cats:visible");
+  cat.triggerEvent("clingy_cats:visible_event");
 }
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
   assignRandomPersonality(cat);
-  cat.triggerEvent("clingy_cats:visible");
+  cat.triggerEvent("clingy_cats:visible_event");
 }
 
 // scripts/logics/pregnancy.ts
@@ -851,56 +848,179 @@ function handleGiveBirth(mother) {
     assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
     assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
     assignRandomPersonality(baby);
-    baby.triggerEvent("clingy_cats:visible");
+    baby.triggerEvent("clingy_cats:visible_event");
   }
 }
 
 // scripts/logics/states.ts
-import { world as world2 } from "@minecraft/server";
-function restoreIdentity(cat) {
+var LAST_TEMP = "clingy_cats:last_temp_group";
+var TRAIT_POOLS = {
+  lazy: [
+    { behavior: null, weight: 3 },
+    { behavior: "enter_still_state", weight: 4 },
+    { behavior: "temp_move_to_soft", weight: 2 },
+    { behavior: "temp_move_to_warm", weight: 1 }
+  ],
+  active: [
+    { behavior: "temp_follow_loose", weight: 2 },
+    { behavior: "enter_still_state", weight: 1 }
+  ],
+  curious: [
+    { behavior: "temp_follow_loose", weight: 2 },
+    { behavior: "enter_still_state", weight: 1 }
+  ],
+  shy: [
+    { behavior: null, weight: 3 },
+    { behavior: "enter_still_state", weight: 4 },
+    { behavior: "temp_move_to_soft", weight: 1 }
+  ],
+  friendly: [
+    { behavior: "temp_follow_close", weight: 2 },
+    { behavior: "temp_play", weight: 2 },
+    { behavior: "enter_still_state", weight: 1 }
+  ],
+  independent: [
+    { behavior: null, weight: 3 },
+    { behavior: "enter_still_state", weight: 3 },
+    { behavior: "temp_move_to_sun", weight: 2 }
+  ]
+};
+var PERSONALITY_POOLS = {
+  affectionate: [
+    { behavior: "temp_follow_close", weight: 4 },
+    { behavior: "enter_still_state", weight: 1 }
+  ],
+  aloof: [
+    { behavior: null, weight: 3 },
+    { behavior: "temp_ocelot_sit", weight: 2 },
+    { behavior: "temp_follow_loose", weight: 1 }
+  ],
+  playful: [
+    { behavior: "temp_play", weight: 3 },
+    { behavior: "temp_follow_loose", weight: 2 },
+    { behavior: "temp_ocelot_sit", weight: 1 }
+  ],
+  calm: [
+    { behavior: null, weight: 3 },
+    { behavior: "temp_follow_loose", weight: 2 },
+    { behavior: "temp_ocelot_sit", weight: 1 }
+  ],
+  anxious: [
+    { behavior: "temp_follow_close", weight: 3 },
+    { behavior: "enter_still_state", weight: 1 }
+  ],
+  confident: [
+    { behavior: "temp_follow_loose", weight: 2 },
+    { behavior: "enter_still_state", weight: 1 }
+  ]
+};
+var BLOCK_POOLS = {
+  bed: [{ behavior: "temp_move_to_bed", weight: 4 }],
+  soft: [{ behavior: "temp_move_to_soft", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
+  warm: [{ behavior: "temp_move_to_warm", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
+  high: [{ behavior: "temp_ocelot_sit", weight: 3 }],
+  owner: [{ behavior: "temp_follow_close", weight: 4 }],
+  sun: [{ behavior: "temp_move_to_sun", weight: 3 }, { behavior: null, weight: 1 }]
+};
+function weightedRandom2(pool) {
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let roll = Math.random() * total;
+  for (const entry of pool) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry.behavior;
+  }
+  return pool[pool.length - 1].behavior;
+}
+function mergePools(...pools) {
+  const merged = /* @__PURE__ */ new Map();
+  for (const pool of pools) {
+    for (const entry of pool) {
+      const key = entry.behavior ?? "__null__";
+      const existing = merged.get(key);
+      if (existing) {
+        existing.weight += entry.weight;
+      } else {
+        merged.set(key, { ...entry });
+      }
+    }
+  }
+  return Array.from(merged.values());
+}
+function behaviorTick(cat) {
   if (!cat.isValid) return;
+  const last = cat.getDynamicProperty(LAST_TEMP);
+  if (last) {
+    cat.triggerEvent(`clingy_cats:remove_${last}`);
+    cat.setDynamicProperty(LAST_TEMP, "");
+  }
   const trait = cat.getProperty("clingy_cats:behavior_trait");
   const personality = cat.getProperty("clingy_cats:personality");
   const block = cat.getProperty("clingy_cats:favorite_block");
   if (!trait || !personality || !block) return;
-  cat.triggerEvent("clingy_cats:on_idle");
-  cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
+  const pool = mergePools(
+    TRAIT_POOLS[trait] ?? [],
+    PERSONALITY_POOLS[personality] ?? [],
+    BLOCK_POOLS[block] ?? []
+  );
+  const chosen = weightedRandom2(pool);
+  if (chosen === "enter_still_state") {
+    cat.triggerEvent("clingy_cats:enter_still_state");
+    cat.setDynamicProperty(LAST_TEMP, "");
+    return;
+  }
+  if (chosen === null) {
+    cat.setDynamicProperty(LAST_TEMP, "");
+    return;
+  }
+  cat.triggerEvent(`clingy_cats:add_${chosen}`);
+  cat.setDynamicProperty(LAST_TEMP, chosen);
+}
+function restoreIdentity(cat) {
+  if (!cat.isValid) return;
+  const trait = cat.getProperty("clingy_cats:behavior_trait");
+  if (!trait) return;
+  const last = cat.getDynamicProperty(LAST_TEMP);
+  if (last) {
+    cat.triggerEvent(`clingy_cats:remove_${last}`);
+    cat.setDynamicProperty(LAST_TEMP, "");
+  }
   cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
-  cat.triggerEvent(`clingy_cats:set_block_${block}`);
 }
 
 // scripts/events/eventRegister.ts
 function registerCatSpawnSubscriber() {
-  system2.afterEvents.scriptEventReceive.subscribe((ev) => {
+  system.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
-      system2.runTimeout(() => {
+      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      system.runTimeout(() => {
         if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
           sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world3.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          world2.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
           return;
         }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
-          world3.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+          world2.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
+        } else {
+          handleWildSpawn(sourceEntity);
         }
-        handleWildSpawn(sourceEntity);
+        behaviorTick(sourceEntity);
       }, 1);
       return;
     }
     if (id === "clingycats:conception") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleConception(sourceEntity);
-      world3.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
+      world2.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
-      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleGiveBirth(sourceEntity);
-      world3.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      world2.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:interact") {
@@ -910,17 +1030,57 @@ function registerCatSpawnSubscriber() {
       restoreIdentity(sourceEntity);
       return;
     }
+    if (id === "clingycats:behavior_tick") {
+      behaviorTick(sourceEntity);
+      return;
+    }
+    if (id == "clingycats:try_sitting") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77try sitting`
+      ].join("\n"));
+    }
+    if (id == "clingycats:try_sleeping") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77try sleeping`
+      ].join("\n"));
+    }
+    if (id == "clingycats:try_grooming") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77try grooming`
+      ].join("\n"));
+    }
+    if (id == "clingycats:sit_confirm") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77sit confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
+      ].join("\n"));
+    }
+    if (id == "clingycats:sleep_confirm") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77sleep confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
+      ].join("\n"));
+    }
+    if (id == "clingycats:groom_confirm") {
+      world2.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77grooming confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
+      ].join("\n"));
+    }
   });
-  world3.sendMessage("\xA7a[ClingyCats] subscriber registered");
+  world2.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/debug/catdebug.ts
-import { world as world4, system as system3, EquipmentSlot } from "@minecraft/server";
+import { world as world3, system as system2, EquipmentSlot } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
-  system3.runInterval(() => {
-    for (const player of world4.getAllPlayers()) {
+  system2.runInterval(() => {
+    for (const player of world3.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
@@ -953,10 +1113,10 @@ function registerDebugRaycast() {
 }
 
 // scripts/main.ts
-system4.run(() => {
+system3.run(() => {
   registerCatSpawnSubscriber();
   registerDebugRaycast();
-  world5.sendMessage("ClingyCats script loaded!");
+  world4.sendMessage("ClingyCats script loaded!");
 });
 
 //# sourceMappingURL=../debug/main.js.map

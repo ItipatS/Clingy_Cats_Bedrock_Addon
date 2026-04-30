@@ -23,8 +23,4 @@ export function assignRandomPersonality(cat: Entity): void {
 
     cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
     cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
-
-    if (block.block !== "owner" || cat.hasComponent("minecraft:is_tamed")) {
-        cat.triggerEvent(`clingy_cats:set_block_${block.block}`);
-    }
 }
