@@ -125,7 +125,7 @@ function mergePools(...pools: BehaviorEntry[][]): BehaviorEntry[] {
 // BEHAVIOR TICK
 // ============================================================
 
-export function behaviorTick(cat: Entity): void {
+export function behaviorTick(cat: Entity, state?: string): void {
     if (!cat.isValid) return;
 
     // clean up previous temp
@@ -146,7 +146,7 @@ export function behaviorTick(cat: Entity): void {
         PERSONALITY_POOLS[personality] ?? [],
         BLOCK_POOLS[block]       ?? [],
     );
-    const chosen = weightedRandom(pool);
+    const chosen = state || weightedRandom(pool);
 
     if (chosen === "enter_still_state") {
         cat.triggerEvent("clingy_cats:enter_still_state");
@@ -158,6 +158,11 @@ export function behaviorTick(cat: Entity): void {
         cat.setDynamicProperty(LAST_TEMP, "");
         return;
     }
+
+    world.sendMessage([
+                `§7pattern:§f${cat.getProperty("clingy_cats:pattern")} §7color:§f${cat.getProperty("clingy_cats:color")}`,
+                `§7behavior tick cosse :§f${chosen} §7last_behavior:§f${last}`
+            ].join("\n"));
 
     cat.triggerEvent(`clingy_cats:add_${chosen}`);
     cat.setDynamicProperty(LAST_TEMP, chosen);

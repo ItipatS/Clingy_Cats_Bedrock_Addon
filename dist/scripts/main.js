@@ -1,8 +1,8 @@
 // scripts/main.ts
-import { world as world4, system as system3 } from "@minecraft/server";
+import { world as world5, system as system3 } from "@minecraft/server";
 
 // scripts/events/eventRegister.ts
-import { world as world2, system } from "@minecraft/server";
+import { world as world3, system } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -853,10 +853,10 @@ function handleGiveBirth(mother) {
 }
 
 // scripts/logics/states.ts
+import { world as world2 } from "@minecraft/server";
 var LAST_TEMP = "clingy_cats:last_temp_group";
 var TRAIT_POOLS = {
   lazy: [
-    { behavior: null, weight: 3 },
     { behavior: "enter_still_state", weight: 4 },
     { behavior: "temp_move_to_soft", weight: 2 },
     { behavior: "temp_move_to_warm", weight: 1 }
@@ -870,7 +870,6 @@ var TRAIT_POOLS = {
     { behavior: "enter_still_state", weight: 1 }
   ],
   shy: [
-    { behavior: null, weight: 3 },
     { behavior: "enter_still_state", weight: 4 },
     { behavior: "temp_move_to_soft", weight: 1 }
   ],
@@ -880,7 +879,6 @@ var TRAIT_POOLS = {
     { behavior: "enter_still_state", weight: 1 }
   ],
   independent: [
-    { behavior: null, weight: 3 },
     { behavior: "enter_still_state", weight: 3 },
     { behavior: "temp_move_to_sun", weight: 2 }
   ]
@@ -891,7 +889,6 @@ var PERSONALITY_POOLS = {
     { behavior: "enter_still_state", weight: 1 }
   ],
   aloof: [
-    { behavior: null, weight: 3 },
     { behavior: "temp_ocelot_sit", weight: 2 },
     { behavior: "temp_follow_loose", weight: 1 }
   ],
@@ -901,7 +898,6 @@ var PERSONALITY_POOLS = {
     { behavior: "temp_ocelot_sit", weight: 1 }
   ],
   calm: [
-    { behavior: null, weight: 3 },
     { behavior: "temp_follow_loose", weight: 2 },
     { behavior: "temp_ocelot_sit", weight: 1 }
   ],
@@ -946,7 +942,7 @@ function mergePools(...pools) {
   }
   return Array.from(merged.values());
 }
-function behaviorTick(cat) {
+function behaviorTick(cat, state) {
   if (!cat.isValid) return;
   const last = cat.getDynamicProperty(LAST_TEMP);
   if (last) {
@@ -962,7 +958,7 @@ function behaviorTick(cat) {
     PERSONALITY_POOLS[personality] ?? [],
     BLOCK_POOLS[block] ?? []
   );
-  const chosen = weightedRandom2(pool);
+  const chosen = state || weightedRandom2(pool);
   if (chosen === "enter_still_state") {
     cat.triggerEvent("clingy_cats:enter_still_state");
     cat.setDynamicProperty(LAST_TEMP, "");
@@ -972,6 +968,10 @@ function behaviorTick(cat) {
     cat.setDynamicProperty(LAST_TEMP, "");
     return;
   }
+  world2.sendMessage([
+    `\xA77pattern:\xA7f${cat.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${cat.getProperty("clingy_cats:color")}`,
+    `\xA77behavior tick cosse :\xA7f${chosen} \xA77last_behavior:\xA7f${last}`
+  ].join("\n"));
   cat.triggerEvent(`clingy_cats:add_${chosen}`);
   cat.setDynamicProperty(LAST_TEMP, chosen);
 }
@@ -993,16 +993,16 @@ function registerCatSpawnSubscriber() {
     const { id, message, sourceEntity } = ev;
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
-      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       system.runTimeout(() => {
         if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
           sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world2.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+          world3.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
           return;
         }
         if (sourceEntity.typeId === "clingy_cats:test") {
           handleSpawnTestCats(sourceEntity);
-          world2.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+          world3.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
           return;
         } else {
           handleWildSpawn(sourceEntity);
@@ -1012,15 +1012,15 @@ function registerCatSpawnSubscriber() {
       return;
     }
     if (id === "clingycats:conception") {
-      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleConception(sourceEntity);
-      world2.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
+      world3.sendMessage(`\xA7e[ClingyCats] conception event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:givebirth") {
-      world2.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
+      world3.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
       handleGiveBirth(sourceEntity);
-      world2.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
+      world3.sendMessage(`\xA7c[ClingyCats] give birth event received from: ${sourceEntity.typeId}`);
       return;
     }
     if (id === "clingycats:interact") {
@@ -1034,53 +1034,57 @@ function registerCatSpawnSubscriber() {
       behaviorTick(sourceEntity);
       return;
     }
+    if (id === "clingycats:enter_still_state_event") {
+      behaviorTick(sourceEntity, "enter_still_state");
+      return;
+    }
     if (id == "clingycats:try_sitting") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77try sitting`
       ].join("\n"));
     }
     if (id == "clingycats:try_sleeping") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77try sleeping`
       ].join("\n"));
     }
     if (id == "clingycats:try_grooming") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77try grooming`
       ].join("\n"));
     }
     if (id == "clingycats:sit_confirm") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77sit confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
       ].join("\n"));
     }
     if (id == "clingycats:sleep_confirm") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77sleep confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
       ].join("\n"));
     }
     if (id == "clingycats:groom_confirm") {
-      world2.sendMessage([
+      world3.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77grooming confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
       ].join("\n"));
     }
   });
-  world2.sendMessage("\xA7a[ClingyCats] subscriber registered");
+  world3.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }
 
 // scripts/debug/catdebug.ts
-import { world as world3, system as system2, EquipmentSlot } from "@minecraft/server";
+import { world as world4, system as system2, EquipmentSlot } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
   system2.runInterval(() => {
-    for (const player of world3.getAllPlayers()) {
+    for (const player of world4.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
@@ -1116,7 +1120,7 @@ function registerDebugRaycast() {
 system3.run(() => {
   registerCatSpawnSubscriber();
   registerDebugRaycast();
-  world4.sendMessage("ClingyCats script loaded!");
+  world5.sendMessage("ClingyCats script loaded!");
 });
 
 //# sourceMappingURL=../debug/main.js.map

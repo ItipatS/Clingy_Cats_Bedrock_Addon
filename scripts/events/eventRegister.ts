@@ -58,6 +58,11 @@ export function registerCatSpawnSubscriber(): void {
             return;
         }
 
+        if (id === "clingycats:enter_still_state_event") {
+            behaviorTick(sourceEntity, "enter_still_state");
+            return;
+        }
+
         if (id == "clingycats:try_sitting") {
             world.sendMessage([
                 `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
