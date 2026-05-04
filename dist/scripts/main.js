@@ -1074,6 +1074,21 @@ function registerCatSpawnSubscriber() {
         `\xA77grooming confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
       ].join("\n"));
     }
+    if (id == "clingycats:weather_rain") {
+      world3.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77avoid rain`
+      ].join("\n"));
+    }
+    if (id == "clingycats:weather_clear") {
+      world3.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77not avoid rain anymore`
+      ].join("\n"));
+    }
+    if (id == "clingycats:follow_given_player") {
+      behaviorTick(sourceEntity, "temp_follow_close");
+    }
   });
   world3.sendMessage("\xA7a[ClingyCats] subscriber registered");
 }

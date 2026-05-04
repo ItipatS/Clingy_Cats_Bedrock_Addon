@@ -1,7 +1,7 @@
 import { world, system } from "@minecraft/server";
 import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
-import { restoreIdentity, behaviorTick } from "../logics/states";
+import { restoreIdentity, behaviorTick } from '../logics/states';
 
 export function registerCatSpawnSubscriber(): void {
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -101,6 +101,26 @@ export function registerCatSpawnSubscriber(): void {
                 `§7grooming confirm §7state:§f${sourceEntity.getProperty("clingy_cats:state")}`
             ].join("\n"));
         }
+
+        if (id == "clingycats:weather_rain") {
+            world.sendMessage([
+                `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
+                `§7avoid rain`
+            ].join("\n"));
+        }
+
+        if (id == "clingycats:weather_clear") {
+            world.sendMessage([
+                `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
+                `§7not avoid rain anymore`
+            ].join("\n"));
+        }
+
+        if (id == "clingycats:follow_given_player") {
+            behaviorTick(sourceEntity, "temp_follow_close")
+
+        }
+
 
     });
      world.sendMessage("§a[ClingyCats] subscriber registered");
