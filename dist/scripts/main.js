@@ -570,6 +570,239 @@ var FAVORITE_BLOCK_POOL = [
   { weight: 1, block: "owner" },
   { weight: 1, block: "sun" }
 ];
+var BREED_SPAWN_POOLS = {
+  ragdoll: {
+    trait: [
+      { value: "lazy", weight: 5 },
+      { value: "friendly", weight: 3 },
+      { value: "independent", weight: 1 },
+      { value: "curious", weight: 1 }
+    ],
+    personality: [
+      { value: "affectionate", weight: 5 },
+      { value: "calm", weight: 3 },
+      { value: "aloof", weight: 1 },
+      { value: "playful", weight: 1 }
+    ],
+    block: [
+      { value: "soft", weight: 5 },
+      { value: "bed", weight: 3 },
+      { value: "owner", weight: 2 }
+    ]
+  },
+  siamese: {
+    trait: [
+      { value: "curious", weight: 4 },
+      { value: "active", weight: 3 },
+      { value: "friendly", weight: 2 },
+      { value: "independent", weight: 1 }
+    ],
+    personality: [
+      { value: "confident", weight: 4 },
+      { value: "playful", weight: 3 },
+      { value: "affectionate", weight: 2 },
+      { value: "anxious", weight: 1 }
+    ],
+    block: [
+      { value: "high", weight: 4 },
+      { value: "sun", weight: 3 },
+      { value: "owner", weight: 2 },
+      { value: "warm", weight: 1 }
+    ]
+  },
+  persian: {
+    trait: [
+      { value: "lazy", weight: 5 },
+      { value: "independent", weight: 3 },
+      { value: "shy", weight: 2 }
+    ],
+    personality: [
+      { value: "aloof", weight: 5 },
+      { value: "calm", weight: 3 },
+      { value: "affectionate", weight: 1 },
+      { value: "playful", weight: 1 }
+    ],
+    block: [
+      { value: "soft", weight: 5 },
+      { value: "warm", weight: 3 },
+      { value: "bed", weight: 2 }
+    ]
+  },
+  british: {
+    trait: [
+      { value: "independent", weight: 4 },
+      { value: "lazy", weight: 3 },
+      { value: "curious", weight: 2 },
+      { value: "friendly", weight: 1 }
+    ],
+    personality: [
+      { value: "aloof", weight: 4 },
+      { value: "calm", weight: 3 },
+      { value: "confident", weight: 2 },
+      { value: "affectionate", weight: 1 }
+    ],
+    block: [
+      { value: "high", weight: 4 },
+      { value: "soft", weight: 3 },
+      { value: "warm", weight: 2 },
+      { value: "sun", weight: 1 }
+    ]
+  },
+  tabby: {
+    trait: [
+      { value: "active", weight: 4 },
+      { value: "curious", weight: 3 },
+      { value: "friendly", weight: 2 },
+      { value: "independent", weight: 1 }
+    ],
+    personality: [
+      { value: "playful", weight: 4 },
+      { value: "confident", weight: 3 },
+      { value: "affectionate", weight: 2 },
+      { value: "calm", weight: 1 }
+    ],
+    block: [
+      { value: "sun", weight: 4 },
+      { value: "high", weight: 3 },
+      { value: "warm", weight: 2 },
+      { value: "soft", weight: 1 }
+    ]
+  },
+  all_black: {
+    trait: [
+      { value: "independent", weight: 4 },
+      { value: "curious", weight: 3 },
+      { value: "shy", weight: 2 },
+      { value: "active", weight: 1 }
+    ],
+    personality: [
+      { value: "aloof", weight: 4 },
+      { value: "confident", weight: 3 },
+      { value: "anxious", weight: 2 },
+      { value: "calm", weight: 1 }
+    ],
+    block: [
+      { value: "high", weight: 4 },
+      { value: "warm", weight: 3 },
+      { value: "soft", weight: 2 },
+      { value: "sun", weight: 1 }
+    ]
+  },
+  black: {
+    trait: [
+      { value: "curious", weight: 4 },
+      { value: "active", weight: 3 },
+      { value: "independent", weight: 2 },
+      { value: "friendly", weight: 1 }
+    ],
+    personality: [
+      { value: "playful", weight: 4 },
+      { value: "confident", weight: 3 },
+      { value: "aloof", weight: 2 },
+      { value: "calm", weight: 1 }
+    ],
+    block: [
+      { value: "high", weight: 4 },
+      { value: "sun", weight: 3 },
+      { value: "warm", weight: 2 },
+      { value: "soft", weight: 1 }
+    ]
+  },
+  calico: {
+    trait: [
+      { value: "friendly", weight: 4 },
+      { value: "curious", weight: 3 },
+      { value: "active", weight: 2 },
+      { value: "shy", weight: 1 }
+    ],
+    personality: [
+      { value: "affectionate", weight: 4 },
+      { value: "playful", weight: 3 },
+      { value: "anxious", weight: 2 },
+      { value: "calm", weight: 1 }
+    ],
+    block: [
+      { value: "soft", weight: 4 },
+      { value: "owner", weight: 3 },
+      { value: "bed", weight: 2 },
+      { value: "warm", weight: 1 }
+    ]
+  },
+  jellie: {
+    trait: [
+      { value: "friendly", weight: 5 },
+      { value: "curious", weight: 3 },
+      { value: "active", weight: 2 }
+    ],
+    personality: [
+      { value: "affectionate", weight: 5 },
+      { value: "playful", weight: 3 },
+      { value: "confident", weight: 2 }
+    ],
+    block: [
+      { value: "owner", weight: 5 },
+      { value: "soft", weight: 3 },
+      { value: "bed", weight: 2 }
+    ]
+  },
+  ocelot: {
+    trait: [
+      { value: "independent", weight: 5 },
+      { value: "shy", weight: 3 },
+      { value: "active", weight: 2 }
+    ],
+    personality: [
+      { value: "aloof", weight: 5 },
+      { value: "anxious", weight: 3 },
+      { value: "confident", weight: 2 }
+    ],
+    block: [
+      { value: "high", weight: 5 },
+      { value: "sun", weight: 3 },
+      { value: "warm", weight: 2 }
+    ]
+  },
+  red: {
+    trait: [
+      { value: "active", weight: 4 },
+      { value: "friendly", weight: 3 },
+      { value: "curious", weight: 2 },
+      { value: "lazy", weight: 1 }
+    ],
+    personality: [
+      { value: "playful", weight: 4 },
+      { value: "affectionate", weight: 3 },
+      { value: "confident", weight: 2 },
+      { value: "calm", weight: 1 }
+    ],
+    block: [
+      { value: "warm", weight: 4 },
+      { value: "sun", weight: 3 },
+      { value: "soft", weight: 2 },
+      { value: "owner", weight: 1 }
+    ]
+  },
+  white: {
+    trait: [
+      { value: "shy", weight: 4 },
+      { value: "lazy", weight: 3 },
+      { value: "independent", weight: 2 },
+      { value: "curious", weight: 1 }
+    ],
+    personality: [
+      { value: "anxious", weight: 4 },
+      { value: "aloof", weight: 3 },
+      { value: "calm", weight: 2 },
+      { value: "affectionate", weight: 1 }
+    ],
+    block: [
+      { value: "soft", weight: 4 },
+      { value: "bed", weight: 3 },
+      { value: "high", weight: 2 },
+      { value: "warm", weight: 1 }
+    ]
+  }
+};
 var TEST_TEXTURES = Object.fromEntries(
   Object.entries(BREED_OFFSETS).flatMap(
     ([breedId, offset]) => Object.entries(BREED_TEXTURES[breedId]).map(([localIdx, data]) => [
@@ -749,24 +982,44 @@ function assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes) {
 
 // scripts/logics/personality.ts
 import { world } from "@minecraft/server";
+function weightedPick(pool) {
+  return weightedRandom(pool).value;
+}
 function assignRandomPersonality(cat) {
-  const trait = weightedRandom(TRAIT_POOL);
-  const personality = weightedRandom(PERSONALITY_POOL);
-  const food = weightedRandom(FAVORITE_FOOD_POOL);
-  const block = weightedRandom(FAVORITE_BLOCK_POOL);
+  const trait = weightedRandom(TRAIT_POOL).trait;
+  const personality = weightedRandom(PERSONALITY_POOL).personality;
+  const food = weightedRandom(FAVORITE_FOOD_POOL).food;
+  const block = weightedRandom(FAVORITE_BLOCK_POOL).block;
   world.sendMessage([
-    `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
-    `\xA77trait:\xA7f${trait.trait}`,
-    `\xA77personality:\xA7f${personality.personality}`,
-    `\xA77food:\xA7f${food.food}`,
-    `\xA77block:\xA7f${block.block}`
+    `\xA77trait:\xA7f${trait}`,
+    `\xA77personality:\xA7f${personality}`,
+    `\xA77food:\xA7f${food}`,
+    `\xA77block:\xA7f${block}`
   ].join("\n"));
-  cat.setProperty("clingy_cats:behavior_trait", trait.trait);
-  cat.setProperty("clingy_cats:personality", personality.personality);
-  cat.setProperty("clingy_cats:favorite_food", food.food);
-  cat.setProperty("clingy_cats:favorite_block", block.block);
-  cat.triggerEvent(`clingy_cats:set_trait_${trait.trait}`);
-  cat.triggerEvent(`clingy_cats:set_personality_${personality.personality}`);
+  cat.setProperty("clingy_cats:behavior_trait", trait);
+  cat.setProperty("clingy_cats:personality", personality);
+  cat.setProperty("clingy_cats:favorite_food", food);
+  cat.setProperty("clingy_cats:favorite_block", block);
+  cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+  cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
+}
+function assignBreedPersonality(cat) {
+  const breedKey = cat.typeId.replace("clingy_cats:", "");
+  const pool = BREED_SPAWN_POOLS[breedKey];
+  if (!pool) {
+    assignRandomPersonality(cat);
+    return;
+  }
+  const trait = weightedPick(pool.trait);
+  const personality = weightedPick(pool.personality);
+  const block = weightedPick(pool.block);
+  const food = weightedRandom(FAVORITE_FOOD_POOL).food;
+  cat.setProperty("clingy_cats:behavior_trait", trait);
+  cat.setProperty("clingy_cats:personality", personality);
+  cat.setProperty("clingy_cats:favorite_block", block);
+  cat.setProperty("clingy_cats:favorite_food", food);
+  cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+  cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
 }
 
 // scripts/logics/breed.ts
@@ -784,7 +1037,7 @@ function handleSpawnTestCats(cat) {
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
-  assignRandomPersonality(cat);
+  assignBreedPersonality(cat);
   cat.triggerEvent("clingy_cats:visible_event");
 }
 
@@ -851,7 +1104,7 @@ function handleGiveBirth(mother) {
     baby.addTag("clingy_cats:not_wild_spawn");
     assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
     assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
-    assignRandomPersonality(baby);
+    assignBreedPersonality(baby);
     baby.triggerEvent("clingy_cats:born");
   }
 }
