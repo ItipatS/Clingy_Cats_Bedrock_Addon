@@ -11,8 +11,10 @@ export type TempBehavior =
     | "temp_move_to_soft"
     | "temp_move_to_warm"
     | "temp_move_to_sun"
-    | "temp_ocelot_sit"
-    | "temp_play";
+    | "temp_play"
+    | "enter_sit_state"
+    | "enter_sleep_state"
+    | "enter_groom_state";
 
 const LAST_TEMP = "clingy_cats:last_temp_group";
 
@@ -27,70 +29,100 @@ interface BehaviorEntry {
 
 const TRAIT_POOLS: Record<BehaviorTrait, BehaviorEntry[]> = {
     lazy: [
-        { behavior: "enter_still_state",  weight: 4 },
-        { behavior: "temp_move_to_soft",  weight: 2 },
-        { behavior: "temp_move_to_warm",  weight: 1 },
+        { behavior: "enter_sleep_state", weight: 4 },
+        { behavior: "enter_sit_state",   weight: 2 },
+        { behavior: "temp_move_to_soft", weight: 2 },
+        { behavior: "temp_move_to_warm", weight: 1 },
     ],
     active: [
-        { behavior: "temp_follow_loose",  weight: 2 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "temp_follow_loose", weight: 2 },
+        { behavior: "enter_sit_state",   weight: 1 },
     ],
     curious: [
-        { behavior: "temp_follow_loose",  weight: 2 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "temp_follow_loose", weight: 2 },
+        { behavior: "enter_groom_state", weight: 2 },
+        { behavior: "enter_sit_state",   weight: 1 },
     ],
     shy: [
-        { behavior: "enter_still_state",  weight: 4 },
-        { behavior: "temp_move_to_soft",  weight: 1 },
+        { behavior: "enter_sleep_state", weight: 3 },
+        { behavior: "enter_sit_state",   weight: 2 },
+        { behavior: "temp_move_to_soft", weight: 1 },
     ],
     friendly: [
-        { behavior: "temp_follow_close",  weight: 2 },
-        { behavior: "temp_play",          weight: 2 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "temp_follow_close", weight: 2 },
+        { behavior: "temp_play",         weight: 2 },
+        { behavior: "enter_groom_state", weight: 1 },
+        { behavior: "enter_sit_state",   weight: 1 },
     ],
     independent: [
-        { behavior: "enter_still_state",  weight: 3 },
-        { behavior: "temp_move_to_sun",   weight: 2 },
+        { behavior: "enter_sleep_state", weight: 2 },
+        { behavior: "enter_sit_state",   weight: 2 },
+        { behavior: "temp_move_to_sun",  weight: 2 },
     ],
 };
 
 const PERSONALITY_POOLS: Record<Personality, BehaviorEntry[]> = {
     affectionate: [
         { behavior: "temp_follow_close",  weight: 4 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "enter_sit_state",    weight: 2 },
+        { behavior: "enter_groom_state",  weight: 1 },
     ],
     aloof: [
-        { behavior: "temp_ocelot_sit",    weight: 2 },
         { behavior: "temp_follow_loose",  weight: 1 },
+        { behavior: "enter_sit_state",    weight: 3 },
+        { behavior: "enter_sleep_state",  weight: 2 },
     ],
     playful: [
         { behavior: "temp_play",          weight: 3 },
         { behavior: "temp_follow_loose",  weight: 2 },
-        { behavior: "temp_ocelot_sit",    weight: 1 },
+        { behavior: "enter_sit_state",    weight: 1 },
     ],
     calm: [
         { behavior: "temp_follow_loose",  weight: 2 },
-        { behavior: "temp_ocelot_sit",    weight: 1 },
+        { behavior: "enter_sleep_state",  weight: 3 },
+        { behavior: "enter_sit_state",    weight: 2 },
     ],
     anxious: [
         { behavior: "temp_follow_close",  weight: 3 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "enter_sit_state",    weight: 2 },
+        { behavior: "enter_groom_state",  weight: 2 },
     ],
     confident: [
         { behavior: "temp_follow_loose",  weight: 2 },
-        { behavior: "enter_still_state",  weight: 1 },
+        { behavior: "enter_sit_state",    weight: 1 },
+        { behavior: "temp_move_to_sun",   weight: 1 },
     ],
 };
 
 const BLOCK_POOLS: Record<FavoriteBlock, BehaviorEntry[]> = {
-    bed:   [{ behavior: "temp_move_to_bed",  weight: 4 }],
-    soft:  [{ behavior: "temp_move_to_soft", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
-    warm:  [{ behavior: "temp_move_to_warm", weight: 3 }, { behavior: "temp_ocelot_sit", weight: 1 }],
-    high:  [{ behavior: "temp_ocelot_sit",   weight: 3 }],
-    owner: [{ behavior: "temp_follow_close", weight: 4 }],
-    sun:   [{ behavior: "temp_move_to_sun",  weight: 3 }, { behavior: null,              weight: 1 }],
+    bed: [
+        { behavior: "temp_move_to_bed",   weight: 4 },
+        { behavior: "enter_sleep_state",  weight: 3 },
+    ],
+    soft: [
+        { behavior: "temp_move_to_soft",  weight: 3 },
+        { behavior: "enter_sit_state",    weight: 2 },
+        { behavior: "enter_groom_state",  weight: 1 },
+    ],
+    warm: [
+        { behavior: "temp_move_to_warm",  weight: 3 },
+        { behavior: "enter_sit_state",    weight: 2 },
+        { behavior: "enter_sleep_state",  weight: 1 },
+    ],
+    high: [
+        { behavior: "enter_sit_state",    weight: 3 },
+        { behavior: "enter_sleep_state",  weight: 1 },
+    ],
+    owner: [
+        { behavior: "temp_follow_close",  weight: 4 },
+        { behavior: "enter_sit_state",    weight: 1 },
+    ],
+    sun: [
+        { behavior: "temp_move_to_sun",   weight: 3 },
+        { behavior: "enter_sit_state",    weight: 2 },
+        { behavior: "enter_sleep_state",  weight: 1 },
+    ],
 };
-
 // ============================================================
 // WEIGHTED RANDOM
 // ============================================================
@@ -148,9 +180,9 @@ export function behaviorTick(cat: Entity, state?: string): void {
     );
     const chosen = state || weightedRandom(pool);
 
-    if (chosen === "enter_still_state") {
-        cat.triggerEvent("clingy_cats:enter_still_state");
-        cat.setDynamicProperty(LAST_TEMP, "");
+    if (chosen === "enter_still_state" || chosen === "enter_sit_state" || chosen === "enter_sleep_state" || chosen === "enter_groom_state") {
+        cat.triggerEvent(`clingy_cats:${chosen}`);
+        cat.setDynamicProperty(LAST_TEMP, ""); // nothing to remove later. on_idle fire next behvior when timer_flag end
         return;
     }
 

@@ -1195,8 +1195,14 @@
                 "minecraft:behavior.follow_mob": {
 					"priority": 3,
 					"preferred_actor_type": "player",
-					"search_range": 10,
-					"stop_distance": 2
+					"search_range": 16,
+					"stop_distance": 2,
+					"filters": {
+						"all_of": [
+						{ "test": "is_underwater", "subject": "other", "value": false },
+						{ "test": "is_family", "subject": "other", "value": "player" }
+						]
+					}
 				}
             },
 
@@ -1204,8 +1210,14 @@
                 "minecraft:behavior.follow_mob": {
 					"priority": 3,
 					"preferred_actor_type": "player",
-					"search_range": 10,
-					"stop_distance": 5
+					"search_range": 16,
+					"stop_distance": 5,
+					"filters": {
+						"all_of": [
+						{ "test": "is_underwater", "subject": "other", "value": false },
+						{ "test": "is_family", "subject": "other", "value": "player" }
+						]
+					}
 				}
             },
 
@@ -1472,9 +1484,9 @@
                 ]
             },
 
-			 "clingy_cats:enter_still_state_event": {
+			"clingy_cats:enter_still_state_event": {
 				"queue_command": {"command": "scriptevent clingycats:enter_still_state_event"}
-			 },
+			},
 
             "clingy_cats:enter_still_state": {
                 "randomize": [
@@ -1482,6 +1494,18 @@
                     { "weight": 2, "add": { "component_groups": ["clingy_cats:state_sleeping"] }, "queue_command": {"command": "scriptevent clingycats:try_sleeping"} },
                     { "weight": 2, "add": { "component_groups": ["clingy_cats:state_grooming"] }, "queue_command": {"command": "scriptevent clingycats:try_grooming"} }
                 ]
+            },
+
+			"clingy_cats:enter_sit_state": {
+               "add": { "component_groups": ["clingy_cats:state_sitting"] }, "queue_command": {"command": "scriptevent clingycats:try_sitting"}
+            },
+
+			"clingy_cats:enter_sleep_state": {
+				"add": { "component_groups": ["clingy_cats:state_sleeping"] }, "queue_command": {"command": "scriptevent clingycats:try_sleeping"}
+            },
+
+			"clingy_cats:enter_groom_state": {
+                "add": { "component_groups": ["clingy_cats:state_grooming"] }, "queue_command": {"command": "scriptevent clingycats:try_grooming"}
             },
 
 			"clingy_cats:on_idle": {

@@ -3,7 +3,7 @@ import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
 import { restoreIdentity, behaviorTick } from '../logics/states';
 
-export function registerCatSpawnSubscriber(): void {
+export function registerCatsEvents(): void {
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
         const { id, message, sourceEntity } = ev;
 
