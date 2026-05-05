@@ -1,8 +1,5 @@
 import { Entity, world } from "@minecraft/server";
-
-export type BehaviorTrait = "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
-export type Personality   = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";
-export type FavoriteBlock = "bed" | "soft" | "warm" | "high" | "owner" | "sun";
+import { BehaviorTrait, Personality, FavoriteBlock } from "../configs/catsbreed";
 
 export type TempBehavior =
     | "temp_follow_close"

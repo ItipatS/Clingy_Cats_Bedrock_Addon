@@ -423,6 +423,264 @@ export const FAVORITE_BLOCK_POOL = [
     { weight: 1, block: "sun"},
 ] as const;
 
+export type BehaviorTrait = "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
+export type Personality   = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";
+export type FavoriteBlock = "bed" | "soft" | "warm" | "high" | "owner" | "sun";
+
+export type WeightedEntry<T extends string> = {
+    value: T;
+    weight: number;
+};
+
+export const BREED_SPAWN_POOLS: Record<string, {
+    trait: WeightedEntry<BehaviorTrait>[],
+    personality: WeightedEntry<Personality>[],
+    block: WeightedEntry<FavoriteBlock>[]
+}> = {
+
+    ragdoll: {
+        trait: [
+            { value: "lazy",        weight: 5 },
+            { value: "friendly",    weight: 3 },
+            { value: "independent", weight: 1 },
+            { value: "curious",     weight: 1 },
+        ],
+        personality: [
+            { value: "affectionate", weight: 5 },
+            { value: "calm",         weight: 3 },
+            { value: "aloof",        weight: 1 },
+            { value: "playful",      weight: 1 },
+        ],
+        block: [
+            { value: "soft",  weight: 5 },
+            { value: "bed",   weight: 3 },
+            { value: "owner", weight: 2 },
+        ]
+    },
+
+    siamese: {
+        trait: [
+            { value: "curious",     weight: 4 },
+            { value: "active",      weight: 3 },
+            { value: "friendly",    weight: 2 },
+            { value: "independent", weight: 1 },
+        ],
+        personality: [
+            { value: "confident",    weight: 4 },
+            { value: "playful",      weight: 3 },
+            { value: "affectionate", weight: 2 },
+            { value: "anxious",      weight: 1 },
+        ],
+        block: [
+            { value: "high",  weight: 4 },
+            { value: "sun",   weight: 3 },
+            { value: "owner", weight: 2 },
+            { value: "warm",  weight: 1 },
+        ]
+    },
+
+    persian: {
+        trait: [
+            { value: "lazy",        weight: 5 },
+            { value: "independent", weight: 3 },
+            { value: "shy",         weight: 2 },
+        ],
+        personality: [
+            { value: "aloof",        weight: 5 },
+            { value: "calm",         weight: 3 },
+            { value: "affectionate", weight: 1 },
+            { value: "playful",      weight: 1 },
+        ],
+        block: [
+            { value: "soft", weight: 5 },
+            { value: "warm", weight: 3 },
+            { value: "bed",  weight: 2 },
+        ]
+    },
+
+    british: {
+        trait: [
+            { value: "independent", weight: 4 },
+            { value: "lazy",        weight: 3 },
+            { value: "curious",     weight: 2 },
+            { value: "friendly",    weight: 1 },
+        ],
+        personality: [
+            { value: "aloof",        weight: 4 },
+            { value: "calm",         weight: 3 },
+            { value: "confident",    weight: 2 },
+            { value: "affectionate", weight: 1 },
+        ],
+        block: [
+            { value: "high", weight: 4 },
+            { value: "soft", weight: 3 },
+            { value: "warm", weight: 2 },
+            { value: "sun",  weight: 1 },
+        ]
+    },
+
+    tabby: {
+        trait: [
+            { value: "active",      weight: 4 },
+            { value: "curious",     weight: 3 },
+            { value: "friendly",    weight: 2 },
+            { value: "independent", weight: 1 },
+        ],
+        personality: [
+            { value: "playful",      weight: 4 },
+            { value: "confident",    weight: 3 },
+            { value: "affectionate", weight: 2 },
+            { value: "calm",         weight: 1 },
+        ],
+        block: [
+            { value: "sun",  weight: 4 },
+            { value: "high", weight: 3 },
+            { value: "warm", weight: 2 },
+            { value: "soft", weight: 1 },
+        ]
+    },
+
+    all_black: {
+        trait: [
+            { value: "independent", weight: 4 },
+            { value: "curious",     weight: 3 },
+            { value: "shy",         weight: 2 },
+            { value: "active",      weight: 1 },
+        ],
+        personality: [
+            { value: "aloof",     weight: 4 },
+            { value: "confident", weight: 3 },
+            { value: "anxious",   weight: 2 },
+            { value: "calm",      weight: 1 },
+        ],
+        block: [
+            { value: "high", weight: 4 },
+            { value: "warm", weight: 3 },
+            { value: "soft", weight: 2 },
+            { value: "sun",  weight: 1 },
+        ]
+    },
+
+    black: {
+        trait: [
+            { value: "curious",     weight: 4 },
+            { value: "active",      weight: 3 },
+            { value: "independent", weight: 2 },
+            { value: "friendly",    weight: 1 },
+        ],
+        personality: [
+            { value: "playful",   weight: 4 },
+            { value: "confident", weight: 3 },
+            { value: "aloof",     weight: 2 },
+            { value: "calm",      weight: 1 },
+        ],
+        block: [
+            { value: "high", weight: 4 },
+            { value: "sun",  weight: 3 },
+            { value: "warm", weight: 2 },
+            { value: "soft", weight: 1 },
+        ]
+    },
+
+    calico: {
+        trait: [
+            { value: "friendly",  weight: 4 },
+            { value: "curious",   weight: 3 },
+            { value: "active",    weight: 2 },
+            { value: "shy",       weight: 1 },
+        ],
+        personality: [
+            { value: "affectionate", weight: 4 },
+            { value: "playful",      weight: 3 },
+            { value: "anxious",      weight: 2 },
+            { value: "calm",         weight: 1 },
+        ],
+        block: [
+            { value: "soft",  weight: 4 },
+            { value: "owner", weight: 3 },
+            { value: "bed",   weight: 2 },
+            { value: "warm",  weight: 1 },
+        ]
+    },
+
+    jellie: {
+        trait: [
+            { value: "friendly",  weight: 5 },
+            { value: "curious",   weight: 3 },
+            { value: "active",    weight: 2 },
+        ],
+        personality: [
+            { value: "affectionate", weight: 5 },
+            { value: "playful",      weight: 3 },
+            { value: "confident",    weight: 2 },
+        ],
+        block: [
+            { value: "owner", weight: 5 },
+            { value: "soft",  weight: 3 },
+            { value: "bed",   weight: 2 },
+        ]
+    },
+
+    ocelot: {
+        trait: [
+            { value: "independent", weight: 5 },
+            { value: "shy",         weight: 3 },
+            { value: "active",      weight: 2 },
+        ],
+        personality: [
+            { value: "aloof",     weight: 5 },
+            { value: "anxious",   weight: 3 },
+            { value: "confident", weight: 2 },
+        ],
+        block: [
+            { value: "high", weight: 5 },
+            { value: "sun",  weight: 3 },
+            { value: "warm", weight: 2 },
+        ]
+    },
+
+    red: {
+        trait: [
+            { value: "active",   weight: 4 },
+            { value: "friendly", weight: 3 },
+            { value: "curious",  weight: 2 },
+            { value: "lazy",     weight: 1 },
+        ],
+        personality: [
+            { value: "playful",      weight: 4 },
+            { value: "affectionate", weight: 3 },
+            { value: "confident",    weight: 2 },
+            { value: "calm",         weight: 1 },
+        ],
+        block: [
+            { value: "warm",  weight: 4 },
+            { value: "sun",   weight: 3 },
+            { value: "soft",  weight: 2 },
+            { value: "owner", weight: 1 },
+        ]
+    },
+
+    white: {
+        trait: [
+            { value: "shy",         weight: 4 },
+            { value: "lazy",        weight: 3 },
+            { value: "independent", weight: 2 },
+            { value: "curious",     weight: 1 },
+        ],
+        personality: [
+            { value: "anxious",      weight: 4 },
+            { value: "aloof",        weight: 3 },
+            { value: "calm",         weight: 2 },
+            { value: "affectionate", weight: 1 },
+        ],
+        block: [
+            { value: "soft", weight: 4 },
+            { value: "bed",  weight: 3 },
+            { value: "high", weight: 2 },
+            { value: "warm", weight: 1 },
+        ]
+    }
+}
 // Flat texture map for test entity — built after BREED_TEXTURES and BREED_OFFSETS
 export const TEST_TEXTURES: Record<number, TextureData> = Object.fromEntries(
     Object.entries(BREED_OFFSETS).flatMap(([breedId, offset]) =>

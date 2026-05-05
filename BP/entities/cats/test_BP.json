@@ -475,7 +475,10 @@
 					"minecraft:rabbit",
 					"minecraft:cooked_rabbit"
 					],
-					"breeds_with": { "clingy_cats:test": {"event": "clingy_cats:become_pregnant", "target": "self" } },
+					"breeds_with": [ 
+						{ "clingy_cats:ragdoll": {"event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:red": {"event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
 					"causes_pregnancy": true
 				},
 				"minecraft:behavior.breed": {

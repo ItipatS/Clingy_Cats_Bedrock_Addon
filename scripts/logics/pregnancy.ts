@@ -2,7 +2,7 @@ import { Entity, system } from '@minecraft/server';
 import { distanceSq } from './utils';
 import { ParentGeneData, ConceptionRecord, determineBabyBreed } from './genetics';
 import { assignInheritedAppearanceFromGenes, assignInheritedEyesAndWhiskersFromGenes } from './appearance';
-import { assignRandomPersonality } from './personality';
+import { assignBreedPersonality } from './personality';
 
 // ============================================================
 // GENE CAPTURE
@@ -100,7 +100,7 @@ export function handleGiveBirth(mother: Entity): void {
 
         assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
         assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
-        assignRandomPersonality(baby);
+        assignBreedPersonality(baby);
         
         baby.triggerEvent("clingy_cats:born");
         
