@@ -3,6 +3,8 @@ import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
 import { restoreIdentity, behaviorTick } from '../logics/states';
 
+import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
+
 export function registerCatsEvents(): void {
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
         const { id, message, sourceEntity } = ev;
@@ -118,7 +120,14 @@ export function registerCatsEvents(): void {
 
         if (id == "clingycats:follow_given_player") {
             behaviorTick(sourceEntity, "temp_follow_close")
+        }
 
+        if (id === "clingycats:request_shoulder_mount") {
+            handleRequestShoulderMount(sourceEntity)
+        }
+
+        if (id === "clingycats:anchor_expire") {
+            handleAnchorExpire(sourceEntity)
         }
 
 

@@ -208,53 +208,12 @@
 					{
 						"on_damage": {
 							"filters": {
-								"test": "enum_property",
-								"domain": "clingy_cats:personality",
+								"test": "is_riding",
 								"subject": "self",
-								"value": "confident"
-							},
-							"event": "clingy_cats:on_hurt_confident",
-							"target": "self"
+								"value": true
+							}
 						},
-						"deals_damage": "yes"
-					},
-					{
-						"on_damage": {
-							"filters": {
-								"test": "enum_property",
-								"domain": "clingy_cats:personality",
-								"subject": "self",
-								"value": "calm"
-							},
-							"event": "clingy_cats:on_hurt_calm",
-							"target": "self"
-						},
-						"deals_damage": "yes"
-					},
-					{
-						"on_damage": {
-							"filters": {
-								"all_of": [
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:personality",
-										"subject": "self",
-										"operator": "!=",
-										"value": "confident"
-									},
-									{
-										"test": "enum_property",
-										"domain": "clingy_cats:personality",
-										"subject": "self",
-										"operator": "!=",
-										"value": "calm"
-									}
-								]
-							},
-							"event": "clingy_cats:on_hurt",
-							"target": "self"
-						},
-						"deals_damage": "yes"
+						"deals_damage": "no"
 					}
 				]
 			},
@@ -529,9 +488,46 @@
 				"interact_text": "action.interact.dye"
 				},
 				"minecraft:on_wake_with_owner": {
-
+				},
+				"minecraft:interact": {
+					"interactions": [
+						{
+							"play_sounds": "purreow",
+							"cooldown": 5,
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"test": "is_owner",
+											"subject": "other",
+											"value": true
+										},
+										{
+											"test": "all_slots_empty",
+											"subject": "other",
+											"operator": "equals",
+											"value": "hand"
+										},
+										{
+											"subject": "other",
+											"test": "is_sneak_held",
+											"value": true
+										}
+									]
+								},
+							"event": "clingy_cats:want_to_ride"
+							},
+							"particle_on_start": {
+								"particle_type": "endrod",
+								"particle_offset_towards_interactor": true,
+								"particle_y_offset": 0.1
+							},			
+							"swing": true
+						}
+					]
 				}
 			},
+
 			"clingy_cats:pregnant": {
 				"minecraft:is_pregnant": {},
 				"minecraft:behavior.lay_egg": {
@@ -653,9 +649,9 @@
             "clingy_cats:can_mount": {
                 "minecraft:behavior.find_mount": {
                     "avoid_water": true,
-                    "mount_distance": 4.0,
+                    "mount_distance": 5.0,
                     "priority": 4,
-                    "start_delay": 100,
+                    "start_delay": 0,
                     "target_needed": false,
                     "within_radius": 16
                 }
@@ -669,6 +665,55 @@
                     "time_down_event": { "event": "clingy_cats:enter_still_state_event", "target": "self" }
                 }
             },
+
+			"clingy_cats:not_riding_player": {
+				"minecraft:entity_sensor": {
+				"relative_range": false,
+				"subsensors": [
+					{
+					"event": "clingy_cats:on_riding_player",
+					"event_filters": {
+						"all_of": [
+						{
+							"test": "is_riding",
+							"operator": "equals",
+							"subject": "self",
+							"value": true
+						}
+						]
+					},
+					"range": [
+						2.0,
+						2.0
+					]
+					}
+				]
+				}
+			},
+			"clingy_cats:riding_player": {
+				"minecraft:entity_sensor": {
+				"relative_range": false,
+				"subsensors": [
+					{
+					"event": "clingy_cats:off_riding_player",
+					"event_filters": {
+						"all_of": [
+						{
+							"test": "is_riding",
+							"operator": "equals",
+							"subject": "self",
+							"value": false
+						}
+						]
+					},
+					"range": [
+						2.0,
+						2.0
+					]
+					}
+				]
+				}
+			},
 
 			"clingy_cats:need_sleep_with_owner": {
                 "minecraft:behavior.pet_sleep_with_owner": {
@@ -1285,13 +1330,6 @@
                 }
             },
 
-            "clingy_cats:temp_ocelot_sit": {
-                "minecraft:behavior.ocelot_sit_on_block": {
-                    "priority": 3,
-                    "speed_multiplier": 1.0
-                }
-            },
-
             "clingy_cats:temp_play": {
                 "minecraft:behavior.play": {
                     "priority": 3,
@@ -1331,7 +1369,7 @@
             "clingy_cats:born": {
                 "sequence": [
                     { "remove": { "component_groups": ["clingy_cats:adult","clingy_cats:wild"] } },
-                    { "add":    { "component_groups": ["clingy_cats:baby","clingy_cats:tamed"] } }
+                    { "add":    { "component_groups": ["clingy_cats:baby","clingy_cats:tamed", "clingy_cats:not_riding_player"] } }
                 ]
             },
 
@@ -1346,7 +1384,7 @@
             "clingy_cats:on_tame": {
                 "sequence": [
                     { "remove": { "component_groups": ["clingy_cats:wild"] } },
-                    { "add":    { "component_groups": ["clingy_cats:tamed"] } },
+                    { "add":    { "component_groups": ["clingy_cats:tamed", "clingy_cats:not_riding_player"] } },
                     { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
                 ]
             },
@@ -1427,33 +1465,6 @@
             "clingy_cats:set_personality_calm":         { "add": { "component_groups": ["clingy_cats:personality_calm"] } },
             "clingy_cats:set_personality_anxious":      { "add": { "component_groups": ["clingy_cats:personality_anxious"] } },
             "clingy_cats:set_personality_confident":    { "add": { "component_groups": ["clingy_cats:personality_confident"] } },
-			
-			"clingy_cats:on_hurt": {
-			 "set_property": { "clingy_cats:emotion": "scared" }
-			},
-
-			"clingy_cats:on_hurt_confident": {
-				"sequence": [
-					{ "set_property": { "clingy_cats:emotion": "angry" } },
-					{ "add": { "component_groups": ["clingy_cats:aggressive"] } }
-				]
-			},
-			
-			"clingy_cats:on_hurt_calm": {
-				"sequence": [
-					{ "set_property": { "clingy_cats:emotion": "angry" } },
-					{
-						"filters": {
-							"test": "enum_property",
-							"domain": "clingy_cats:emotion",
-							"subject": "self",
-							"operator": "!=",
-							"value": "scared"
-						},
-						"add": { "component_groups": ["clingy_cats:aggressive"] }
-					}
-				]
-			},
 
 			"clingy_cats:target_acquired": {
 				"set_property": { "clingy_cats:state": "hunting" }
@@ -1511,9 +1522,11 @@
 			"clingy_cats:on_idle": {
                 "sequence": [
                     { "set_property": { "clingy_cats:state": "idle" } },
-                    { "remove": { "component_groups": [
-                        "clingy_cats:state_sitting"
-                    ]}},
+                    { "remove": 
+						{ 
+						"component_groups": ["clingy_cats:state_sitting"]
+						}
+					},
 					{"queue_command": { "command": "scriptevent clingycats:behavior_tick" }}
                 ]
             },
@@ -1562,53 +1575,17 @@
             "clingy_cats:on_weather_clear_event": { "remove": { "component_groups": ["clingy_cats:on_rain"] } , "add": { "component_groups": ["clingy_cats:on_weather_clear"] }, "queue_command": {"command": "scriptevent clingycats:weather_clear"} },
 
             "clingy_cats:add_temp_follow_close":    { 
-				"sequence": [
-					{	
-						"filters": { "test": "is_tamed", "value": true },
-						"add":    { "component_groups": ["clingy_cats:temp_follow_owner_close"] } 
-					},
-					{
-						"filters": { "test": "is_tamed", "value": false },
-						"add":    { "component_groups": ["clingy_cats:temp_follow_close"] } 
-					}
-				]
+				"add":    { "component_groups": ["clingy_cats:temp_follow_close"] }
 			},
             "clingy_cats:remove_temp_follow_close": { 
-				"sequence": [
-					{	
-						"filters": { "test": "is_tamed", "value": true },
-						"remove":    { "component_groups": ["clingy_cats:temp_follow_owner_close"] } 
-					},
-					{
-						"filters": { "test": "is_tamed", "value": false },
-						"remove":    { "component_groups": ["clingy_cats:temp_follow_close"] } 
-					}
-				] 
+				"remove":    { "component_groups": ["clingy_cats:temp_follow_close"] } 
 			},
 
             "clingy_cats:add_temp_follow_loose":    { 
-				"sequence": [
-					{	
-						"filters": { "test": "is_tamed", "value": true },
-						"add":    { "component_groups": ["clingy_cats:temp_follow_owner_loose"] } 
-					},
-					{
-						"filters": { "test": "is_tamed", "value": false },
-						"add":    { "component_groups": ["clingy_cats:temp_follow_loose"] } 
-					}
-				]
+				"add":    { "component_groups": ["clingy_cats:temp_follow_loose"] } 
 			},
             "clingy_cats:remove_temp_follow_loose": { 
-				"sequence": [
-					{	
-						"filters": { "test": "is_tamed", "value": true },
-						"remove":    { "component_groups": ["clingy_cats:temp_follow_owner_loose"] } 
-					},
-					{
-						"filters": { "test": "is_tamed", "value": false },
-						"remove":    { "component_groups": ["clingy_cats:temp_follow_loose"] } 
-					}
-				] 
+				"remove":    { "component_groups": ["clingy_cats:temp_follow_loose"] } 
 			},
 
             "clingy_cats:add_temp_move_to_bed":     { "add":    { "component_groups": ["clingy_cats:temp_move_to_bed"] } },
@@ -1623,13 +1600,15 @@
             "clingy_cats:add_temp_move_to_sun":     { "add":    { "component_groups": ["clingy_cats:temp_move_to_sun"] } },
             "clingy_cats:remove_temp_move_to_sun":  { "remove": { "component_groups": ["clingy_cats:temp_move_to_sun"] } },
 
-            "clingy_cats:add_temp_ocelot_sit":      { "add":    { "component_groups": ["clingy_cats:temp_ocelot_sit"] } },
-            "clingy_cats:remove_temp_ocelot_sit":   { "remove": { "component_groups": ["clingy_cats:temp_ocelot_sit"] } },
-
             "clingy_cats:add_temp_play":            { "add":    { "component_groups": ["clingy_cats:temp_play"] } },
             "clingy_cats:remove_temp_play":         { "remove": { "component_groups": ["clingy_cats:temp_play"] } },
 
-            "clingy_cats:add_can_mount":   { "add": { "component_groups": ["clingy_cats:can_mount"] } },
+            "clingy_cats:want_to_ride": {
+				"sequence": [
+					{ "add": { "component_groups": ["clingy_cats:can_mount"] } },
+					{ "queue_command": { "command": "scriptevent clingycats:request_shoulder_mount" } }
+				]
+			},
 
             "clingy_cats:on_riding_player": {
                 "sequence": [
@@ -1645,10 +1624,6 @@
                     { "trigger": "clingy_cats:on_idle" },
                     { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
                 ]
-            },
-
-            "clingy_cats:request_shoulder_mount": {
-                "queue_command": { "command": "scriptevent clingycats:request_shoulder_mount" }
             },
 
 			"clingy_cats:on_give" : {

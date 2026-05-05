@@ -1,0 +1,68 @@
+{
+    "format_version": "1.26.10",
+    "minecraft:entity": {
+        "description": {
+            "identifier": "clingy_cats:shoulder_anchor",
+            "is_spawnable": false,
+            "is_summonable": true,
+            "is_experimental": false
+        },
+
+        "components": {
+            "minecraft:type_family": { "family": ["parrot_tame", "clingy_cats_anchor"] },
+            "minecraft:scale": { "value": 0.001 },
+            "minecraft:collision_box": { "width": 0.001, "height": 0.001 },
+            "minecraft:physics": {},
+            "minecraft:movement": { "value": 0.6 },
+            "minecraft:movement.basic": {},
+            "minecraft:navigation.walk": {
+                "can_float": true,
+                "can_path_over_water": true,
+                "can_jump": true
+            },
+            "minecraft:is_hidden_when_invisible": {},
+            "minecraft:persistent": {},
+            "minecraft:rideable": {
+                "seat_count": 1,
+                "family_types": ["clingy_cats"],
+                "pull_in_entities": true,
+                "seats": [{
+                    "position": [0, 0, 0],
+                    "min_rider_count": 0,
+                    "max_rider_count": 1
+                }]
+            },
+            "minecraft:behavior.float": { "priority": 0 },
+            "minecraft:behavior.find_mount": {
+                "priority": 1,
+                "avoid_water": true,
+                "mount_distance": 4.0,
+                "start_delay": 0,
+                "target_needed": false,
+                "within_radius": 8
+            }
+        },
+
+        "component_groups": {
+            "clingy_cats:anchor_timer_lazy":        { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [40, 60], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } },
+            "clingy_cats:anchor_timer_active":      { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [10, 20], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } },
+            "clingy_cats:anchor_timer_curious":     { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [15, 25], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } },
+            "clingy_cats:anchor_timer_shy":         { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [8,  15], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } },
+            "clingy_cats:anchor_timer_friendly":    { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [30, 50], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } },
+            "clingy_cats:anchor_timer_independent": { "minecraft:timer": { "looping": false, "randomInterval": true, "time": [8,  12], "time_down_event": { "event": "clingy_cats:anchor_expire", "target": "self" } } }
+        },
+
+        "events": {
+            "clingy_cats:anchor_timer_lazy":        { "add": { "component_groups": ["clingy_cats:anchor_timer_lazy"] } },
+            "clingy_cats:anchor_timer_active":      { "add": { "component_groups": ["clingy_cats:anchor_timer_active"] } },
+            "clingy_cats:anchor_timer_curious":     { "add": { "component_groups": ["clingy_cats:anchor_timer_curious"] } },
+            "clingy_cats:anchor_timer_shy":         { "add": { "component_groups": ["clingy_cats:anchor_timer_shy"] } },
+            "clingy_cats:anchor_timer_friendly":    { "add": { "component_groups": ["clingy_cats:anchor_timer_friendly"] } },
+            "clingy_cats:anchor_timer_independent": { "add": { "component_groups": ["clingy_cats:anchor_timer_independent"] } },
+
+            "clingy_cats:anchor_expire": {
+                "queue_command": { "command": "scriptevent clingycats:anchor_expire" }
+            }
+        }
+    }
+}
