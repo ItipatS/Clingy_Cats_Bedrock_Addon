@@ -840,15 +840,19 @@ function handleGiveBirth(mother) {
   pregnancyMap.delete(mother.id);
   mother.setDynamicProperty("clingy_cats:conception_data", void 0);
   const { mother: momGenes, father: dadGenes, babyCount = 1 } = record ?? { mother: captureGenes(mother), father: void 0, babyCount: 1 };
-  for (let i = 0; i < babyCount; i++) {
+  for (let i = 0; i < 5; i++) {
     const babyBreed = determineBabyBreed(momGenes, dadGenes);
     const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
+    const owner = mother.dimension.getPlayers({ location: mother.location, maxDistance: 10 })[0];
+    if (owner) {
+      const tameable = baby.getComponent("minecraft:tameable");
+      tameable?.tame(owner);
+    }
     baby.addTag("clingy_cats:not_wild_spawn");
-    baby.triggerEvent("clingy_cats:born");
     assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
     assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
     assignRandomPersonality(baby);
-    baby.triggerEvent("clingy_cats:visible_event");
+    baby.triggerEvent("clingy_cats:born");
   }
 }
 
@@ -1075,21 +1079,19 @@ function registerCatsEvents() {
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
       world4.sendMessage(`\xA7b[ClingyCats] event received: ${id}`);
-      system.runTimeout(() => {
-        if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
-          sourceEntity.removeTag("clingy_cats:not_wild_spawn");
-          world4.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
-          return;
-        }
-        if (sourceEntity.typeId === "clingy_cats:test") {
-          handleSpawnTestCats(sourceEntity);
-          world4.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
-          return;
-        } else {
-          handleWildSpawn(sourceEntity);
-        }
-        behaviorTick(sourceEntity);
-      }, 1);
+      if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
+        sourceEntity.removeTag("clingy_cats:not_wild_spawn");
+        world4.sendMessage(`\xA7a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
+        return;
+      }
+      if (sourceEntity.typeId === "clingy_cats:test" && !sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
+        handleSpawnTestCats(sourceEntity);
+        world4.sendMessage(`\xA7d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
+        return;
+      } else {
+        handleWildSpawn(sourceEntity);
+      }
+      behaviorTick(sourceEntity);
       return;
     }
     if (id === "clingycats:conception") {

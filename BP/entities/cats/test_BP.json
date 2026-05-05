@@ -375,7 +375,7 @@
 		},
 		"component_groups": {
 			"clingy_cats:visible_baby": {
-				 "minecraft:scale_by_age": { "start_scale": 0.4, "end_scale": 0.8 }
+				"minecraft:scale_by_age": { "start_scale": 0.4, "end_scale": 0.8 }
 			},
 			"clingy_cats:visible_adult": {
 				"minecraft:scale": {
@@ -661,7 +661,7 @@
                 "minecraft:timer": {
                     "looping": true,
                     "randomInterval": true,
-                    "time": [8, 15],
+                    "time": [5, 5],
                     "time_down_event": { "event": "clingy_cats:enter_still_state_event", "target": "self" }
                 }
             },
@@ -1266,26 +1266,6 @@
 				}
             },
 
-            "clingy_cats:temp_follow_owner_close": {
-                "minecraft:behavior.follow_owner": {
-                    "priority": 3,
-                    "speed_multiplier": 1.1,
-                    "start_distance": 6,
-                    "stop_distance": 2,
-                    "can_teleport": false
-                }
-            },
-
-            "clingy_cats:temp_follow_owner_loose": {
-                "minecraft:behavior.follow_owner": {
-                    "priority": 3,
-                    "speed_multiplier": 0.9,
-                    "start_distance": 14,
-                    "stop_distance": 6,
-                    "can_teleport": false
-                }
-            },
-
             "clingy_cats:temp_move_to_bed": {
                 "minecraft:behavior.move_to_block": {
                     "priority": 3,
@@ -1300,7 +1280,7 @@
             "clingy_cats:temp_move_to_soft": {
                 "minecraft:behavior.move_to_block": {
                     "priority": 3,
-                    "target_blocks": ["wool","carpet","moss_block"],
+                    "target_blocks": ["wool", "carpet", "moss_block", "minecraft:hay_block"],
                     "target_selection_method": "nearest",
                     "search_range": 16, "search_height": 4,
                     "goal_radius": 2.0,
@@ -1351,16 +1331,11 @@
 					{
 						"add": {
 							"component_groups": [
-								"clingy_cats:on_weather_clear"
+								"clingy_cats:on_weather_clear",
+								"clingy_cats:not_riding_player"
 							]
 						}
 					},
-                    { "trigger": "clingy_cats:spawn" }
-                ]
-            },
-
-            "clingy_cats:spawn": {
-                "sequence": [
                     { "trigger": "clingy_cats:randomize_sound_variant" },
                     { "queue_command": { "command": "scriptevent clingycats:catspawn" } }
                 ]
@@ -1368,15 +1343,29 @@
 
             "clingy_cats:born": {
                 "sequence": [
-                    { "remove": { "component_groups": ["clingy_cats:adult","clingy_cats:wild"] } },
-                    { "add":    { "component_groups": ["clingy_cats:baby","clingy_cats:tamed", "clingy_cats:not_riding_player"] } }
+                    { "remove": { "component_groups": ["clingy_cats:adult","clingy_cats:wild", "clingy_cats:visible_adult"] } },
+                    { "add":    { "component_groups": ["clingy_cats:baby", "clingy_cats:visible_baby"] } },
+					{ "trigger": "clingy_cats:enter_sleep_state" },
+					{
+						"filters": {
+						"test": "is_tamed",
+						"subject": "self",
+						"value": false
+						},
+						"add": {
+							"component_groups": [
+								"clingy_cats:wild"
+							]
+						}
+					}
                 ]
             },
 
             "clingy_cats:ageable_grow_up": {
                 "sequence": [
-                    { "remove": { "component_groups": ["clingy_cats:baby","clingy_cats:visible_baby"] } },
-                    { "add":    { "component_groups": ["clingy_cats:adult","clingy_cats:visible_adult"] } },
+                    { "remove": { "component_groups": ["clingy_cats:baby"] } },
+                    { "add":    { "component_groups": ["clingy_cats:adult"] } },
+					{ "trigger": "clingy_cats:visible_event" },
                     { "trigger": "clingy_cats:randomize_sound_variant" }
                 ]
             },
@@ -1384,7 +1373,7 @@
             "clingy_cats:on_tame": {
                 "sequence": [
                     { "remove": { "component_groups": ["clingy_cats:wild"] } },
-                    { "add":    { "component_groups": ["clingy_cats:tamed", "clingy_cats:not_riding_player"] } },
+                    { "add":    { "component_groups": ["clingy_cats:tamed"] } },
                     { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
                 ]
             },
@@ -1416,9 +1405,8 @@
 				"sequence": [
 				{
 					"filters": {
-					"test": "is_baby",
-					"subject": "self",
-					"value": true
+					"test": "has_component",
+                  	"value": "minecraft:is_baby"
 					},
 					"remove": {
 					"component_groups": [
@@ -1433,10 +1421,9 @@
 				},
 				{
 					"filters": {
-					"test": "is_baby",
-					"subject": "self",
-					"operator": "!=",
-					"value": true
+					"test": "has_component",
+					"operator": "not",
+					"value": "minecraft:is_baby"
 					},
 					"remove": {
 					"component_groups": [

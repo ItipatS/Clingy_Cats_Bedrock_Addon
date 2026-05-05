@@ -1,4 +1,4 @@
-import { Entity } from '@minecraft/server';
+import { Entity, system } from '@minecraft/server';
 import { distanceSq } from './utils';
 import { ParentGeneData, ConceptionRecord, determineBabyBreed } from './genetics';
 import { assignInheritedAppearanceFromGenes, assignInheritedEyesAndWhiskersFromGenes } from './appearance';
@@ -84,17 +84,25 @@ export function handleGiveBirth(mother: Entity): void {
 
     const { mother: momGenes, father: dadGenes, babyCount = 1 } = record ?? { mother: captureGenes(mother), father: undefined, babyCount: 1 };
 
-    for (let i = 0; i < babyCount; i++) {
+    for (let i = 0; i < 5; i++) {
         const babyBreed = determineBabyBreed(momGenes, dadGenes);
         const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
 
+        const owner = mother.dimension.getPlayers({ location: mother.location, maxDistance: 10 })[0];
+     
+        if (owner) {
+           const tameable = baby.getComponent("minecraft:tameable");
+            tameable?.tame(owner) 
+        }
+        
         // Tag before clingycats:catspawn fires next tick so that handler skips random appearance
         baby.addTag("clingy_cats:not_wild_spawn");
-        baby.triggerEvent("clingy_cats:born");
 
         assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
         assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
         assignRandomPersonality(baby);
-        baby.triggerEvent("clingy_cats:visible_event");
+        
+        baby.triggerEvent("clingy_cats:born");
+        
     }
 }

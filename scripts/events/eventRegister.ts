@@ -13,13 +13,12 @@ export function registerCatsEvents(): void {
 
         if (id === "clingycats:catspawn") { 
             world.sendMessage(`§b[ClingyCats] event received: ${id}`);
-            system.runTimeout(() => {
                 if (sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
                     sourceEntity.removeTag("clingy_cats:not_wild_spawn");
                     world.sendMessage(`§a[ClingyCats] Non-wild spawn event received on: ${sourceEntity.typeId}`);
                     return;
                 }
-                if (sourceEntity.typeId === "clingy_cats:test") {
+                if (sourceEntity.typeId === "clingy_cats:test" && !sourceEntity.hasTag("clingy_cats:not_wild_spawn")) {
                     handleSpawnTestCats(sourceEntity);
                     world.sendMessage(`§d[ClingyCats] catspawn on: ${sourceEntity.typeId}`);
                     return;
@@ -28,7 +27,6 @@ export function registerCatsEvents(): void {
                    handleWildSpawn(sourceEntity); 
                 }
                 behaviorTick(sourceEntity);
-            }, 1)
             return;
         }
 
