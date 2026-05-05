@@ -2,7 +2,7 @@
 	"format_version": "1.26.10",
 	"minecraft:entity": {
 		"description": {
-			"identifier": "clingy_cats:test",
+			"identifier": "clingy_cats:calico",
 			"spawn_category": "creature",
 			"is_spawnable": true,
 			"is_summonable": true,
@@ -475,7 +475,20 @@
 					"minecraft:rabbit",
 					"minecraft:cooked_rabbit"
 					],
-					"breeds_with": { "clingy_cats:test": {"event": "clingy_cats:become_pregnant", "target": "self" } },
+					"breeds_with": [
+						{ "clingy_cats:all_black":  { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:black":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:british":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:calico":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:jellie":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:ocelot":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:persian":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:ragdoll":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:red":        { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:siamese":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:tabby":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:white":      { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
 					"causes_pregnancy": true
 				},
 				"minecraft:behavior.breed": {
@@ -1042,38 +1055,24 @@
 			},
 
 			"clingy_cats:trait_friendly": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [40, 80],
-					"time_down_event": {
-						"event": "clingy_cats:behavior_tick",
-						"target": "self"
-					}
-				},
+				"minecraft:timer": { "looping": true, "time": [25, 55], "randomInterval": true,
+					"time_down_event": { "event": "clingy_cats:behavior_tick", "target": "self" } },
 				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 2,
-					"max_look_count": 5,
-					"min_look_time": 30,
-					"max_look_time": 80,
-					"min_angle_of_view_horizontal": 30.0,
-					"max_angle_of_view_horizontal": 80.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 40
+					"priority": 9, "continue_if_leashed": true, "continue_sitting_on_reload": true,
+					"min_look_count": 2, "max_look_count": 5,
+					"min_look_time": 25, "max_look_time": 70,
+					"min_angle_of_view_horizontal": 35.0, "max_angle_of_view_horizontal": 90.0,
+					"probability": 0.02, "random_look_around_cooldown": 35
 				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.7,
-					"interval": 80
-				},
+				"minecraft:behavior.random_stroll": { "priority": 10, "speed_multiplier": 0.8, "interval": 60 },
 				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 12,
-					"probability": 0.12,
-					"look_time": {"max":180,"min":60},
+					"priority": 11, "look_distance": 14,
+					"probability": 0.14, "look_time": { "max": 180, "min": 60 },
 					"angle_of_view_horizontal": 60
+				},
+				"minecraft:behavior.pet_sleep_with_owner": {
+					"priority": 2, "speed_multiplier": 1.2,
+					"search_radius": 14, "search_height": 14, "goal_radius": 1.0
 				}
 			},
 
@@ -1245,7 +1244,7 @@
 						"min": 0,
 						"max": 0
 					},
-                    "duration_range": { "min": 15.0, "max": 25.0 },
+                    "duration_range": { "min": 14.0, "max": 22.0 },
                     "on_start": { "event": "clingy_cats:on_sitting",  "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
@@ -1262,7 +1261,7 @@
 						"min": 0,
 						"max": 0
 					},
-					"duration_range": { "min": 20.0, "max": 30.0 },
+					"duration_range": { "min": 18.0, "max": 28.0 },
                     "on_start": { "event": "clingy_cats:on_sleeping", "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
@@ -1279,7 +1278,7 @@
 						"min": 0,
 						"max": 0
 					},
-                    "duration_range": { "min": 10.0, "max": 15.0 },
+                    "duration_range": { "min": 14.0, "max": 22.0 },
                     "on_start": { "event": "clingy_cats:on_grooming", "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }

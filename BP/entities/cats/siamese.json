@@ -2,7 +2,7 @@
 	"format_version": "1.26.10",
 	"minecraft:entity": {
 		"description": {
-			"identifier": "clingy_cats:test",
+			"identifier": "clingy_cats:siamese",
 			"spawn_category": "creature",
 			"is_spawnable": true,
 			"is_summonable": true,
@@ -475,7 +475,20 @@
 					"minecraft:rabbit",
 					"minecraft:cooked_rabbit"
 					],
-					"breeds_with": { "clingy_cats:test": {"event": "clingy_cats:become_pregnant", "target": "self" } },
+					"breeds_with": [
+						{ "clingy_cats:all_black":  { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:black":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:british":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:calico":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:jellie":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:ocelot":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:persian":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:ragdoll":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:red":        { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:siamese":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:tabby":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
+						{ "clingy_cats:white":      { "event": "clingy_cats:become_pregnant", "target": "self" } }
+					],
 					"causes_pregnancy": true
 				},
 				"minecraft:behavior.breed": {
@@ -855,134 +868,53 @@
 			},
 
 			"clingy_cats:trait_active": {
-				"minecraft:timer": {
-					"looping": true,
-					"time": [20, 50],
-					"randomInterval": true,
-					"time_down_event": {
-						"event": "clingy_cats:behavior_tick",
-						"target": "self"
-					}
-				},
+				"minecraft:timer": { "looping": true, "time": [15, 35], "randomInterval": true,
+					"time_down_event": { "event": "clingy_cats:behavior_tick", "target": "self" } },
 				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 1,
-					"max_look_count": 3,
-					"min_look_time": 20,
-					"max_look_time": 60,
-					"min_angle_of_view_horizontal": 30.0,
-					"max_angle_of_view_horizontal": 90.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 30
+					"priority": 9, "continue_if_leashed": true, "continue_sitting_on_reload": true,
+					"min_look_count": 1, "max_look_count": 2,
+					"min_look_time": 15, "max_look_time": 40,
+					"min_angle_of_view_horizontal": 45.0, "max_angle_of_view_horizontal": 120.0,
+					"probability": 0.01, "random_look_around_cooldown": 20
 				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 1.1,
-					"interval": 30
-				},
+				"minecraft:behavior.random_stroll": { "priority": 10, "speed_multiplier": 1.2, "interval": 20 },
 				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 6,
-					"reselect_targets": true,
-					"within_radius": 16.0,
+					"priority": 6, "reselect_targets": true, "within_radius": 20.0,
 					"entity_types": [
-						{
-							"filters": {
-								"any_of" : [
-									{"test": "is_family",
-									"subject": "other",
-									"value": "rabbit"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "tropicalfish"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "pufferfish"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "turtle"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "salmon"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "cod"}
-
-								]
-
-							},
-							"max_dist": 8
-						},
-						{
-							"filters": {
-								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "baby_turtle" },
-									{ "test": "in_water", "subject": "other", "operator": "!=", "value": true },
-									{
-										"test": "has_component",
-										"subject": "self",
-										"operator": "not",
-										"value": "minecraft:is_tamed" 
-									}
-								]
-							},
-							"max_dist": 8
-						}
+						{ "filters": { "any_of": [
+							{ "test": "is_family", "subject": "other", "value": "rabbit" },
+							{ "test": "is_family", "subject": "other", "value": "tropicalfish" },
+							{ "test": "is_family", "subject": "other", "value": "pufferfish" },
+							{ "test": "is_family", "subject": "other", "value": "turtle" },
+							{ "test": "is_family", "subject": "other", "value": "salmon" },
+							{ "test": "is_family", "subject": "other", "value": "cod" },
+							{ "test": "is_family", "subject": "other", "value": "bat" }
+						]}, "max_dist": 12 }
 					]
 				}
-               
 			},
 
 			"clingy_cats:trait_curious": {
-				"minecraft:timer": {
-					"looping": true,
-					"randomInterval": true,
-					"time": [30, 80],
-					"time_down_event": {
-						"event": "clingy_cats:behavior_tick",
-						"target": "self"
-					}
-				},
+				"minecraft:timer": { "looping": true, "time": [20, 50], "randomInterval": true,
+					"time_down_event": { "event": "clingy_cats:behavior_tick", "target": "self" } },
 				"minecraft:behavior.random_look_around_and_sit": {
-					"continue_if_leashed": true,
-					"continue_sitting_on_reload": true,
-					"priority": 9,
-					"min_look_count": 3,
-					"max_look_count": 6,
-					"min_look_time": 30,
-					"max_look_time": 80,
-					"min_angle_of_view_horizontal": 45.0,
-					"max_angle_of_view_horizontal": 120.0,
-					"probability": 0.02,
-					"random_look_around_cooldown": 40
+					"priority": 9, "continue_if_leashed": true, "continue_sitting_on_reload": true,
+					"min_look_count": 4, "max_look_count": 8,
+					"min_look_time": 20, "max_look_time": 60,
+					"min_angle_of_view_horizontal": 60.0, "max_angle_of_view_horizontal": 150.0,
+					"probability": 0.01, "random_look_around_cooldown": 20
 				},
-				"minecraft:behavior.random_stroll": {
-					"priority": 10,
-					"speed_multiplier": 0.8,
-					"interval": 80
-				},
+				"minecraft:behavior.random_stroll": { "priority": 10, "speed_multiplier": 1.0, "interval": 40 },
 				"minecraft:behavior.look_at_player": {
-					"priority": 11,
-					"look_distance": 10,
-					"probability": 0.08,
-					"look_time": {"max":120,"min":40},
-					"angle_of_view_horizontal": 60
+					"priority": 11, "look_distance": 16,
+					"probability": 0.15, "look_time": { "max": 160, "min": 60 },
+					"angle_of_view_horizontal": 90
 				},
 				"minecraft:behavior.pickup_items": {
-                    "priority": 8,
-                    "can_pickup_any_item": true,
-                    "excluded_items": [],
-                    "goal_radius": 2,
-                    "max_dist": 16,
-                    "pickup_based_on_chance": false,
-                    "track_target": true
-                }
+					"priority": 8, "can_pickup_any_item": true, "excluded_items": [],
+					"goal_radius": 2, "max_dist": 20,
+					"pickup_based_on_chance": false, "track_target": true
+				}
 			},
 
 			"clingy_cats:trait_shy": {
@@ -1245,7 +1177,7 @@
 						"min": 0,
 						"max": 0
 					},
-                    "duration_range": { "min": 15.0, "max": 25.0 },
+                    "duration_range": { "min": 8.0, "max": 15.0 },
                     "on_start": { "event": "clingy_cats:on_sitting",  "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
@@ -1262,7 +1194,7 @@
 						"min": 0,
 						"max": 0
 					},
-					"duration_range": { "min": 20.0, "max": 30.0 },
+					"duration_range": { "min": 10.0, "max": 18.0 },
                     "on_start": { "event": "clingy_cats:on_sleeping", "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
@@ -1279,7 +1211,7 @@
 						"min": 0,
 						"max": 0
 					},
-                    "duration_range": { "min": 10.0, "max": 15.0 },
+                    "duration_range": { "min": 6.0, "max": 10.0 },
                     "on_start": { "event": "clingy_cats:on_grooming", "target": "self" },
                     "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }

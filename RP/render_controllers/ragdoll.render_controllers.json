@@ -1,0 +1,21 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+        "controller.render.clingy_cats.ragdoll": {
+            "arrays": {
+                "textures": {
+                "Array.skins": [
+                    "Texture.ragdoll",
+                    "Texture.ragdoll2",
+                    "Texture.ragdoll3",
+                    "Texture.ragdoll4",
+                    "Texture.ragdoll5"
+                ]
+                }
+            },
+            "geometry": "Geometry.default",
+            "materials": [ { "*": "Material.default" } ],
+            "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+        }
+    }
+}

@@ -12,7 +12,7 @@
             "minecraft:type_family": { "family": ["parrot_tame", "clingy_cats_anchor"] },
             "minecraft:scale": { "value": 0.001 },
             "minecraft:collision_box": { "width": 0.001, "height": 0.001 },
-            "minecraft:physics": {},
+            "minecraft:physics": {"push_towards_closest_space": true},
             "minecraft:movement": { "value": 0.6 },
             "minecraft:movement.basic": {},
             "minecraft:navigation.walk": {
