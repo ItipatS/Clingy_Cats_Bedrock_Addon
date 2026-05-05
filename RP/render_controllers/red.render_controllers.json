@@ -1,0 +1,44 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.red": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.red",
+            "Texture.red2",
+            "Texture.red3",
+            "Texture.red4",
+            "Texture.red5",
+            "Texture.red6",
+            "Texture.red7",
+            "Texture.red8",
+            "Texture.red9",
+            "Texture.red10",
+            "Texture.red11",
+            "Texture.red12",
+            "Texture.red13",
+            "Texture.red14",
+            "Texture.red15",
+            "Texture.red16",
+            "Texture.red17",
+            "Texture.red18",
+            "Texture.red19",
+            "Texture.red20",
+            "Texture.red21",
+            "Texture.red22",
+            "Texture.red23",
+            "Texture.red24",
+            "Texture.red25",
+            "Texture.red26",
+            "Texture.red27",
+            "Texture.red28"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

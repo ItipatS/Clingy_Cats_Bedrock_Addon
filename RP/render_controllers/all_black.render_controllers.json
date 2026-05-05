@@ -1,0 +1,40 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.all_black": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.all_black",
+            "Texture.all_black2",
+            "Texture.all_black3",
+            "Texture.all_black4",
+            "Texture.all_black5",
+            "Texture.all_black6",
+            "Texture.all_black7",
+            "Texture.all_black8",
+            "Texture.all_black9",
+            "Texture.all_black10",
+            "Texture.all_black11",
+            "Texture.all_black12",
+            "Texture.all_black13",
+            "Texture.all_black14",
+            "Texture.all_black15",
+            "Texture.all_black16",
+            "Texture.all_black17",
+            "Texture.all_black18",
+            "Texture.all_black19",
+            "Texture.all_black20",
+            "Texture.all_black21",
+            "Texture.all_black22",
+            "Texture.all_black23",
+            "Texture.all_black24"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

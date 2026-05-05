@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.white": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.white",
+            "Texture.white2",
+            "Texture.white3",
+            "Texture.white4"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

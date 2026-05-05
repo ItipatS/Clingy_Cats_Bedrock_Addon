@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.siamese": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.siamese",
+            "Texture.siamese2",
+            "Texture.siamese3",
+            "Texture.siamese4",
+            "Texture.siamese5",
+            "Texture.siamese6"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

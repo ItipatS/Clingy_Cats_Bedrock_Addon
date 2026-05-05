@@ -1,0 +1,43 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.british": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.british",
+            "Texture.british2",
+            "Texture.british3",
+            "Texture.british4",
+            "Texture.british5",
+            "Texture.british6",
+            "Texture.british7",
+            "Texture.british8",
+            "Texture.british9",
+            "Texture.british10",
+            "Texture.british11",
+            "Texture.british12",
+            "Texture.british13",
+            "Texture.british14",
+            "Texture.british15",
+            "Texture.british16",
+            "Texture.british17",
+            "Texture.british18",
+            "Texture.british19",
+            "Texture.british20",
+            "Texture.british21",
+            "Texture.british22",
+            "Texture.british23",
+            "Texture.british24",
+            "Texture.british25",
+            "Texture.british26",
+            "Texture.british27"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

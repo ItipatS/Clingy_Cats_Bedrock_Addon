@@ -1,0 +1,38 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.tabby": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.tabby",
+            "Texture.tabby2",
+            "Texture.tabby3",
+            "Texture.tabby4",
+            "Texture.tabby5",
+            "Texture.tabby6",
+            "Texture.tabby7",
+            "Texture.tabby8",
+            "Texture.tabby9",
+            "Texture.tabby10",
+            "Texture.tabby11",
+            "Texture.tabby12",
+            "Texture.tabby13",
+            "Texture.tabby14",
+            "Texture.tabby15",
+            "Texture.tabby16",
+            "Texture.tabby17",
+            "Texture.tabby18",
+            "Texture.tabby19",
+            "Texture.tabby20",
+            "Texture.tabby21",
+            "Texture.tabby22"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

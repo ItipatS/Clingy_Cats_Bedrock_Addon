@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.calico": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.calico",
+            "Texture.calico2",
+            "Texture.calico3",
+            "Texture.calico4",
+            "Texture.calico5",
+            "Texture.calico6",
+            "Texture.calico7",
+            "Texture.calico8",
+            "Texture.calico9",
+            "Texture.calico10",
+            "Texture.calico11",
+            "Texture.calico12",
+            "Texture.calico13",
+            "Texture.calico14",
+            "Texture.calico15",
+            "Texture.calico16"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

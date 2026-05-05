@@ -1,0 +1,36 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.black": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.black",
+            "Texture.black2",
+            "Texture.black3",
+            "Texture.black4",
+            "Texture.black5",
+            "Texture.black6",
+            "Texture.black7",
+            "Texture.black8",
+            "Texture.black9",
+            "Texture.black10",
+            "Texture.black11",
+            "Texture.black12",
+            "Texture.black13",
+            "Texture.black14",
+            "Texture.black15",
+            "Texture.black16",
+            "Texture.black17",
+            "Texture.black18",
+            "Texture.black19",
+            "Texture.black20"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

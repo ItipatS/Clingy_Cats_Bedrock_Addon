@@ -1,0 +1,40 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.jellie": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.jellie",
+            "Texture.jellie2",
+            "Texture.jellie3",
+            "Texture.jellie4",
+            "Texture.jellie5",
+            "Texture.jellie6",
+            "Texture.jellie7",
+            "Texture.jellie8",
+            "Texture.jellie9",
+            "Texture.jellie10",
+            "Texture.jellie11",
+            "Texture.jellie12",
+            "Texture.jellie13",
+            "Texture.jellie14",
+            "Texture.jellie15",
+            "Texture.jellie16",
+            "Texture.jellie17",
+            "Texture.jellie18",
+            "Texture.jellie19",
+            "Texture.jellie20",
+            "Texture.jellie21",
+            "Texture.jellie22",
+            "Texture.jellie23",
+            "Texture.jellie24"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}

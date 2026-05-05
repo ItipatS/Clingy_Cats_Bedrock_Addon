@@ -1,0 +1,24 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.clingy_cats.persian": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.persian",
+            "Texture.persian2",
+            "Texture.persian3",
+            "Texture.persian4",
+            "Texture.persian5",
+            "Texture.persian6",
+            "Texture.persian7",
+            "Texture.persian8"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+    }
+  }
+}
