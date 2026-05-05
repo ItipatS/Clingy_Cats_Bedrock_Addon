@@ -20,7 +20,8 @@
 						"playing",
 						"hunting",
 						"grooming",
-						"fleeing"
+						"fleeing",
+						"rubbing"
 					],
 					"default": "idle",
 					"client_sync": true
@@ -154,16 +155,44 @@
 				"total_supply": 15,
 				"suffocate_time": 0
 			},
+			"minecraft:behavior.tempt": {
+				"can_get_scared": false,
+				"can_tempt_while_ridden": true,
+				"can_tempt_vertically": true,
+				"items": [
+					"minecraft:cod",
+					"minecraft:cooked_cod",
+					"minecraft:salmon",
+					"minecraft:cooked_salmon",
+					"minecraft:beef",
+					"minecraft:cooked_beef",
+					"minecraft:chicken",
+					"minecraft:cooked_chicken",
+					"minecraft:muttonRaw",
+					"minecraft:cooked_mutton",
+					"minecraft:porkchop",
+					"minecraft:cooked_porkchop",
+					"minecraft:rabbit",
+					"minecraft:cooked_rabbit"
+				],
+				"within_radius": 0
+			},
 			"minecraft:healable": {
 				"items": [
-				{
-					"item": "fish",
-					"heal_amount": 2
-				},
-				{
-					"item": "salmon",
-					"heal_amount": 2
-				}
+					{ "item": "minecraft:cod",           "heal_amount": 2 },
+					{ "item": "minecraft:cooked_cod",    "heal_amount": 2 },
+					{ "item": "minecraft:salmon",        "heal_amount": 2 },
+					{ "item": "minecraft:cooked_salmon", "heal_amount": 2 },
+					{ "item": "minecraft:beef",          "heal_amount": 2 },
+					{ "item": "minecraft:cooked_beef",   "heal_amount": 2 },
+					{ "item": "minecraft:chicken",       "heal_amount": 2 },
+					{ "item": "minecraft:cooked_chicken","heal_amount": 2 },
+					{ "item": "minecraft:muttonRaw",     "heal_amount": 2 },
+					{ "item": "minecraft:cooked_mutton", "heal_amount": 2 },
+					{ "item": "minecraft:porkchop",      "heal_amount": 2 },
+					{ "item": "minecraft:cooked_porkchop","heal_amount": 2 },
+					{ "item": "minecraft:rabbit",        "heal_amount": 2 },
+					{ "item": "minecraft:cooked_rabbit", "heal_amount": 2 }
 				]
 			},
 			"minecraft:hurt_on_condition": {
@@ -306,13 +335,16 @@
 				]
 			},
 			"minecraft:behavior.share_items": {
-				"goal_radius": 0.5,
-				"max_dist": 0,
-				"priority": 2,
+				"goal_radius": 2,
+				"priority": 8,
+				"max_dist": 3,
+				"speed_multiplier": 0.5,
 				"entity_types": [
 					{
-						"filters": {
-						"test": "is_owner"
+						"filters": 
+						{
+							"subject": "other",
+							"test": "is_owner"
 						}
 					}
 				]
@@ -390,8 +422,20 @@
 				"minecraft:ageable": {
 					"duration": 1200,
 					"feed_items": [
+						"minecraft:cod",
 						"minecraft:cooked_cod",
-						"minecraft:cooked_salmon"
+						"minecraft:salmon",
+						"minecraft:cooked_salmon",
+						"minecraft:beef",
+						"minecraft:cooked_beef",
+						"minecraft:chicken",
+						"minecraft:cooked_chicken",
+						"minecraft:muttonRaw",
+						"minecraft:cooked_mutton",
+						"minecraft:porkchop",
+						"minecraft:cooked_porkchop",
+						"minecraft:rabbit",
+						"minecraft:cooked_rabbit"
 					],
 					"pause_growth_items": ["golden_dandelion"],
 					"reset_growth_items": ["golden_dandelion"],
@@ -415,7 +459,22 @@
 					"require_tame": true,
 					"require_full_health": false,
 					"allow_sitting": true,
-					"breed_items": ["fish", "salmon"],
+					"breed_items": [
+					"minecraft:cod",
+					"minecraft:cooked_cod",
+					"minecraft:salmon",
+					"minecraft:cooked_salmon",
+					"minecraft:beef",
+					"minecraft:cooked_beef",
+					"minecraft:chicken",
+					"minecraft:cooked_chicken",
+					"minecraft:muttonRaw",
+					"minecraft:cooked_mutton",
+					"minecraft:porkchop",
+					"minecraft:cooked_porkchop",
+					"minecraft:rabbit",
+					"minecraft:cooked_rabbit"
+					],
 					"breeds_with": { "clingy_cats:test": {"event": "clingy_cats:become_pregnant", "target": "self" } },
 					"causes_pregnancy": true
 				},
@@ -521,6 +580,38 @@
 								"particle_type": "endrod",
 								"particle_offset_towards_interactor": true,
 								"particle_y_offset": 0.1
+							},			
+							"swing": true
+						},
+						{
+							"play_sounds": "purreow",
+							"cooldown": 1,
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"test": "is_owner",
+											"subject": "other",
+											"value": true
+										},
+										{
+											"test": "all_slots_empty",
+											"subject": "other",
+											"operator": "equals",
+											"value": "hand"
+										},
+										{
+											"subject": "other",
+											"test": "is_sneak_held",
+											"value": false
+										}
+									]
+								},
+							"event": "clingy_cats:enter_rub_state"
+							},
+							"particle_on_start": {
+								"particle_type": "heart",
+								"particle_offset_towards_interactor": true
 							},			
 							"swing": true
 						}
@@ -661,7 +752,7 @@
                 "minecraft:timer": {
                     "looping": true,
                     "randomInterval": true,
-                    "time": [5, 5],
+                    "time": [3, 6],
                     "time_down_event": { "event": "clingy_cats:enter_still_state_event", "target": "self" }
                 }
             },
@@ -760,13 +851,6 @@
 					"priority": 10,
 					"speed_multiplier": 0.4,
 					"interval": 240
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.4,
-					"within_radius": 8,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
 				}
 			},
 
@@ -797,13 +881,6 @@
 					"priority": 10,
 					"speed_multiplier": 1.1,
 					"interval": 30
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.8,
-					"within_radius": 24,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
 				},
 				"minecraft:behavior.nearest_prioritized_attackable_target": {
 					"priority": 6,
@@ -890,13 +967,6 @@
 					"speed_multiplier": 0.8,
 					"interval": 80
 				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.6,
-					"within_radius": 16,
-					"can_get_scared": false,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
 				"minecraft:behavior.look_at_player": {
 					"priority": 11,
 					"look_distance": 10,
@@ -941,13 +1011,6 @@
 					"priority": 10,
 					"speed_multiplier": 0.6,
 					"interval": 160
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.5,
-					"within_radius": 8,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
 				},
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
@@ -1005,13 +1068,6 @@
 					"speed_multiplier": 0.7,
 					"interval": 80
 				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.7,
-					"within_radius": 24,
-					"can_get_scared": false,
-					"items": ["fish", "salmon", "tropical_fish"]
-				},
 				"minecraft:behavior.look_at_player": {
 					"priority": 11,
 					"look_distance": 12,
@@ -1047,13 +1103,6 @@
 					"priority": 10,
 					"speed_multiplier": 0.9,
 					"interval": 120
-				},
-				"minecraft:behavior.tempt": {
-					"priority": 5,
-					"speed_multiplier": 0.5,
-					"within_radius": 10,
-					"can_get_scared": true,
-					"items": ["fish", "salmon", "tropical_fish"]
 				},
 				"minecraft:behavior.look_at_player": {
 					"priority": 11,
@@ -1198,7 +1247,7 @@
 					},
                     "duration_range": { "min": 15.0, "max": 25.0 },
                     "on_start": { "event": "clingy_cats:on_sitting",  "target": "self" },
-                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
             },
 
@@ -1215,7 +1264,7 @@
 					},
 					"duration_range": { "min": 20.0, "max": 30.0 },
                     "on_start": { "event": "clingy_cats:on_sleeping", "target": "self" },
-                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
             },
 
@@ -1232,7 +1281,24 @@
 					},
                     "duration_range": { "min": 10.0, "max": 15.0 },
                     "on_start": { "event": "clingy_cats:on_grooming", "target": "self" },
-                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
+                }
+            },
+
+			"clingy_cats:state_rubbing": {
+                "minecraft:behavior.timer_flag_1": {
+                    "priority": 9,
+                    "control_flags": [
+						"move",
+						"jump"
+					],
+                    "cooldown_range": {
+						"min": 0,
+						"max": 0
+					},
+                    "duration_range": { "min": 5.0, "max": 10.0 },
+                    "on_start": { "event": "clingy_cats:on_rubbing", "target": "self" },
+                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
                 }
             },
 
@@ -1506,6 +1572,26 @@
                 "add": { "component_groups": ["clingy_cats:state_grooming"] }, "queue_command": {"command": "scriptevent clingycats:try_grooming"}
             },
 
+			"clingy_cats:enter_rub_state": {
+				"sequence": [ 
+					{
+						"filters": 
+						{
+							"test": "enum_property",
+							"domain": "clingy_cats:state",
+							"operator": "not",
+							"value": "rubbing"
+						},
+						"add": { "component_groups": ["clingy_cats:state_rubbing"] }, "queue_command": {"command": "scriptevent clingycats:try_rubbing"}
+					}
+				]
+
+            },
+
+			"clingy_cats:set_idle": {
+                "set_property": { "clingy_cats:state": "idle" }
+            },
+
 			"clingy_cats:on_idle": {
                 "sequence": [
                     { "set_property": { "clingy_cats:state": "idle" } },
@@ -1550,6 +1636,16 @@
 					},
 					{
 					"queue_command": {"command": "scriptevent clingycats:groom_confirm"}
+					}
+                ]
+				
+            },
+
+			"clingy_cats:on_rubbing": {
+                "sequence": [
+                    { "set_property": { "clingy_cats:state": "rubbing" } },
+					{
+					"queue_command": {"command": "scriptevent clingycats:rub_confirm"}
 					}
                 ]
 				
@@ -1601,13 +1697,18 @@
                 "sequence": [
                     { "remove": { "component_groups": ["clingy_cats:can_mount"] } },
                     { "set_property": { "clingy_cats:state": "idle" } },
-                    { "add": { "component_groups": ["clingy_cats:riding_tick"] } }
+                    { "add": { "component_groups": ["clingy_cats:riding_tick", "clingy_cats:riding_player"] } }
                 ]
             },
 
             "clingy_cats:off_riding_player": {
                 "sequence": [
                     { "remove": { "component_groups": ["clingy_cats:riding_tick"] } },
+					{ "add": {
+						"component_groups": [
+							"clingy_cats:not_riding_player"
+						]
+					}},
                     { "trigger": "clingy_cats:on_idle" },
                     { "queue_command": { "command": "scriptevent clingycats:restore_identity" } }
                 ]

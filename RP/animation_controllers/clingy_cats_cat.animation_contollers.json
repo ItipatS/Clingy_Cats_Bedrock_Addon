@@ -15,7 +15,7 @@
             { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
             { "hissing":  "query.property('clingy_cats:state') == 'hissing'" },
             { "grooming": "query.property('clingy_cats:state') == 'grooming'" },
-            { "purring":  "query.property('clingy_cats:state') == 'purring'" },
+            { "rubbing":  "query.property('clingy_cats:state') == 'rubbing'" },
             { "walking":  "query.modified_move_speed > 0.01" }
           ]
         },
@@ -78,7 +78,7 @@
           ]
         },
 
-        "purring": {
+        "rubbing": {
           "animations": [
             { "rub": "1.0" }
           ],

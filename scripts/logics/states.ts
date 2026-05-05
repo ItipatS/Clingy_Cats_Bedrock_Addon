@@ -210,6 +210,9 @@ export function restoreIdentity(cat: Entity): void {
     const trait = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
     if (!trait) return;
 
+    const personality = cat.getProperty("clingy_cats:personality_trait") as Personality;
+    if (!personality) return;
+
     // clean up any stuck temp
     const last = cat.getDynamicProperty(LAST_TEMP) as string | undefined;
     if (last) {
@@ -218,4 +221,5 @@ export function restoreIdentity(cat: Entity): void {
     }
 
     cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+    cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
 }

@@ -83,6 +83,14 @@ export function registerCatsEvents(): void {
                 `§7try grooming`
             ].join("\n"));
         }
+
+        if (id == "clingycats:try_rubbing") {
+            world.sendMessage([
+                `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
+                `§7try rubbing`
+            ].join("\n"));
+        }
+
         if (id == "clingycats:sit_confirm") {
             world.sendMessage([
                 `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
@@ -99,6 +107,13 @@ export function registerCatsEvents(): void {
             world.sendMessage([
                 `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
                 `§7grooming confirm §7state:§f${sourceEntity.getProperty("clingy_cats:state")}`
+            ].join("\n"));
+        }
+
+        if (id == "clingycats:rubbing_confirm") {
+            world.sendMessage([
+                `§7pattern:§f${sourceEntity.getProperty("clingy_cats:pattern")} §7color:§f${sourceEntity.getProperty("clingy_cats:color")}`,
+                `§7rubbing confirm`
             ].join("\n"));
         }
 

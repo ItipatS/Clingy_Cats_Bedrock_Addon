@@ -1014,12 +1014,15 @@ function restoreIdentity(cat) {
   if (!cat.isValid) return;
   const trait = cat.getProperty("clingy_cats:behavior_trait");
   if (!trait) return;
+  const personality = cat.getProperty("clingy_cats:personality_trait");
+  if (!personality) return;
   const last = cat.getDynamicProperty(LAST_TEMP);
   if (last) {
     cat.triggerEvent(`clingy_cats:remove_${last}`);
     cat.setDynamicProperty(LAST_TEMP, "");
   }
   cat.triggerEvent(`clingy_cats:set_trait_${trait}`);
+  cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
 }
 
 // scripts/logics/riding.ts
@@ -1139,6 +1142,12 @@ function registerCatsEvents() {
         `\xA77try grooming`
       ].join("\n"));
     }
+    if (id == "clingycats:try_rubbing") {
+      world4.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77try rubbing`
+      ].join("\n"));
+    }
     if (id == "clingycats:sit_confirm") {
       world4.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
@@ -1155,6 +1164,12 @@ function registerCatsEvents() {
       world4.sendMessage([
         `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
         `\xA77grooming confirm \xA77state:\xA7f${sourceEntity.getProperty("clingy_cats:state")}`
+      ].join("\n"));
+    }
+    if (id == "clingycats:rubbing_confirm") {
+      world4.sendMessage([
+        `\xA77pattern:\xA7f${sourceEntity.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${sourceEntity.getProperty("clingy_cats:color")}`,
+        `\xA77rubbing confirm`
       ].join("\n"));
     }
     if (id == "clingycats:weather_rain") {
