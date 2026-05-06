@@ -262,6 +262,13 @@
       "textures": [
         "Array.whiskers[q.property('clingy_cats:whisker_index')]"
       ]
+    },
+    "controller.render.clingy_cats_collar": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.tame" } ],
+      "textures": [
+        "q.is_tamed ? Texture.collar : Texture.none"
+      ]
     }
   }
 }

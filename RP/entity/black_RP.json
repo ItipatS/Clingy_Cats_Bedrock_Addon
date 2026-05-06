@@ -3,7 +3,10 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "clingy_cats:black",
-      "materials": { "default": "skeleton" },
+      "materials": { 
+        "default": "skeleton",
+        "tame": "entity_alphatest_change_color"
+      },
       "textures": {
         "none":   "textures/entity/llama/decor/decor_none",
         "collar": "textures/entity/clingy_cats/cat_collar",
@@ -98,7 +101,8 @@
       "render_controllers": [
         "controller.render.clingy_cats.black",
         "controller.render.clingy_cats_eyes",
-        "controller.render.clingy_cats_whiskers"
+        "controller.render.clingy_cats_whiskers",
+        "controller.render.clingy_cats_collar"
       ],
       "spawn_egg": { "texture": "black_spawn_egg", "texture_index": 0 },
       "held_item_ignores_lighting": false,

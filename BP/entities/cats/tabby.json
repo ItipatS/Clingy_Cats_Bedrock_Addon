@@ -156,6 +156,7 @@
 				"suffocate_time": 0
 			},
 			"minecraft:behavior.tempt": {
+				"priority": 3,
 				"can_get_scared": false,
 				"can_tempt_while_ridden": true,
 				"can_tempt_vertically": true,
@@ -168,7 +169,7 @@
 					"minecraft:cooked_beef",
 					"minecraft:chicken",
 					"minecraft:cooked_chicken",
-					"minecraft:muttonRaw",
+					"minecraft:mutton",
 					"minecraft:cooked_mutton",
 					"minecraft:porkchop",
 					"minecraft:cooked_porkchop",
@@ -187,7 +188,7 @@
 					{ "item": "minecraft:cooked_beef",   "heal_amount": 2 },
 					{ "item": "minecraft:chicken",       "heal_amount": 2 },
 					{ "item": "minecraft:cooked_chicken","heal_amount": 2 },
-					{ "item": "minecraft:muttonRaw",     "heal_amount": 2 },
+					{ "item": "minecraft:mutton",     "heal_amount": 2 },
 					{ "item": "minecraft:cooked_mutton", "heal_amount": 2 },
 					{ "item": "minecraft:porkchop",      "heal_amount": 2 },
 					{ "item": "minecraft:cooked_porkchop","heal_amount": 2 },
@@ -322,7 +323,7 @@
 				"priority": 2
 			},
 			"minecraft:inventory": {
-				"inventory_size": 0,
+				"inventory_size": 1,
 				"private": true
 			},
 			"minecraft:shareables": {
@@ -393,17 +394,8 @@
 				"priority": 3,
 				"run_speed": 8,
 				"throw_sound": "item_thrown"
-			},
-			"minecraft:giveable": {
-				"triggers": {
-				"cooldown": 3.0,
-				"items": ["cod", "salmon", "minecraft:tropical_fish"],
-				"on_give": {
-					"event": "clingy_cats:on_give",
-					"target": "self"
-				}
-				}
 			}
+			 
 		},
 		"component_groups": {
 			"clingy_cats:visible_baby": {
@@ -430,7 +422,7 @@
 						"minecraft:cooked_beef",
 						"minecraft:chicken",
 						"minecraft:cooked_chicken",
-						"minecraft:muttonRaw",
+						"minecraft:mutton",
 						"minecraft:cooked_mutton",
 						"minecraft:porkchop",
 						"minecraft:cooked_porkchop",
@@ -444,7 +436,11 @@
 						"target": "self"
 					},
 					"interact_filters": []
-				}
+				},
+                "minecraft:behavior.follow_parent": {
+                    "priority": 9,
+                    "speed_multiplier": 1.1
+                }
 			},
 			"clingy_cats:adult": {
 				"minecraft:experience_reward": {
@@ -468,7 +464,7 @@
 					"minecraft:cooked_beef",
 					"minecraft:chicken",
 					"minecraft:cooked_chicken",
-					"minecraft:muttonRaw",
+					"minecraft:mutton",
 					"minecraft:cooked_mutton",
 					"minecraft:porkchop",
 					"minecraft:cooked_porkchop",
@@ -492,7 +488,7 @@
 					"causes_pregnancy": true
 				},
 				"minecraft:behavior.breed": {
-					"priority": 3,
+					"priority": 1,
 					"speed_multiplier": 0.5
 				}
 			},
@@ -653,7 +649,7 @@
 								"particle_type": "endrod",
 								"particle_offset_towards_interactor": true,
 								"particle_y_offset": 0.1
-							},			
+							},				
 							"swing": true
 						},
 						{
@@ -684,6 +680,98 @@
 							},
 							"particle_on_start": {
 								"particle_type": "heart",
+								"particle_y_offset": -0.1
+							},			
+							"swing": true
+						},
+						{
+							"play_sounds": "eat",
+							"cooldown": 1,
+							"drop_item_slot": "slot.weapon.mainhand",
+							"equip_item_slot": "slot.weapon.mainhand",
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"test": "is_owner",
+											"subject": "other",
+											"value": true
+										},
+										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
+											"subject": "other",
+											"test": "is_sneak_held",
+											"value": false
+										},
+										{
+													"operator": "not",
+													"test": "all_slots_empty",
+													"subject": "other",
+													"value": "hand"
+												},
+												{
+													"operator": "not",
+													"test": "all_slots_empty",
+													"subject": "self",
+													"value": "main_hand"
+												}
+									]
+								}
+							},
+							"take_item": true,
+							"particle_on_start": {
+								"particle_type": "spit",
+								"particle_y_offset": -0.1
+							},			
+							"swing": true
+						},
+						{
+							"play_sounds": "purreow",
+							"cooldown": 1,
+							"drop_item_slot": "slot.weapon.mainhand",
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"test": "is_owner",
+											"subject": "other",
+											"value": true
+										},
+										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
+											"subject": "other",
+											"test": "is_sneak_held",
+											"value": false
+										},
+										{
+													"operator": "equals",
+													"test": "all_slots_empty",
+													"subject": "other",
+													"value": "hand"
+												},
+												{
+													"operator": "not",
+													"test": "all_slots_empty",
+													"subject": "self",
+													"value": "hand"
+												}
+									]
+								}
+							},
+							"particle_on_start": {
+								"particle_type": "spit",
 								"particle_y_offset": -0.1
 							},			
 							"swing": true
@@ -1660,19 +1748,7 @@
             },
 
 			"clingy_cats:enter_rub_state": {
-				"sequence": [ 
-					{
-						"filters": 
-						{
-							"test": "enum_property",
-							"domain": "clingy_cats:state",
-							"operator": "not",
-							"value": "rubbing"
-						},
-						"add": { "component_groups": ["clingy_cats:state_rubbing"] }
-					}
-				]
-
+				"add": { "component_groups": ["clingy_cats:state_rubbing"] }
             },
 
 			"clingy_cats:set_idle": {
