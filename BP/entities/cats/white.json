@@ -1546,22 +1546,22 @@
 
             "clingy_cats:enter_still_state": {
                 "randomize": [
-                    { "weight": 3, "add": { "component_groups": ["clingy_cats:state_sitting"] }, "queue_command": {"command": "scriptevent clingycats:try_sitting"} },
-                    { "weight": 2, "add": { "component_groups": ["clingy_cats:state_sleeping"] }, "queue_command": {"command": "scriptevent clingycats:try_sleeping"} },
-                    { "weight": 2, "add": { "component_groups": ["clingy_cats:state_grooming"] }, "queue_command": {"command": "scriptevent clingycats:try_grooming"} }
+                    { "weight": 3, "add": { "component_groups": ["clingy_cats:state_sitting"] } },
+                    { "weight": 2, "add": { "component_groups": ["clingy_cats:state_sleeping"] } },
+                    { "weight": 2, "add": { "component_groups": ["clingy_cats:state_grooming"] } }
                 ]
             },
 
 			"clingy_cats:enter_sit_state": {
-               "add": { "component_groups": ["clingy_cats:state_sitting"] }, "queue_command": {"command": "scriptevent clingycats:try_sitting"}
+               "add": { "component_groups": ["clingy_cats:state_sitting"] }
             },
 
 			"clingy_cats:enter_sleep_state": {
-				"add": { "component_groups": ["clingy_cats:state_sleeping"] }, "queue_command": {"command": "scriptevent clingycats:try_sleeping"}
+				"add": { "component_groups": ["clingy_cats:state_sleeping"] }
             },
 
 			"clingy_cats:enter_groom_state": {
-                "add": { "component_groups": ["clingy_cats:state_grooming"] }, "queue_command": {"command": "scriptevent clingycats:try_grooming"}
+                "add": { "component_groups": ["clingy_cats:state_grooming"] }
             },
 
 			"clingy_cats:enter_rub_state": {
@@ -1574,7 +1574,7 @@
 							"operator": "not",
 							"value": "rubbing"
 						},
-						"add": { "component_groups": ["clingy_cats:state_rubbing"] }, "queue_command": {"command": "scriptevent clingycats:try_rubbing"}
+						"add": { "component_groups": ["clingy_cats:state_rubbing"] }
 					}
 				]
 
@@ -1598,7 +1598,6 @@
 
 			"clingy_cats:on_sitting": {
                 "set_property": { "clingy_cats:state": "sitting" }
-				,"queue_command": {"command": "scriptevent clingycats:sit_confirm"}
             },
 
             "clingy_cats:on_sleeping": {
@@ -1609,11 +1608,7 @@
                         { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } },
                         { "weight": 1, "set_property": { "clingy_cats:sub_state": 2 } }
                     ]
-					},
-					{
-						"queue_command": {"command": "scriptevent clingycats:sleep_confirm"}
 					}
-					
                 ]
 				 
             },
@@ -1625,9 +1620,6 @@
                         { "weight": 1, "set_property": { "clingy_cats:sub_state": 0 } },
                         { "weight": 1, "set_property": { "clingy_cats:sub_state": 1 } }
                     	]
-					},
-					{
-					"queue_command": {"command": "scriptevent clingycats:groom_confirm"}
 					}
                 ]
 				
@@ -1635,10 +1627,7 @@
 
 			"clingy_cats:on_rubbing": {
                 "sequence": [
-                    { "set_property": { "clingy_cats:state": "rubbing" } },
-					{
-					"queue_command": {"command": "scriptevent clingycats:rub_confirm"}
-					}
+                    { "set_property": { "clingy_cats:state": "rubbing" } }
                 ]
 				
             },
@@ -1646,8 +1635,8 @@
 			"clingy_cats:on_flee":    { "set_property": { "clingy_cats:state": "fleeing" } },
             "clingy_cats:on_purring": { "set_property": { "clingy_cats:state": "purring" } },
 
-			"clingy_cats:on_rain_event":          { "remove": { "component_groups": ["clingy_cats:on_weather_clear"] } , "add":    { "component_groups": ["clingy_cats:on_rain"] },"queue_command": {"command": "scriptevent clingycats:weather_rain"} },
-            "clingy_cats:on_weather_clear_event": { "remove": { "component_groups": ["clingy_cats:on_rain"] } , "add": { "component_groups": ["clingy_cats:on_weather_clear"] }, "queue_command": {"command": "scriptevent clingycats:weather_clear"} },
+			"clingy_cats:on_rain_event":          { "remove": { "component_groups": ["clingy_cats:on_weather_clear"] } , "add":    { "component_groups": ["clingy_cats:on_rain"] }},
+            "clingy_cats:on_weather_clear_event": { "remove": { "component_groups": ["clingy_cats:on_rain"] } , "add": { "component_groups": ["clingy_cats:on_weather_clear"] }},
 
             "clingy_cats:add_temp_follow_close":    { 
 				"add":    { "component_groups": ["clingy_cats:temp_follow_close"] }

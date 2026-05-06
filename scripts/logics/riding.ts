@@ -58,8 +58,6 @@ export function handleRequestShoulderMount(cat: Entity): void {
     const ids = getStoredAnchorIds(player);
     ids.push(anchor.id);
     setStoredAnchorIds(player, ids);
-
-    world.sendMessage(`§b[ClingyCats] anchor spawned for ${player.name} trait:${trait}`);
 }
 
 // ============================================================
@@ -73,7 +71,6 @@ export function handleAnchorExpire(anchor: Entity): void {
     if (player) {
         const ids = getStoredAnchorIds(player);
         setStoredAnchorIds(player, ids.filter(id => id !== anchor.id));
-        world.sendMessage(`§c[ClingyCats] anchor expired for ${player.name}`);
     }
     anchor.remove();
 }

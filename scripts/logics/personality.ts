@@ -15,13 +15,6 @@ export function assignRandomPersonality(cat: Entity): void {
     const food        = weightedRandom(FAVORITE_FOOD_POOL).food;
     const block       = weightedRandom(FAVORITE_BLOCK_POOL).block;
 
-    world.sendMessage([
-        `§7trait:§f${trait}`,
-        `§7personality:§f${personality}`,
-        `§7food:§f${food}`,
-        `§7block:§f${block}`,
-    ].join("\n"));
-
     cat.setProperty("clingy_cats:behavior_trait", trait);
     cat.setProperty("clingy_cats:personality",    personality);
     cat.setProperty("clingy_cats:favorite_food",  food);

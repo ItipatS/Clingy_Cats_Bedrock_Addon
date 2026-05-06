@@ -188,11 +188,6 @@ export function behaviorTick(cat: Entity, state?: string): void {
         return;
     }
 
-    world.sendMessage([
-                `§7pattern:§f${cat.getProperty("clingy_cats:pattern")} §7color:§f${cat.getProperty("clingy_cats:color")}`,
-                `§7behavior tick cosse :§f${chosen} §7last_behavior:§f${last}`
-            ].join("\n"));
-
     cat.triggerEvent(`clingy_cats:add_${chosen}`);
     cat.setDynamicProperty(LAST_TEMP, chosen);
 }

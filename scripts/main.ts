@@ -5,5 +5,4 @@ import {  registerDebugRaycast } from "./debug/catdebug";
 system.run(() => {
     registerCatsEvents();
     registerDebugRaycast();
-    world.sendMessage("ClingyCats script loaded!");
 });
