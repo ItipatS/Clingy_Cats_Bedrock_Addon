@@ -593,7 +593,7 @@
 								"particle_type": "endrod",
 								"particle_offset_towards_interactor": true,
 								"particle_y_offset": 0.1
-							},			
+							},				
 							"swing": true
 						},
 						{
@@ -624,7 +624,7 @@
 							},
 							"particle_on_start": {
 								"particle_type": "heart",
-								"particle_offset_towards_interactor": true
+								"particle_y_offset": -0.1
 							},			
 							"swing": true
 						}
