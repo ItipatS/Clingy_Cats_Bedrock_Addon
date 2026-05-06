@@ -84,7 +84,7 @@
         "controller.render.clingy_cats_eyes",
         "controller.render.clingy_cats_whiskers"
       ],
-      "spawn_egg": { "texture": "test_spawn_egg", "texture_index": 0 },
+      "spawn_egg": { "texture": "white_spawn_egg", "texture_index": 0 },
       "held_item_ignores_lighting": true,
       "held_item_scale": 0.5
     }

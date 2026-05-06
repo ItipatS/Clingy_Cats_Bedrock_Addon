@@ -1,2 +1,32 @@
 pack.name=ClingyCats RP
 pack.description=Breed-specific cat behavior addon with genetics, personality, and cross-breed inheritance.
+
+###entity
+entity.clingy_cats:test.name= Test
+entity.clingy_cats:all_black.name= All Black
+entity.clingy_cats:black.name= Black
+entity.clingy_cats:british.name= British
+entity.clingy_cats:calico.name= Calico
+entity.clingy_cats:jellie.name= Jellie
+entity.clingy_cats:ocelot.name= Ocelot
+entity.clingy_cats:persian.name= Persian
+entity.clingy_cats:ragdoll.name= Ragdoll
+entity.clingy_cats:red.name= Red
+entity.clingy_cats:siamese.name= Siamese
+entity.clingy_cats:tabby.name= Tabby
+entity.clingy_cats:white.name= White
+
+###spawnegg
+item.spawn_egg.entity.clingy_cats:test.name= Test Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:all_black.name= All Black Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:black.name= Black Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:british.name= British Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:calico.name= Calico Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:jellie.name= Jellie Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:ocelot.name= Ocelot Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:persian.name= Persian Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:ragdoll.name= Ragdoll Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:red.name= Red Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:siamese.name= Siamese Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:tabby.name= Tabby Cat Spawn Egg
+item.spawn_egg.entity.clingy_cats:white.name= White (sphinx) Egg§r

@@ -51,7 +51,9 @@
         "whiskers3": "textures/entity/clingy_cats/whiskers3",
         "whiskers4": "textures/entity/clingy_cats/whiskers4",
         "whiskers5": "textures/entity/clingy_cats/whiskers5",
-        "whiskers6": "textures/entity/clingy_cats/whiskers6"
+        "whiskers6": "textures/entity/clingy_cats/whiskers6",
+        "all_black9":  "textures/entity/clingy_cats/all_black9",
+        "all_black10": "textures/entity/clingy_cats/all_black10"
       },
       "geometry": { "default": "geometry.clingy_cats.cats" },
       "animations": {
@@ -86,7 +88,7 @@
         "controller.render.clingy_cats_eyes",
         "controller.render.clingy_cats_whiskers"
       ],
-      "spawn_egg": { "texture": "test_spawn_egg", "texture_index": 0 },
+      "spawn_egg": { "texture": "siamese_spawn_egg", "texture_index": 0 },
       "held_item_ignores_lighting": true,
       "held_item_scale": 0.5
     }

@@ -11,12 +11,20 @@
             "Texture.siamese4",
             "Texture.siamese5",
             "Texture.siamese6"
+          ],
+          "Array.baby_skins": [
+            "Texture.all_black9",
+            "Texture.all_black9",
+            "Texture.all_black9",
+            "Texture.all_black10",
+            "Texture.all_black10",
+            "Texture.all_black10"
           ]
         }
       },
       "geometry": "Geometry.default",
       "materials": [ { "*": "Material.default" } ],
-      "textures": [ "Array.skins[q.property('clingy_cats:sub_variant')]" ]
+      "textures": [ "query.is_baby ? Array.baby_skins[q.property('clingy_cats:sub_variant')] : Array.skins[q.property('clingy_cats:sub_variant')]" ]
     }
   }
 }
