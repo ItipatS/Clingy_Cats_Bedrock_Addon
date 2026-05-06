@@ -322,7 +322,7 @@
 				"priority": 2
 			},
 			"minecraft:inventory": {
-				"inventory_size": 1,
+				"inventory_size": 0,
 				"private": true
 			},
 			"minecraft:shareables": {
@@ -475,20 +475,20 @@
 					"minecraft:rabbit",
 					"minecraft:cooked_rabbit"
 					],
-					"breeds_with": [
-						{ "clingy_cats:all_black":  { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:black":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:british":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:calico":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:jellie":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:ocelot":     { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:persian":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:ragdoll":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:red":        { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:siamese":    { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:tabby":      { "event": "clingy_cats:become_pregnant", "target": "self" } },
-						{ "clingy_cats:white":      { "event": "clingy_cats:become_pregnant", "target": "self" } }
-					],
+					"breeds_with": {
+						"clingy_cats:all_black": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:black": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:british": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:calico": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:jellie": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:ocelot": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:persian": { "event": "clingy_cats:become_pregnant", "target": "self" }, 
+						"clingy_cats:ragdoll": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:red": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:siamese": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:tabby": { "event": "clingy_cats:become_pregnant", "target": "self" },
+						"clingy_cats:white": { "event": "clingy_cats:become_pregnant", "target": "self" }
+					},
 					"causes_pregnancy": true
 				},
 				"minecraft:behavior.breed": {
@@ -545,6 +545,33 @@
 
 							},
 							"max_dist": 8
+						}
+					]
+				},
+				"minecraft:behavior.avoid_mob_type": {
+					"priority": 4,
+					"ignore_visibility": false,
+					"sprint_distance": 5,
+					"avoid_mob_sound": "agitated",
+					"control_flags": ["jump", "move"],
+					"on_escape_event": {
+						"event": "clingy_cats:on_flee",
+						"target": "self"
+					},
+					"sound_interval": {"max":4.0,"min":2.0},
+					"entity_types": [
+						{
+							"filters": {
+								"all_of": [
+									{ "test": "is_family", "subject": "other",  "value": "player" },
+									{ "test": "is_sneaking", "subject": "other", "value": false }
+								]
+							},
+							"max_dist": 20,
+							"max_flee": 30,
+							"sprint_speed_multiplier": 2.0,
+							"walk_speed_multiplier": 1.2,
+							"must_see": true
 						}
 					]
 				}
@@ -1011,7 +1038,7 @@
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
 					"ignore_visibility": false,
-					"sprint_distance": 10,
+					"sprint_distance": 5,
 					"avoid_mob_sound": "agitated",
 					"control_flags": ["jump", "move"],
 					"on_escape_event": {
@@ -1023,7 +1050,12 @@
 						{
 							"filters": {
 								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "player" },
+									{
+										"test": "is_owner",
+										"subject": "other",
+										"value": false
+									},
+									{ "test": "is_family", "subject": "other","operator": "not",  "value": "clingy_cats" },
 									{ "test": "is_sneaking", "subject": "other", "value": false }
 								]
 							},
@@ -1056,6 +1088,9 @@
 				"minecraft:behavior.pet_sleep_with_owner": {
 					"priority": 2, "speed_multiplier": 1.0,
 					"search_radius": 12, "search_height": 12, "goal_radius": 1.0
+				},"minecraft:behavior.avoid_mob_type": {
+					"priority": 4,
+					"entity_types": []
 				}
 			},
 
@@ -1167,7 +1202,7 @@
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
 					"ignore_visibility": false,
-					"sprint_distance": 16,
+					"sprint_distance": 5,
 					"avoid_mob_sound": "agitated",
 					"control_flags": ["jump", "move"],
 					"on_escape_event": {
@@ -1179,7 +1214,12 @@
 						{
 							"filters": {
 								"all_of": [
-									{ "test": "is_family", "subject": "other", "value": "player" },
+									{
+										"test": "is_owner",
+										"subject": "other",
+										"value": false
+									},
+									{ "test": "is_family", "subject": "other","operator": "not",  "value": "clingy_cats" },
 									{ "test": "is_sneaking", "subject": "other", "value": false }
 								]
 							},
@@ -1229,7 +1269,7 @@
 					},
                     "duration_range": { "min": 20.0, "max": 35.0 },
                     "on_start": { "event": "clingy_cats:on_sitting",  "target": "self" },
-                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
                 }
             },
 
@@ -1246,7 +1286,7 @@
 					},
 					"duration_range": { "min": 40.0, "max": 60.0 },
                     "on_start": { "event": "clingy_cats:on_sleeping", "target": "self" },
-                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
                 }
             },
 
@@ -1263,7 +1303,7 @@
 					},
                     "duration_range": { "min": 10.0, "max": 15.0 },
                     "on_start": { "event": "clingy_cats:on_grooming", "target": "self" },
-                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
                 }
             },
 
@@ -1280,7 +1320,7 @@
 					},
                     "duration_range": { "min": 5.0, "max": 10.0 },
                     "on_start": { "event": "clingy_cats:on_rubbing", "target": "self" },
-                    "on_end":   { "event": "clingy_cats:set_idle",     "target": "self" }
+                    "on_end":   { "event": "clingy_cats:on_idle",     "target": "self" }
                 }
             },
 
@@ -1289,7 +1329,7 @@
 					"priority": 3,
 					"preferred_actor_type": "player",
 					"search_range": 16,
-					"stop_distance": 2,
+					"stop_distance": 6,
 					"filters": {
 						"all_of": [
 						{ "test": "is_underwater", "subject": "other", "value": false },
@@ -1304,7 +1344,7 @@
 					"priority": 3,
 					"preferred_actor_type": "player",
 					"search_range": 16,
-					"stop_distance": 5,
+					"stop_distance": 8,
 					"filters": {
 						"all_of": [
 						{ "test": "is_underwater", "subject": "other", "value": false },
