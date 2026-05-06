@@ -286,8 +286,8 @@
         "texture": "test_spawn_egg",
         "texture_index": 0
       },
-      "held_item_ignores_lighting": true,
-      "held_item_scale": 0.5
+      "held_item_ignores_lighting": false,
+      "held_item_scale": 0.75
     }
   }
 }

@@ -510,44 +510,77 @@
 					}
 				},
 				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 2,
-					"reselect_targets": true,
-					"within_radius": 16.0,
-					"entity_types": [
-						{
-							"filters": {
-								"any_of" : [
-									{"test": "is_family",
-									"subject": "other",
-									"value": "rabbit"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "tropicalfish"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "pufferfish"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "turtle"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "salmon"},
-
-									{"test": "is_family",
-									"subject": "other",
-									"value": "cod"}
-
-								]
-
-							},
-							"max_dist": 8
-						}
-					]
-				},
+          "priority": 6,
+          "attack_interval": 2,
+          "reselect_targets": true,
+          "target_search_height": 5,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "rabbit"
+              },
+              "max_dist": 12,
+              "priority": 0
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "chicken"
+              },
+              "max_dist": 12,
+              "priority": 0
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "cod"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "salmon"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "tropicalfish"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "baby_turtle"
+                  },
+                  {
+                    "test": "in_water",
+                    "subject": "other",
+                    "operator": "!=",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 12,
+              "priority": 0
+            }
+          ]
+        },
 				"minecraft:behavior.avoid_mob_type": {
 					"priority": 4,
 					"ignore_visibility": false,
@@ -906,19 +939,77 @@
 				},
 				"minecraft:behavior.random_stroll": { "priority": 10, "speed_multiplier": 1.2, "interval": 20 },
 				"minecraft:behavior.nearest_prioritized_attackable_target": {
-					"priority": 6, "reselect_targets": true, "within_radius": 20.0,
-					"entity_types": [
-						{ "filters": { "any_of": [
-							{ "test": "is_family", "subject": "other", "value": "rabbit" },
-							{ "test": "is_family", "subject": "other", "value": "tropicalfish" },
-							{ "test": "is_family", "subject": "other", "value": "pufferfish" },
-							{ "test": "is_family", "subject": "other", "value": "turtle" },
-							{ "test": "is_family", "subject": "other", "value": "salmon" },
-							{ "test": "is_family", "subject": "other", "value": "cod" },
-							{ "test": "is_family", "subject": "other", "value": "bat" }
-						]}, "max_dist": 12 }
-					]
-				}
+          "priority": 6,
+          "attack_interval": 2,
+          "reselect_targets": true,
+          "target_search_height": 5,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "rabbit"
+              },
+              "max_dist": 12,
+              "priority": 0
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "chicken"
+              },
+              "max_dist": 12,
+              "priority": 0
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "cod"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "salmon"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "tropicalfish"
+              },
+              "max_dist": 12,
+              "priority": 1
+            },
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "baby_turtle"
+                  },
+                  {
+                    "test": "in_water",
+                    "subject": "other",
+                    "operator": "!=",
+                    "value": true
+                  }
+                ]
+              },
+              "max_dist": 12,
+              "priority": 0
+            }
+          ]
+        }
 			},
 
 			"clingy_cats:trait_curious": {
