@@ -335,21 +335,6 @@
 					{ "item": "wool",         "max_amount": 1, "want_amount": 1, "surplus_amount": 1, "priority": 0 }
 				]
 			},
-			"minecraft:behavior.share_items": {
-				"goal_radius": 2,
-				"priority": 8,
-				"max_dist": 3,
-				"speed_multiplier": 0.5,
-				"entity_types": [
-					{
-						"filters": 
-						{
-							"subject": "other",
-							"test": "is_owner"
-						}
-					}
-				]
-			},
 			"minecraft:behavior.stalk_and_pounce_on_target": {
 				"priority": 7,
 				"stalk_speed": 1.2,
@@ -385,7 +370,7 @@
             },
 			"minecraft:behavior.eat_carried_item": {
 				"priority": 12,
-				"delay_before_eating": 28
+				"delay_before_eating": 10
 			},
 			"minecraft:behavior.stay_while_sitting": {
 				"priority": 3
@@ -545,6 +530,44 @@
 					"max": 20,
 					"value": 20
 				},
+				"minecraft:interact": {
+					"interactions": [
+						{
+							"play_sounds": "eat",
+							"cooldown": 1,
+							"equip_item_slot": "slot.weapon.mainhand",
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
+											"subject": "other",
+											"operator": "not",
+											"test": "all_slots_empty",
+											"value": "main_hand"
+										},{
+											"subject": "self",
+											"test": "all_slots_empty",
+											"value": "hand"
+										}
+									]
+								},"event": "clingy_cats:on_give"
+							},
+							"take_item": true,
+							"particle_on_start": {
+								"particle_type": "spit",
+								"particle_y_offset": -0.1
+							},			
+							"swing": true
+						}
+					]
+				},
 				"minecraft:tameable": {
 					"probability": 0.33,
 					"tame_items": ["fish", "salmon"],
@@ -679,6 +702,13 @@
 											"value": true
 										},
 										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
 											"test": "all_slots_empty",
 											"subject": "other",
 											"operator": "equals",
@@ -712,6 +742,13 @@
 											"value": true
 										},
 										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
 											"test": "all_slots_empty",
 											"subject": "other",
 											"operator": "equals",
@@ -721,6 +758,11 @@
 											"subject": "other",
 											"test": "is_sneak_held",
 											"value": false
+										},
+										{
+											"subject": "self",
+											"test": "all_slots_empty",
+											"value": "hand"
 										}
 									]
 								},
@@ -758,17 +800,18 @@
 											"value": false
 										},
 										{
-													"operator": "not",
-													"test": "all_slots_empty",
-													"subject": "other",
-													"value": "hand"
-												},
-												{
-													"operator": "not",
-													"test": "all_slots_empty",
-													"subject": "self",
-													"value": "main_hand"
-												}
+											"subject": "other",
+											"operator": "not",
+											"test": "all_slots_empty",
+											"value": "hand"
+										},
+										{
+											"subject": "self",
+											"operator": "not",
+											"test": "all_slots_empty",
+											"value": "hand"
+										}
+										
 									]
 								}
 							},
@@ -780,7 +823,7 @@
 							"swing": true
 						},
 						{
-							"play_sounds": "purreow",
+							"play_sounds": "pop",
 							"cooldown": 1,
 							"drop_item_slot": "slot.weapon.mainhand",
 							"on_interact": {
@@ -804,17 +847,17 @@
 											"value": false
 										},
 										{
-													"operator": "equals",
-													"test": "all_slots_empty",
-													"subject": "other",
-													"value": "hand"
-												},
-												{
-													"operator": "not",
-													"test": "all_slots_empty",
-													"subject": "self",
-													"value": "hand"
-												}
+											"subject": "other",
+											"test": "all_slots_empty",
+											"value": "hand"
+										},
+										{
+											"subject": "self",
+											"operator": "not",
+											"test": "all_slots_empty",
+											"value": "hand"
+										}
+										
 									]
 								}
 							},
