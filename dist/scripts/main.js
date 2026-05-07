@@ -554,8 +554,8 @@ var FAVORITE_FOOD_POOL = [
   { weight: 3, food: "porkchop" },
   { weight: 3, food: "cod" },
   { weight: 3, food: "salmon" },
-  { weight: 2, food: "tropical" },
-  { weight: 1, food: "puffer" },
+  { weight: 2, food: "tropical_fish" },
+  { weight: 1, food: "pufferfish" },
   { weight: 2, food: "rabbit" },
   { weight: 3, food: "chicken" }
   /*{ weight: 2, food: "treat_fish"},
@@ -1266,6 +1266,34 @@ function restoreIdentity(cat) {
   cat.triggerEvent(`clingy_cats:set_personality_${personality}`);
 }
 
+// scripts/logics/interact.ts
+import { EquipmentSlot } from "@minecraft/server";
+var FAVORITE_TAME_CHANCE = 0.3;
+var NORMAL_TAME_CHANCE = 0.1;
+function handleGiveItem(cat) {
+  if (!cat.isValid) return;
+  const mainhand = cat.getComponent("minecraft:equippable")?.getEquipmentSlot(EquipmentSlot.Mainhand);
+  if (!mainhand) return;
+  const itemName = mainhand.typeId.replace("minecraft:", "");
+  const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
+  const isFavorite = itemName === favoriteFood;
+  const chance = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
+  const success = Math.random() < chance;
+  if (isFavorite) {
+    cat.dimension.spawnParticle("minecraft:heart_particle", cat.location);
+    cat.dimension.playSound("mob.cat.purreow", cat.location, { volume: 1, pitch: 1 });
+  } else {
+    cat.dimension.spawnParticle("minecraft:villager_happy", cat.location);
+    cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 1, pitch: 1 });
+  }
+  if (!success) return;
+  const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 10 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
+  if (!player) return;
+  const tameable = cat.getComponent("minecraft:tameable");
+  tameable?.tame(player);
+  cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1, pitch: 1.2 });
+}
+
 // scripts/logics/riding.ts
 var ANCHOR_IDS_KEY = "clingy_cats:anchor_ids";
 var MAX_ANCHORS = 2;
@@ -1355,8 +1383,9 @@ function registerCatsEvents() {
       behaviorTick(sourceEntity, "enter_still_state");
       return;
     }
-    if (id == "clingycats:follow_given_player") {
+    if (id == "clingycats:on_give_food") {
       behaviorTick(sourceEntity, "temp_follow_close");
+      handleGiveItem(sourceEntity);
     }
     if (id === "clingycats:request_shoulder_mount") {
       handleRequestShoulderMount(sourceEntity);
@@ -1368,13 +1397,13 @@ function registerCatsEvents() {
 }
 
 // scripts/debug/catdebug.ts
-import { world as world2, system as system2, EquipmentSlot } from "@minecraft/server";
+import { world as world2, system as system2, EquipmentSlot as EquipmentSlot2 } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
   system2.runInterval(() => {
     for (const player of world2.getAllPlayers()) {
-      const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
+      const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot2.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       const hit = player.getEntitiesFromViewDirection({
         maxDistance: 10,
@@ -1383,8 +1412,8 @@ function registerDebugRaycast() {
       if (!hit?.entity) continue;
       const cat = hit.entity;
       if (!cat.typeId.startsWith("clingy_cats:")) continue;
-      const mainhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot.Mainhand);
-      const offhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot.Offhand);
+      const mainhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot2.Mainhand);
+      const offhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot2.Offhand);
       const inv = cat.getComponent("minecraft:inventory")?.container;
       const invStr = inv ? Array.from({ length: inv.size }, (_, i) => inv.getItem(i)?.typeId ?? "_").join(",") : "no_inv";
       const lines = [

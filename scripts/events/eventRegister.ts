@@ -2,7 +2,7 @@ import { world, system } from "@minecraft/server";
 import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
 import { restoreIdentity, behaviorTick } from '../logics/states';
-
+import { handleGiveItem } from "../logics/interact";
 import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
 
 export function registerCatsEvents(): void {
@@ -58,8 +58,9 @@ export function registerCatsEvents(): void {
             return;
         }
 
-        if (id == "clingycats:follow_given_player") {
+        if (id == "clingycats:on_give_food") {
             behaviorTick(sourceEntity, "temp_follow_close")
+            handleGiveItem(sourceEntity)
         }
 
         if (id === "clingycats:request_shoulder_mount") {
