@@ -1548,7 +1548,7 @@
                     "target_blocks": ["furnace","lit_furnace","campfire","soul_campfire"],
                     "target_selection_method": "nearest",
                     "search_range": 16, "search_height": 4,
-                    "goal_radius": 2.0,
+                    "goal_radius": 4.0,
                     "on_reach": { "event": "clingy_cats:enter_still_state_event", "target": "self" }
                 }
             },

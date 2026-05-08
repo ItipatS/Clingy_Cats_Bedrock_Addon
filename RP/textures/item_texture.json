@@ -15,6 +15,9 @@
 		"jellie_spawn_egg":     { "textures": "textures/items/spawn_eggs/jellie_spawn_egg" },
 		"ocelot_spawn_egg":     { "textures": "textures/items/spawn_eggs/ocelot_spawn_egg" },
 		"red_spawn_egg":        { "textures": "textures/items/spawn_eggs/red_spawn_egg" },
-		"white_spawn_egg":      { "textures": "textures/items/spawn_eggs/white_spawn_egg" }
+		"white_spawn_egg":      { "textures": "textures/items/spawn_eggs/white_spawn_egg" },
+		"clingy_cats:meownifier": {
+            "textures": "textures/items/meownifier"
+        }
 	}
 }

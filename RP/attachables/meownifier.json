@@ -1,0 +1,35 @@
+{
+  "format_version": "1.20.30",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "clingy_cats:meownifier",
+      "item": { "clingy_cats:meownifier": "query.is_owner_identifier_any('minecraft:player')" },
+      "materials": {
+        "default": "entity",
+        "enchanted": "entity_alphatest_glint"
+      },
+      "textures": {
+        "default": "textures/items/meownifier",
+        "enchanted": "textures/misc/enchanted_item_glint"
+      },
+      "geometry": {
+        "default": "geometry.moewnifier"
+      },
+      "animations": {
+        "hold_first_person": "animation.moewnifier.first_person_hold",
+        "hold_third_person": "animation.moewnifier.third_person_hold"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "hold_first_person": "context.is_first_person == 1.0"
+          },
+          {
+            "hold_third_person": "context.is_first_person == 0.0"
+          }
+        ]
+      },
+      "render_controllers": ["controller.render.item_default"]
+    }
+  }
+}

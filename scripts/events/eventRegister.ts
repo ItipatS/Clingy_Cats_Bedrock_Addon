@@ -1,4 +1,4 @@
-import { world, system , EntityComponentTypes, EquipmentSlot } from "@minecraft/server";
+import { world, system} from "@minecraft/server";
 import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
 import { restoreIdentity, behaviorTick } from '../logics/states';
