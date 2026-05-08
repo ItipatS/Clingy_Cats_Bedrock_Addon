@@ -110,8 +110,8 @@
 					"carrot",
 					"cod",
 					"salmon",
-					"tropical",
-					"puffer",
+					"tropical_fish",
+					"pufferfish",
 					"rabbit",
 					"chicken",
 					"treat_fish",
@@ -131,7 +131,27 @@
 				"clingy_cats:eye_index": { "type": "int", "range": [0, 33], "default": 0, "client_sync": true },
 				"clingy_cats:affection_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
 				"clingy_cats:trust_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
-				"clingy_cats:frequency": {"type": "int", "range": [0,100], "default": 50, "client_sync": false}
+				"clingy_cats:frequency": {"type": "int", "range": [0,100], "default": 50, "client_sync": false},
+				"clingy_cats:equipment": { "type": "enum",
+					"values": [
+					"none",
+					"porkchop",
+					"beef",
+					"spider_eye",
+					"carrot",
+					"cod",
+					"salmon",
+					"tropical_fish",
+					"pufferfish",
+					"rabbit",
+					"chicken",
+					"treat_fish",
+					"treat_meat",
+					"treat_fancy"
+					],
+					"default":"none",
+					"client_sync": false
+				}
 			}
 		},
 		
@@ -367,11 +387,7 @@
 					
             },
 
-			"minecraft:equippable": {
-				"slots": [
-					{ "slot": 0 }
-				]
-			},
+			
 			"minecraft:behavior.eat_carried_item": {
 				"priority": 2,
 				"delay_before_eating": 10
@@ -486,6 +502,7 @@
 						{
 							"play_sounds": "eat",
 							"cooldown": 1,
+							
 							"equip_item_slot": "slot.weapon.mainhand",
 							"on_interact": {
 								"filters": {
@@ -520,13 +537,15 @@
 												{
 													"subject": "self",
 													"operator": "not",
-													"test": "all_slots_empty",
-													"value": "hand"
+													"test": "has_equipment_tag",
+													"domain": "hand",
+													"value": "minecraft:is_food"
 												}
 											]
 										}
 									]
-								},"event": "clingy_cats:on_give"
+								},
+								"event": "clingy_cats:on_give"
 							},
 							"take_item": true,
 							"particle_on_start": {
@@ -1861,8 +1880,20 @@
                 ]
             },
 
-			"clingy_cats:on_give" : {
-				 "queue_command": { "command": "scriptevent clingycats:on_give_food" }
+			"clingy_cats:on_give": {
+				"sequence": [
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "porkchop"               }, "set_property": { "clingy_cats:equipment": "porkchop"     } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "beef"                   }, "set_property": { "clingy_cats:equipment": "beef"          } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "spider_eye"             }, "set_property": { "clingy_cats:equipment": "spider_eye"    } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "carrot"                 }, "set_property": { "clingy_cats:equipment": "carrot"        } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "cod"                    }, "set_property": { "clingy_cats:equipment": "cod"           } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "salmon"                 }, "set_property": { "clingy_cats:equipment": "salmon"        } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "tropical_fish"          }, "set_property": { "clingy_cats:equipment": "tropical_fish" } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "pufferfish"             }, "set_property": { "clingy_cats:equipment": "pufferfish"    } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "rabbit"                 }, "set_property": { "clingy_cats:equipment": "rabbit"        } },
+					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "chicken"                }, "set_property": { "clingy_cats:equipment": "chicken"       } },
+					{ "queue_command": { "command": "scriptevent clingycats:on_give_food" } }
+				]
 			}
 
 		}

@@ -95,10 +95,10 @@
         "animate": [ "lookat", "ac.state" ]
       },
       "render_controllers": [
+        "controller.render.clingy_cats_collar",
         "controller.render.clingy_cats.calico",
         "controller.render.clingy_cats_eyes",
-        "controller.render.clingy_cats_whiskers",
-        "controller.render.clingy_cats_collar"
+        "controller.render.clingy_cats_whiskers"
       ],
       "spawn_egg": { "texture": "calico_spawn_egg", "texture_index": 0 },
       "held_item_ignores_lighting": false,

@@ -1267,18 +1267,29 @@ function restoreIdentity(cat) {
 }
 
 // scripts/logics/interact.ts
-import { EquipmentSlot } from "@minecraft/server";
 var FAVORITE_TAME_CHANCE = 0.3;
 var NORMAL_TAME_CHANCE = 0.1;
+var EQUIPMENT_TO_FOOD = {
+  "tropical_fish": "tropical",
+  "pufferfish": "puffer"
+};
 function handleGiveItem(cat) {
   if (!cat.isValid) return;
-  const mainhand = cat.getComponent("minecraft:equippable")?.getEquipmentSlot(EquipmentSlot.Mainhand);
-  if (!mainhand) return;
-  const itemName = mainhand.typeId.replace("minecraft:", "");
+  const equipment = cat.getProperty("clingy_cats:equipment");
   const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
-  const isFavorite = itemName === favoriteFood;
+  console.warn(`[DEBUG:on_give_food] entity=${cat.typeId} id=${cat.id}`);
+  console.warn(`[DEBUG:on_give_food] equipment=${equipment} favoriteFood=${favoriteFood}`);
+  if (equipment === "none") {
+    console.warn(`[DEBUG:on_give_food] equipment is none \u2014 has_equipment filters missed or item not in slot yet`);
+    return;
+  }
+  const mappedEquip = EQUIPMENT_TO_FOOD[equipment] ?? equipment;
+  const isFavorite = mappedEquip === favoriteFood;
+  console.warn(`[DEBUG:on_give_food] mappedEquip=${mappedEquip} isFavorite=${isFavorite}`);
   const chance = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
   const success = Math.random() < chance;
+  console.warn(`[DEBUG:on_give_food] chance=${chance} success=${success}`);
+  cat.setProperty("clingy_cats:equipment", "none");
   if (isFavorite) {
     cat.dimension.spawnParticle("minecraft:heart_particle", cat.location);
     cat.dimension.playSound("mob.cat.purreow", cat.location, { volume: 1, pitch: 1 });
@@ -1288,6 +1299,7 @@ function handleGiveItem(cat) {
   }
   if (!success) return;
   const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 10 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
+  console.warn(`[DEBUG:on_give_food] taming player=${player?.name ?? "NOT FOUND"}`);
   if (!player) return;
   const tameable = cat.getComponent("minecraft:tameable");
   tameable?.tame(player);
@@ -1397,7 +1409,7 @@ function registerCatsEvents() {
 }
 
 // scripts/debug/catdebug.ts
-import { world as world2, system as system2, EquipmentSlot as EquipmentSlot2 } from "@minecraft/server";
+import { world as world2, system as system2, EquipmentSlot as EquipmentSlot2, EntityComponentTypes as EntityComponentTypes2 } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
@@ -1412,10 +1424,8 @@ function registerDebugRaycast() {
       if (!hit?.entity) continue;
       const cat = hit.entity;
       if (!cat.typeId.startsWith("clingy_cats:")) continue;
-      const mainhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot2.Mainhand);
-      const offhand = cat.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot2.Offhand);
-      const inv = cat.getComponent("minecraft:inventory")?.container;
-      const invStr = inv ? Array.from({ length: inv.size }, (_, i) => inv.getItem(i)?.typeId ?? "_").join(",") : "no_inv";
+      const inventory = cat.getComponent(EntityComponentTypes2.Inventory);
+      const heldItem = inventory?.container?.getItem(0);
       const lines = [
         `\xA7e${cat.typeId.replace("clingy_cats:", "")} \xA77[${cat.id.slice(-6)}]`,
         `\xA77sub:\xA7f${cat.getProperty("clingy_cats:sub_variant")} \xA77pattern:\xA7f${cat.getProperty("clingy_cats:pattern")} \xA77color:\xA7f${cat.getProperty("clingy_cats:color")}`,
@@ -1425,9 +1435,10 @@ function registerDebugRaycast() {
         `\xA77food:\xA7f${cat.getProperty("clingy_cats:favorite_food")} \xA77block:\xA7f${cat.getProperty("clingy_cats:favorite_block")}`,
         `\xA77baby:\xA7f${cat.hasComponent("minecraft:is_baby")} \xA77tamed:\xA7f${cat.hasComponent("minecraft:is_tamed")} \xA77tags:\xA7f${cat.getTags().join(",") || "none"}`,
         `\xA77state:\xA7f${cat.getProperty("clingy_cats:state")}`,
-        `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
         `\xA77pregnant:\xA7f${cat.hasComponent("minecraft:is_pregnant")}\xA77clingy_pregnant:\xA7f${cat.getProperty("clingy_cats:pregnant")}`,
-        `\xA77want_to_lay_eggs?:\xA7f${cat.hasComponent("minecraft:behavior.lay_egg")}`
+        `\xA77want_to_lay_eggs?:\xA7f${cat.hasComponent("minecraft:behavior.lay_egg")}`,
+        `\xA77has equippable?:\xA7f${cat.hasComponent("minecraft:equippablee")}`,
+        `MH:${heldItem?.typeId ?? "empty"} , inv:[${inventory}]`
       ].join("\n");
       player.onScreenDisplay.setActionBar(lines);
     }

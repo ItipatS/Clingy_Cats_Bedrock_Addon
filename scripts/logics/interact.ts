@@ -1,33 +1,40 @@
-import { Entity, EquipmentSlot, world } from "@minecraft/server";
+import { Entity } from "@minecraft/server";
 import { distanceSq } from "./utils";
 
 const FAVORITE_TAME_CHANCE = 0.30;
 const NORMAL_TAME_CHANCE   = 0.10;
 
-export function handleGiveItem(cat: Entity): void {
+// equipment property uses full item names; favorite_food uses shorthands for these two
+const EQUIPMENT_TO_FOOD: Record<string, string> = {
+    "tropical_fish": "tropical",
+    "pufferfish":    "puffer"
+};
 
+export function handleGiveItem(cat: Entity): void {
     if (!cat.isValid) return;
 
-    const equippable   = cat.getComponent("minecraft:equippable");
-    const mainhand     = equippable?.getEquipmentSlot(EquipmentSlot.Mainhand);
+    const equipment    = cat.getProperty("clingy_cats:equipment") as string;
     const favoriteFood = cat.getProperty("clingy_cats:favorite_food") as string;
 
     console.warn(`[DEBUG:on_give_food] entity=${cat.typeId} id=${cat.id}`);
-    console.warn(`[DEBUG:on_give_food] equippable=${equippable ? "OK" : "MISSING"}`);
-    console.warn(`[DEBUG:on_give_food] mainhand item=${mainhand?.typeId ?? "empty"}`);
-    console.warn(`[DEBUG:on_give_food] favoriteFood=${favoriteFood}`);
+    console.warn(`[DEBUG:on_give_food] equipment=${equipment} favoriteFood=${favoriteFood}`);
 
-    if (!mainhand) return;
+    if (equipment === "none") {
+        console.warn(`[DEBUG:on_give_food] equipment is none — has_equipment filters missed or item not in slot yet`);
+        return;
+    }
 
-    const itemName   = mainhand.typeId.replace("minecraft:", "");
-    const isFavorite = itemName === favoriteFood;
+    const mappedEquip = EQUIPMENT_TO_FOOD[equipment] ?? equipment;
+    const isFavorite  = mappedEquip === favoriteFood;
 
-    console.warn(`[DEBUG:on_give_food] itemName=${itemName} isFavorite=${isFavorite}`);
+    console.warn(`[DEBUG:on_give_food] mappedEquip=${mappedEquip} isFavorite=${isFavorite}`);
 
     const chance  = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
     const success = Math.random() < chance;
 
     console.warn(`[DEBUG:on_give_food] chance=${chance} success=${success}`);
+
+    cat.setProperty("clingy_cats:equipment", "none");
 
     if (isFavorite) {
         cat.dimension.spawnParticle("minecraft:heart_particle", cat.location);

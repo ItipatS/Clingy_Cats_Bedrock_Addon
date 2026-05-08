@@ -1,4 +1,4 @@
-import { world, system, EquipmentSlot } from "@minecraft/server";
+import { world, system, EquipmentSlot, EntityComponentTypes } from "@minecraft/server";
 
 const DEBUG = true;
 
@@ -20,15 +20,8 @@ export function registerDebugRaycast(): void {
             const cat = hit.entity;
             if (!cat.typeId.startsWith("clingy_cats:")) continue;
 
-            const mainhand = cat.getComponent("minecraft:equippable")
-                ?.getEquipment(EquipmentSlot.Mainhand);
-            const offhand = cat.getComponent("minecraft:equippable")
-                ?.getEquipment(EquipmentSlot.Offhand);
-
-            const inv = cat.getComponent("minecraft:inventory")?.container;
-            const invStr = inv 
-                ? Array.from({length: inv.size}, (_, i) => inv.getItem(i)?.typeId ?? "_").join(",")
-                : "no_inv";
+            const inventory = cat.getComponent(EntityComponentTypes.Inventory);
+            const heldItem  = inventory?.container?.getItem(0);
 
             const lines = [
                
@@ -39,9 +32,11 @@ export function registerDebugRaycast(): void {
                 `§7trait:§f${cat.getProperty("clingy_cats:behavior_trait")} §7personality:§f${cat.getProperty("clingy_cats:personality")} §7sound:§f${cat.getProperty("clingy_cats:sound_variant")}`,
                 `§7food:§f${cat.getProperty("clingy_cats:favorite_food")} §7block:§f${cat.getProperty("clingy_cats:favorite_block")}`,
                 `§7baby:§f${cat.hasComponent("minecraft:is_baby")} §7tamed:§f${cat.hasComponent("minecraft:is_tamed")} §7tags:§f${cat.getTags().join(",")||"none"}`,
-                `§7state:§f${cat.getProperty("clingy_cats:state")}`, `MH:${mainhand?.typeId ?? "empty"} OH:${offhand?.typeId ?? "empty"} , inv:[${invStr}]`,
+                `§7state:§f${cat.getProperty("clingy_cats:state")}`,
                 `§7pregnant:§f${cat.hasComponent("minecraft:is_pregnant")}` + `§7clingy_pregnant:§f${cat.getProperty("clingy_cats:pregnant")}`,
                 `§7want_to_lay_eggs?:§f${cat.hasComponent("minecraft:behavior.lay_egg")}`,
+                `§7has equippable?:§f${cat.hasComponent("minecraft:equippablee")}`,
+                `MH:${heldItem?.typeId ?? "empty"} , inv:[${inventory}]`,
 
             ].join("\n");
 

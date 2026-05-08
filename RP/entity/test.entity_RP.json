@@ -278,10 +278,10 @@
       },
 
       "render_controllers": [
+        "controller.render.clingy_cats_collar",
         "controller.render.clingy_cats_base",
         "controller.render.clingy_cats_eyes",
-        "controller.render.clingy_cats_whiskers",
-        "controller.render.clingy_cats_collar"
+        "controller.render.clingy_cats_whiskers"
       ],
 
       "spawn_egg": {
