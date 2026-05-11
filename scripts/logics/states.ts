@@ -202,7 +202,7 @@ export function restoreIdentity(cat: Entity): void {
     const trait = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
     if (!trait) return;
 
-    const personality = cat.getProperty("clingy_cats:personality_trait") as Personality;
+    const personality = cat.getProperty("clingy_cats:personality") as Personality;
     if (!personality) return;
 
     // clean up any stuck temp

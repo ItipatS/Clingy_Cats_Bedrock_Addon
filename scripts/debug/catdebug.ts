@@ -1,4 +1,4 @@
-import { world, system, EquipmentSlot, EntityComponentTypes } from "@minecraft/server";
+import { world, system, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
 
 const DEBUG = true;
 
@@ -10,6 +10,7 @@ export function registerDebugRaycast(): void {
             const held = player.getComponent("equippable")
                 ?.getEquipment(EquipmentSlot.Mainhand);
             if (held?.typeId !== "minecraft:stick") continue;
+            if (player.getGameMode() === GameMode.Creative) return;
 
             const hit = player.getEntitiesFromViewDirection({
                 maxDistance: 10,

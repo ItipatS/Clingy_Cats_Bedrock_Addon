@@ -406,7 +406,6 @@ export const FAVORITE_FOOD_POOL = [
     { weight: 3, food: "cod"     },
     { weight: 3, food: "salmon"    },
     { weight: 2, food: "tropical_fish"  },
-    { weight: 1, food: "pufferfish"   },
     { weight: 2, food: "rabbit"    },
     { weight: 3, food: "chicken"    },
     /*{ weight: 2, food: "treat_fish"},
@@ -426,6 +425,7 @@ export const FAVORITE_BLOCK_POOL = [
 export type BehaviorTrait = "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
 export type Personality   = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";
 export type FavoriteBlock = "bed" | "soft" | "warm" | "high" | "owner" | "sun";
+export type CatSize       = "tiny" | "small" | "normal" | "large" | "huge";
 
 export type WeightedEntry<T extends string> = {
     value: T;
@@ -435,7 +435,8 @@ export type WeightedEntry<T extends string> = {
 export const BREED_SPAWN_POOLS: Record<string, {
     trait: WeightedEntry<BehaviorTrait>[],
     personality: WeightedEntry<Personality>[],
-    block: WeightedEntry<FavoriteBlock>[]
+    block: WeightedEntry<FavoriteBlock>[],
+    size: WeightedEntry<CatSize>[]
 }> = {
 
     ragdoll: {
@@ -455,6 +456,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "soft",  weight: 5 },
             { value: "bed",   weight: 3 },
             { value: "owner", weight: 2 },
+        ],
+        size: [
+            { value: "tiny",   weight: 1 },
+            { value: "small",  weight: 5 },
+            { value: "normal", weight: 25 },
+            { value: "large",  weight: 45 },
+            { value: "huge",   weight: 24 },
         ]
     },
 
@@ -476,6 +484,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "sun",   weight: 3 },
             { value: "owner", weight: 2 },
             { value: "warm",  weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 30 },
+            { value: "normal", weight: 45 },
+            { value: "large",  weight: 17 },
+            { value: "huge",   weight: 3 },
         ]
     },
 
@@ -495,6 +510,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "soft", weight: 5 },
             { value: "warm", weight: 3 },
             { value: "bed",  weight: 2 },
+        ],
+        size: [
+            { value: "tiny",   weight: 3 },
+            { value: "small",  weight: 15 },
+            { value: "normal", weight: 45 },
+            { value: "large",  weight: 30 },
+            { value: "huge",   weight: 7 },
         ]
     },
 
@@ -516,6 +538,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "soft", weight: 3 },
             { value: "warm", weight: 2 },
             { value: "sun",  weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 2 },
+            { value: "small",  weight: 10 },
+            { value: "normal", weight: 35 },
+            { value: "large",  weight: 40 },
+            { value: "huge",   weight: 13 },
         ]
     },
 
@@ -537,6 +566,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "high", weight: 3 },
             { value: "warm", weight: 2 },
             { value: "soft", weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -558,6 +594,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "warm", weight: 3 },
             { value: "soft", weight: 2 },
             { value: "sun",  weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -579,6 +622,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "sun",  weight: 3 },
             { value: "warm", weight: 2 },
             { value: "soft", weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -600,6 +650,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "owner", weight: 3 },
             { value: "bed",   weight: 2 },
             { value: "warm",  weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -618,6 +675,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "owner", weight: 5 },
             { value: "soft",  weight: 3 },
             { value: "bed",   weight: 2 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -636,6 +700,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "high", weight: 5 },
             { value: "sun",  weight: 3 },
             { value: "warm", weight: 2 },
+        ],
+        size: [
+            { value: "tiny",   weight: 10 },
+            { value: "small",  weight: 35 },
+            { value: "normal", weight: 40 },
+            { value: "large",  weight: 13 },
+            { value: "huge",   weight: 2 },
         ]
     },
 
@@ -657,6 +728,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "sun",   weight: 3 },
             { value: "soft",  weight: 2 },
             { value: "owner", weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 5 },
+            { value: "small",  weight: 20 },
+            { value: "normal", weight: 50 },
+            { value: "large",  weight: 20 },
+            { value: "huge",   weight: 5 },
         ]
     },
 
@@ -678,6 +756,13 @@ export const BREED_SPAWN_POOLS: Record<string, {
             { value: "bed",  weight: 3 },
             { value: "high", weight: 2 },
             { value: "warm", weight: 1 },
+        ],
+        size: [
+            { value: "tiny",   weight: 8 },
+            { value: "small",  weight: 30 },
+            { value: "normal", weight: 42 },
+            { value: "large",  weight: 15 },
+            { value: "huge",   weight: 5 },
         ]
     }
 }

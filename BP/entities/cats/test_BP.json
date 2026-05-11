@@ -1,5 +1,5 @@
-{
-	"format_version": "1.26.10",
+﻿{
+	"format_version": "1.26.20",
 	"minecraft:entity": {
 		"description": {
 			"identifier": "clingy_cats:test",
@@ -111,7 +111,6 @@
 					"cod",
 					"salmon",
 					"tropical_fish",
-					"pufferfish",
 					"rabbit",
 					"chicken",
 					"treat_fish",
@@ -142,7 +141,6 @@
 					"cod",
 					"salmon",
 					"tropical_fish",
-					"pufferfish",
 					"rabbit",
 					"chicken",
 					"treat_fish",
@@ -150,6 +148,17 @@
 					"treat_fancy"
 					],
 					"default":"none",
+					"client_sync": false
+				},
+				"clingy_cats:size": {
+					"type": "enum",
+					"values": ["tiny","small","normal","large","huge"],
+					"default": "normal",
+					"client_sync": false
+				},
+				"clingy_cats:immortal": {
+					"type": "bool",
+					"default": false,
 					"client_sync": false
 				}
 			}
@@ -194,7 +203,8 @@
 					"minecraft:porkchop",
 					"minecraft:cooked_porkchop",
 					"minecraft:rabbit",
-					"minecraft:cooked_rabbit"
+					"minecraft:cooked_rabbit",
+					"minecraft:tropical_fish"
 				],
 				"within_radius": 0
 			},
@@ -356,14 +366,15 @@
 				"priority": 7,
 				"stalk_speed": 1.2,
 				"max_stalk_dist": 12.0,
-				"leap_height": 0.9,
+				"leap_height": 0.2,
 				"leap_dist": 0.8,
 				"pounce_max_dist": 5.0,
-				"interest_time": 2.0,
-				"stuck_time": 2.0,
+				"interest_time": 0.5,
 				"strike_dist": 2.0
 			},
 "minecraft:behavior.pickup_items": {
+					"on_pickup_item_end": {"event": "clingy_cats:on_pick_up", "target": "self"},
+					"on_pickup_item_start": {"event": "clingy_cats:on_pick_up_start", "target": "self"},
                     "priority": 8,
                     "can_pickup_any_item": true,
                     "excluded_items": [
@@ -381,16 +392,17 @@
                         { "tags": "q.any_tag('minecraft:decorated_pot_sherds')" }
                     ],
                     "speed_multiplier": 1.1,
-                    "goal_radius": 2,
+                    "goal_radius": 1,
+					"search_height": 12,
                     "max_dist": 12,
-                    "track_target": true
+                    "track_target": false
 					
             },
 
 			
 			"minecraft:behavior.eat_carried_item": {
 				"priority": 2,
-				"delay_before_eating": 10
+				"delay_before_eating": 100
 			},
 			"minecraft:behavior.stay_while_sitting": {
 				"priority": 3
@@ -625,7 +637,7 @@
           ]
         },
 				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
+					"priority": 2,
 					"ignore_visibility": false,
 					"sprint_distance": 5,
 					"avoid_mob_sound": "agitated",
@@ -794,7 +806,46 @@
 								"particle_y_offset": -0.1
 							},			
 							"swing": true
+						},
+						{
+							"play_sounds": "twinkle",
+							"cooldown": 1,
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{
+											"domain": "hand",
+											"operator": "not",
+											"test": "has_equipment",
+											"subject": "other",
+											"value": "lead"
+										},
+										{
+											"subject": "other",
+											"operator": "not",
+											"test": "all_slots_empty",
+											"value": "main_hand"
+										},
+										{
+											"subject": "other",
+											"operator": "equals",
+											"test": "has_equipment",
+											"value": "totem_of_undying"
+										},						
+										{
+											"subject": "self",
+											"test": "bool_property",
+											"domain": "clingy_cats:immortal",
+											"value": false
+										}
+									]
+								},
+								"event": "clingy_cats:on_give_totem"
+							},
+							"use_item": true,		
+							"swing": true
 						}
+
 					]
 				}
 			},
@@ -814,7 +865,7 @@
 					"search_height": 2,
 					"search_range": 10,
 					"speed_multiplier": 1,
-					"target_blocks": [
+										"target_blocks": [
 						"minecraft:bed",
 						"minecraft:brown_wool",
 						"minecraft:yellow_wool",
@@ -833,7 +884,40 @@
 						"minecraft:black_wool",
 						"minecraft:white_wool",
 						"minecraft:hay_block",
-						"minecraft:moss_block"
+						"minecraft:moss_block",
+						"minecraft:oak_leaves",
+						"minecraft:birch_leaves",
+						"minecraft:spruce_leaves",
+						"minecraft:jungle_leaves",
+						"minecraft:acacia_leaves",
+						"minecraft:dark_oak_leaves",
+						"minecraft:mangrove_leaves",
+						"minecraft:cherry_leaves",
+						"minecraft:azalea_leaves",
+						"minecraft:flowering_azalea_leaves",
+						"minecraft:white_carpet",
+						"minecraft:orange_carpet",
+						"minecraft:magenta_carpet",
+						"minecraft:light_blue_carpet",
+						"minecraft:yellow_carpet",
+						"minecraft:lime_carpet",
+						"minecraft:pink_carpet",
+						"minecraft:gray_carpet",
+						"minecraft:light_gray_carpet",
+						"minecraft:cyan_carpet",
+						"minecraft:purple_carpet",
+						"minecraft:blue_carpet",
+						"minecraft:brown_carpet",
+						"minecraft:green_carpet",
+						"minecraft:red_carpet",
+						"minecraft:black_carpet",
+						"minecraft:sand",
+						"minecraft:red_sand",
+						"minecraft:short_grass",
+						"minecraft:fern",
+						"minecraft:podzol",
+						"minecraft:coarse_dirt",
+						"minecraft:rooted_dirt"
 					],
 					"target_materials_above_block": [
 						"Air"
@@ -990,7 +1074,7 @@
                 "minecraft:behavior.pet_sleep_with_owner": {
                     "priority": 2,
                     "speed_multiplier": 1.2,
-                    "search_radius": 10,
+                    "search_range": 10,
                     "search_height": 10,
                     "goal_radius": 1.0
                 }
@@ -1167,13 +1251,16 @@
 					"angle_of_view_horizontal": 60
 				},
 				"minecraft:behavior.pickup_items": {
+					"on_pickup_item_end": {"event": "clingy_cats:on_pick_up", "target": "self"},
+					"on_pickup_item_start": {"event": "clingy_cats:on_pick_up_start", "target": "self"},
                     "priority": 8,
                     "can_pickup_any_item": true,
                     "excluded_items": [],
-                    "goal_radius": 2,
-                    "max_dist": 16,
+                    "goal_radius": 1,
+					"search_height": 12,
+                    "max_dist": 12,
                     "pickup_based_on_chance": false,
-                    "track_target": true
+                    "track_target": false
 					
                 }
 			},
@@ -1206,7 +1293,7 @@
 					"interval": 160
 				},
 				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
+					"priority": 2,
 					"ignore_visibility": false,
 					"sprint_distance": 5,
 					"avoid_mob_sound": "agitated",
@@ -1273,7 +1360,7 @@
 					"look_time": {"max":180,"min":60},
 					"angle_of_view_horizontal": 60
 				},"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
+					"priority": 2,
 					"entity_types": []
 				}
 			},
@@ -1317,7 +1404,7 @@
 				"minecraft:behavior.pet_sleep_with_owner": {
 					"priority": 2,
 					"speed_multiplier": 1.2,
-					"search_radius": 10,
+					"search_range": 10,
 					"search_height": 10,
 					"goal_radius": 1.0
 				},
@@ -1384,7 +1471,7 @@
 					"ignore_mob_damage": true
 				},
 				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
+					"priority": 2,
 					"ignore_visibility": false,
 					"sprint_distance": 5,
 					"avoid_mob_sound": "agitated",
@@ -1428,7 +1515,7 @@
 					"ignore_mob_damage": true
 				},
 				"minecraft:behavior.avoid_mob_type": {
-					"priority": 4,
+					"priority": 2,
 					"entity_types": []
 				},
 				"minecraft:behavior.look_at_player": {
@@ -1591,7 +1678,23 @@
                         "filters": { "test": "is_family", "subject": "other", "value": "clingy_cats" }
                     }]
                 }
-            }
+            },
+
+			"clingy_cats:become_immortal": {
+				"minecraft:hurt_on_condition": {
+					"damage_conditions": [
+
+					]
+				},
+				"minecraft:damage_sensor": {
+					"triggers": [
+						{
+							"cause": "all",
+							"deals_damage": "no"
+						}
+					]
+				}
+			}
 		},
 		"events": {
 			"minecraft:entity_spawned": {
@@ -1627,6 +1730,18 @@
 						"add": {
 							"component_groups": [
 								"clingy_cats:wild"
+							]
+						}
+					},
+					{
+						"filters": {
+						"test": "is_tamed",
+						"subject": "self",
+						"value": true
+						},
+						"add": {
+							"component_groups": [
+								"clingy_cats:tamed"
 							]
 						}
 					}
@@ -1671,7 +1786,7 @@
                 ]
             },
 
-			"minecraft:spawn_from_village": {},
+			
 
 			"clingy_cats:visible_event": {
 				"sequence": [
@@ -1897,6 +2012,50 @@
                 ]
             },
 
+			"clingy_cats:on_pick_up_start":{
+				"queue_command": { "command": "scriptevent clingycats:on_pick_up_start_event" },
+				
+				"filters": {
+					"all_of": [
+						{
+							"subject": "self",
+							"operator": "equals",
+							"test": "has_equipment_tag",
+							"domain": "any",
+							"value": "minecraft:is_food"
+						},
+						{
+							"test": "distance_to_nearest_player",
+							"operator": "<",
+							"value": 20.0
+						}
+					]
+				},
+				"trigger": "clingy_cats:on_give"
+			},
+
+			"clingy_cats:on_pick_up":{
+				"queue_command": { "command": "scriptevent clingycats:on_pick_up_event" },
+				
+				"filters": {
+					"all_of": [
+						{
+							"subject": "self",
+							"operator": "equals",
+							"test": "has_equipment_tag",
+							"domain": "any",
+							"value": "minecraft:is_food"
+						},
+						{
+							"test": "distance_to_nearest_player",
+							"operator": "<",
+							"value": 20.0
+						}
+					]
+				},
+				"trigger": "clingy_cats:on_give"
+			},
+
 			"clingy_cats:on_give": {
 				"sequence": [
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "porkchop"               }, "set_property": { "clingy_cats:equipment": "porkchop"     } },
@@ -1906,10 +2065,18 @@
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "cod"                    }, "set_property": { "clingy_cats:equipment": "cod"           } },
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "salmon"                 }, "set_property": { "clingy_cats:equipment": "salmon"        } },
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "tropical_fish"          }, "set_property": { "clingy_cats:equipment": "tropical_fish" } },
-					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "pufferfish"             }, "set_property": { "clingy_cats:equipment": "pufferfish"    } },
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "rabbit"                 }, "set_property": { "clingy_cats:equipment": "rabbit"        } },
 					{ "filters": { "test": "has_equipment", "subject": "self", "domain": "any", "value": "chicken"                }, "set_property": { "clingy_cats:equipment": "chicken"       } },
 					{ "queue_command": { "command": "scriptevent clingycats:on_give_food" } }
+				]
+			},
+
+			"clingy_cats:on_give_totem": {
+				"sequence": [
+					{ "set_property": { "clingy_cats:immortal": true } },
+					{ "add": { "component_groups": ["clingy_cats:become_immortal"] } },
+					{ "queue_command": { "command": "playsound mob.totem.use @s" } },
+					{ "queue_command": { "command": "particle minecraft:totem_particle ~ ~1 ~" } }
 				]
 			}
 

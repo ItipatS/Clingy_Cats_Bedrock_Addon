@@ -30,3 +30,8 @@ item.spawn_egg.entity.clingy_cats:red.name= Red Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:siamese.name= Siamese Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:tabby.name= Tabby Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:white.name= White (sphinx) Egg§r
+
+###item
+
+item.clingy_cats:meownifier.name= Meownifier
+item.clingy_cats:guide_book.name= Guidebook

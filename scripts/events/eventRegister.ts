@@ -1,11 +1,14 @@
 import { world, system} from "@minecraft/server";
 import { handleWildSpawn, handleSpawnTestCats } from "../logics/breed";
+import { applyAdultSize } from "../logics/appearance";
 import { handleConception, handleGiveBirth } from "../logics/pregnancy";
 import { restoreIdentity, behaviorTick } from '../logics/states';
 import { handleGiveItem } from "../logics/interact";
 import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
+import { registerGuideBookEvents } from "../logics/guideBook";
 
 export function registerCatsEvents(): void {
+    registerGuideBookEvents();
     system.afterEvents.scriptEventReceive.subscribe((ev) => {
         const { id, message, sourceEntity } = ev;
 
@@ -59,8 +62,17 @@ export function registerCatsEvents(): void {
         }
 
         if (id == "clingycats:on_give_food") {
-            behaviorTick(sourceEntity, "temp_follow_close")
             handleGiveItem(sourceEntity)
+        }
+        
+        if (id == "clingycats:on_pick_up_event") {
+            const cat = sourceEntity
+            //world.sendMessage(`§e${cat.typeId.replace("clingy_cats:", "")} §7[${cat.id.slice(-6)}] pickup succesful`);
+        }
+
+        if (id == "clingycats:on_pick_up_start_event") {
+            const cat = sourceEntity
+            //world.sendMessage(`§e${cat.typeId.replace("clingy_cats:", "")} §7[${cat.id.slice(-6)}] start to pick up`);
         }
 
         if (id === "clingycats:request_shoulder_mount") {
@@ -69,7 +81,11 @@ export function registerCatsEvents(): void {
 
         if (id === "clingycats:anchor_expire") {
             handleAnchorExpire(sourceEntity)
-        } 
+        }
+
+        if (id === "clingycats:grow_up") {
+            applyAdultSize(sourceEntity);
+        }
 
     });
 }

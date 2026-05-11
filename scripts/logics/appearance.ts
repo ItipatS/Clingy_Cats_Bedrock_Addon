@@ -1,7 +1,71 @@
 import { Entity } from '@minecraft/server';
-import { TextureData, EyesData, WhiskerData, BREED_TEXTURES, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
+import { TextureData, EyesData, WhiskerData, CatSize, BREED_TEXTURES, BREED_SPAWN_POOLS, EYE_COLORS, EYE_SHAPES, WHISKERS } from '../configs/catsbreed';
 import { randomFrom, uniqueValues } from './utils';
 import { ParentGeneData, inheritTrait, inheritPattern, pickTexture } from './genetics';
+
+// ============================================================
+// SIZE
+// ============================================================
+
+const SIZE_ORDER: CatSize[] = ["tiny", "small", "normal", "large", "huge"];
+
+function pickWeightedSize(pool: { value: CatSize; weight: number }[]): CatSize {
+    const total = pool.reduce((s, e) => s + e.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of pool) {
+        roll -= entry.weight;
+        if (roll <= 0) return entry.value;
+    }
+    return "normal";
+}
+
+export function applyFullMoonOverrides(cat: Entity): void {
+    const catalog = BREED_TEXTURES[cat.typeId];
+    if (catalog) {
+        const paleKeys = Object.keys(catalog).map(Number).filter(k =>
+            catalog[k].color === "white" || catalog[k].color === "cream"
+        );
+        if (paleKeys.length > 0 && Math.random() < 0.80) {
+            const localIdx = paleKeys[Math.floor(Math.random() * paleKeys.length)];
+            applyTextureData(cat, localIdx, catalog[localIdx]);
+        }
+    }
+    const heteroOptions = EYE_COLORS.filter(c => c.startsWith("heterochromia"));
+    const eyeColor = heteroOptions[Math.floor(Math.random() * heteroOptions.length)] as typeof EYE_COLORS[number];
+    const eyeShape = EYE_SHAPES[Math.floor(Math.random() * EYE_SHAPES.length)];
+    const shapeIdx = EYE_SHAPES.indexOf(eyeShape);
+    const colorIdx = EYE_COLORS.indexOf(eyeColor);
+    applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape: eyeShape, color: eyeColor });
+    const isBaby = cat.hasComponent("minecraft:is_baby");
+    cat.setProperty("clingy_cats:size", "huge");
+    cat.triggerEvent(isBaby ? "clingy_cats:baby_size_huge" : "clingy_cats:size_huge");
+}
+
+export function assignRandomSize(cat: Entity): void {
+    const breedKey = cat.typeId.replace("clingy_cats:", "");
+    const pool = BREED_SPAWN_POOLS[breedKey]?.size;
+    const size = pool ? pickWeightedSize(pool) : "normal";
+    cat.setProperty("clingy_cats:size", size);
+    const isBaby = cat.hasComponent("minecraft:is_baby");
+    cat.triggerEvent(isBaby ? `clingy_cats:baby_size_${size}` : `clingy_cats:size_${size}`);
+}
+
+export function assignInheritedSize(baby: Entity, momSize: string, dadSize?: string): void {
+    const sourceSize = (dadSize && Math.random() < 0.5) ? dadSize : momSize;
+    const sourceIdx  = SIZE_ORDER.indexOf(sourceSize as CatSize);
+    const idx        = sourceIdx === -1 ? 2 : sourceIdx;
+    const childIdx   = Math.random() < 0.85
+        ? Math.max(0, Math.min(SIZE_ORDER.length - 1, idx + Math.floor(Math.random() * 3) - 1))
+        : Math.floor(Math.random() * SIZE_ORDER.length);
+    const size = SIZE_ORDER[childIdx];
+    baby.setProperty("clingy_cats:size", size);
+    baby.triggerEvent(`clingy_cats:baby_size_${size}`);
+}
+
+export function applyAdultSize(cat: Entity): void {
+    const size = (cat.getProperty("clingy_cats:size") as string) ?? "normal";
+    cat.triggerEvent(`clingy_cats:size_${size}`);
+}
 
 // ============================================================
 // APPLY TO ENTITY

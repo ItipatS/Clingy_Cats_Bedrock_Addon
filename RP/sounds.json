@@ -89,23 +89,23 @@
                         "royal" : {
                             "events" : {
                                 "ambient" : {
-                                "sound" : "mob.royal_cat.ambient",
-                                "volume" : 0.70
-                                },
-                                "ambient.tame" : {
-                                "sound" : "mob.royal_cat.ambient",
-                                "volume" : 0.70
-                                },
-                                "death" : "mob.royal_cat.death",
-                                "eat" : "mob.cat.eat",
-                                "hurt" : "mob.royal_cat.hurt",
-                                "purr" : {
-                                "sound" : "mob.royal_cat.purr",
-                                "volume" : 0.70
-                                },
-                                "purreow" : {
-                                "sound" : "mob.royal_cat.purreow",
-                                "volume" : 0.70
+                                    "sound" : "mob.royal_cat.ambient",
+                                    "volume" : 0.70
+                                    },
+                                    "ambient.tame" : {
+                                    "sound" : "mob.royal_cat.ambient",
+                                    "volume" : 0.70
+                                    },
+                                    "death" : "mob.royal_cat.death",
+                                    "eat" : "mob.cat.eat",
+                                    "hurt" : "mob.royal_cat.hurt",
+                                    "purr" : {
+                                    "sound" : "mob.royal_cat.purr",
+                                    "volume" : 0.70
+                                    },
+                                    "purreow" : {
+                                    "sound" : "mob.royal_cat.purreow",
+                                    "volume" : 0.70
                                 }
                             },
                             "pitch" : 1.0,

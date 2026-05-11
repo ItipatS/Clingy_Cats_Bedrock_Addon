@@ -11,6 +11,7 @@ export interface ParentGeneData {
     eyeColor:   string;
     eyeShape:   string;
     whiskers:   string;
+    size:       string;
 }
 
 export interface ConceptionRecord {
@@ -130,6 +131,7 @@ export function findMutationBreed(motherTypeId: string, fatherTypeId: string): s
     const candidates: string[] = [];
     for (const [breedId, catalog] of Object.entries(BREED_TEXTURES)) {
         if (parentBreeds.has(breedId)) continue;
+        if (breedId === "clingy_cats:test") continue;
         const hasMatch = Object.values(catalog).some(
             e => validPatterns.has(e.pattern) && validColors.has(e.color)
         );

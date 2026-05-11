@@ -1,8 +1,11 @@
 // scripts/main.ts
-import { system as system3 } from "@minecraft/server";
+import { system as system5 } from "@minecraft/server";
 
 // scripts/events/eventRegister.ts
-import { system } from "@minecraft/server";
+import { system as system2 } from "@minecraft/server";
+
+// scripts/logics/breed.ts
+import { world } from "@minecraft/server";
 
 // scripts/configs/catsbreed.ts
 var ALL_BLACK_TEXTURES = {
@@ -555,7 +558,6 @@ var FAVORITE_FOOD_POOL = [
   { weight: 3, food: "cod" },
   { weight: 3, food: "salmon" },
   { weight: 2, food: "tropical_fish" },
-  { weight: 1, food: "pufferfish" },
   { weight: 2, food: "rabbit" },
   { weight: 3, food: "chicken" }
   /*{ weight: 2, food: "treat_fish"},
@@ -588,6 +590,13 @@ var BREED_SPAWN_POOLS = {
       { value: "soft", weight: 5 },
       { value: "bed", weight: 3 },
       { value: "owner", weight: 2 }
+    ],
+    size: [
+      { value: "tiny", weight: 1 },
+      { value: "small", weight: 5 },
+      { value: "normal", weight: 25 },
+      { value: "large", weight: 45 },
+      { value: "huge", weight: 24 }
     ]
   },
   siamese: {
@@ -608,6 +617,13 @@ var BREED_SPAWN_POOLS = {
       { value: "sun", weight: 3 },
       { value: "owner", weight: 2 },
       { value: "warm", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 30 },
+      { value: "normal", weight: 45 },
+      { value: "large", weight: 17 },
+      { value: "huge", weight: 3 }
     ]
   },
   persian: {
@@ -626,6 +642,13 @@ var BREED_SPAWN_POOLS = {
       { value: "soft", weight: 5 },
       { value: "warm", weight: 3 },
       { value: "bed", weight: 2 }
+    ],
+    size: [
+      { value: "tiny", weight: 3 },
+      { value: "small", weight: 15 },
+      { value: "normal", weight: 45 },
+      { value: "large", weight: 30 },
+      { value: "huge", weight: 7 }
     ]
   },
   british: {
@@ -646,6 +669,13 @@ var BREED_SPAWN_POOLS = {
       { value: "soft", weight: 3 },
       { value: "warm", weight: 2 },
       { value: "sun", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 2 },
+      { value: "small", weight: 10 },
+      { value: "normal", weight: 35 },
+      { value: "large", weight: 40 },
+      { value: "huge", weight: 13 }
     ]
   },
   tabby: {
@@ -666,6 +696,13 @@ var BREED_SPAWN_POOLS = {
       { value: "high", weight: 3 },
       { value: "warm", weight: 2 },
       { value: "soft", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   all_black: {
@@ -686,6 +723,13 @@ var BREED_SPAWN_POOLS = {
       { value: "warm", weight: 3 },
       { value: "soft", weight: 2 },
       { value: "sun", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   black: {
@@ -706,6 +750,13 @@ var BREED_SPAWN_POOLS = {
       { value: "sun", weight: 3 },
       { value: "warm", weight: 2 },
       { value: "soft", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   calico: {
@@ -726,6 +777,13 @@ var BREED_SPAWN_POOLS = {
       { value: "owner", weight: 3 },
       { value: "bed", weight: 2 },
       { value: "warm", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   jellie: {
@@ -743,6 +801,13 @@ var BREED_SPAWN_POOLS = {
       { value: "owner", weight: 5 },
       { value: "soft", weight: 3 },
       { value: "bed", weight: 2 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   ocelot: {
@@ -760,6 +825,13 @@ var BREED_SPAWN_POOLS = {
       { value: "high", weight: 5 },
       { value: "sun", weight: 3 },
       { value: "warm", weight: 2 }
+    ],
+    size: [
+      { value: "tiny", weight: 10 },
+      { value: "small", weight: 35 },
+      { value: "normal", weight: 40 },
+      { value: "large", weight: 13 },
+      { value: "huge", weight: 2 }
     ]
   },
   red: {
@@ -780,6 +852,13 @@ var BREED_SPAWN_POOLS = {
       { value: "sun", weight: 3 },
       { value: "soft", weight: 2 },
       { value: "owner", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 5 },
+      { value: "small", weight: 20 },
+      { value: "normal", weight: 50 },
+      { value: "large", weight: 20 },
+      { value: "huge", weight: 5 }
     ]
   },
   white: {
@@ -800,6 +879,13 @@ var BREED_SPAWN_POOLS = {
       { value: "bed", weight: 3 },
       { value: "high", weight: 2 },
       { value: "warm", weight: 1 }
+    ],
+    size: [
+      { value: "tiny", weight: 8 },
+      { value: "small", weight: 30 },
+      { value: "normal", weight: 42 },
+      { value: "large", weight: 15 },
+      { value: "huge", weight: 5 }
     ]
   }
 };
@@ -889,6 +975,7 @@ function findMutationBreed(motherTypeId, fatherTypeId) {
   const candidates = [];
   for (const [breedId, catalog] of Object.entries(BREED_TEXTURES)) {
     if (parentBreeds.has(breedId)) continue;
+    if (breedId === "clingy_cats:test") continue;
     const hasMatch = Object.values(catalog).some(
       (e) => validPatterns.has(e.pattern) && validColors.has(e.color)
     );
@@ -905,6 +992,58 @@ function determineBabyBreed(mother, father) {
 }
 
 // scripts/logics/appearance.ts
+var SIZE_ORDER = ["tiny", "small", "normal", "large", "huge"];
+function pickWeightedSize(pool) {
+  const total = pool.reduce((s, e) => s + e.weight, 0);
+  let roll = Math.random() * total;
+  for (const entry of pool) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry.value;
+  }
+  return "normal";
+}
+function applyFullMoonOverrides(cat) {
+  const catalog = BREED_TEXTURES[cat.typeId];
+  if (catalog) {
+    const paleKeys = Object.keys(catalog).map(Number).filter(
+      (k) => catalog[k].color === "white" || catalog[k].color === "cream"
+    );
+    if (paleKeys.length > 0 && Math.random() < 0.8) {
+      const localIdx = paleKeys[Math.floor(Math.random() * paleKeys.length)];
+      applyTextureData(cat, localIdx, catalog[localIdx]);
+    }
+  }
+  const heteroOptions = EYE_COLORS.filter((c) => c.startsWith("heterochromia"));
+  const eyeColor = heteroOptions[Math.floor(Math.random() * heteroOptions.length)];
+  const eyeShape = EYE_SHAPES[Math.floor(Math.random() * EYE_SHAPES.length)];
+  const shapeIdx = EYE_SHAPES.indexOf(eyeShape);
+  const colorIdx = EYE_COLORS.indexOf(eyeColor);
+  applyEyesData(cat, shapeIdx * EYE_COLORS.length + colorIdx, { shape: eyeShape, color: eyeColor });
+  const isBaby = cat.hasComponent("minecraft:is_baby");
+  cat.setProperty("clingy_cats:size", "huge");
+  cat.triggerEvent(isBaby ? "clingy_cats:baby_size_huge" : "clingy_cats:size_huge");
+}
+function assignRandomSize(cat) {
+  const breedKey = cat.typeId.replace("clingy_cats:", "");
+  const pool = BREED_SPAWN_POOLS[breedKey]?.size;
+  const size = pool ? pickWeightedSize(pool) : "normal";
+  cat.setProperty("clingy_cats:size", size);
+  const isBaby = cat.hasComponent("minecraft:is_baby");
+  cat.triggerEvent(isBaby ? `clingy_cats:baby_size_${size}` : `clingy_cats:size_${size}`);
+}
+function assignInheritedSize(baby, momSize, dadSize) {
+  const sourceSize = dadSize && Math.random() < 0.5 ? dadSize : momSize;
+  const sourceIdx = SIZE_ORDER.indexOf(sourceSize);
+  const idx = sourceIdx === -1 ? 2 : sourceIdx;
+  const childIdx = Math.random() < 0.85 ? Math.max(0, Math.min(SIZE_ORDER.length - 1, idx + Math.floor(Math.random() * 3) - 1)) : Math.floor(Math.random() * SIZE_ORDER.length);
+  const size = SIZE_ORDER[childIdx];
+  baby.setProperty("clingy_cats:size", size);
+  baby.triggerEvent(`clingy_cats:baby_size_${size}`);
+}
+function applyAdultSize(cat) {
+  const size = cat.getProperty("clingy_cats:size") ?? "normal";
+  cat.triggerEvent(`clingy_cats:size_${size}`);
+}
 function applyTextureData(cat, idx, data) {
   cat.setProperty("clingy_cats:sub_variant", idx);
   cat.setProperty("clingy_cats:hairs", data.hairs);
@@ -1030,8 +1169,12 @@ function handleSpawnTestCats(cat) {
 function handleWildSpawn(cat) {
   assignRandomAppearance(cat);
   assignRandomEyesAndWhiskers(cat);
+  if (world.getMoonPhase() === 0) {
+    applyFullMoonOverrides(cat);
+  } else {
+    assignRandomSize(cat);
+  }
   assignBreedPersonality(cat);
-  cat.triggerEvent("clingy_cats:visible_event");
 }
 
 // scripts/logics/pregnancy.ts
@@ -1051,11 +1194,12 @@ function captureGenes(entity) {
     traits: getParentTraits(entity),
     eyeColor: entity.getProperty("clingy_cats:eye_color"),
     eyeShape: entity.getProperty("clingy_cats:eye_shape"),
-    whiskers: entity.getProperty("clingy_cats:whiskers")
+    whiskers: entity.getProperty("clingy_cats:whiskers"),
+    size: entity.getProperty("clingy_cats:size") ?? "normal"
   };
 }
 function findFather(mother) {
-  return mother.dimension.getEntities({ location: mother.location, maxDistance: 6, families: ["cat"] }).filter((e) => e.id !== mother.id && !e.hasComponent("minecraft:is_baby")).sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
+  return mother.dimension.getEntities({ location: mother.location, maxDistance: 6, families: ["clingy_cats"] }).filter((e) => e.id !== mother.id && !e.hasComponent("minecraft:is_baby")).sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
 }
 var pregnancyMap = /* @__PURE__ */ new Map();
 var LITTER_WEIGHTS = [40, 30, 15, 8, 5, 2];
@@ -1097,6 +1241,7 @@ function handleGiveBirth(mother) {
     baby.addTag("clingy_cats:not_wild_spawn");
     assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
     assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
+    assignInheritedSize(baby, momGenes.size, dadGenes?.size);
     assignBreedPersonality(baby);
     baby.triggerEvent("clingy_cats:born");
   }
@@ -1255,7 +1400,7 @@ function restoreIdentity(cat) {
   if (!cat.isValid) return;
   const trait = cat.getProperty("clingy_cats:behavior_trait");
   if (!trait) return;
-  const personality = cat.getProperty("clingy_cats:personality_trait");
+  const personality = cat.getProperty("clingy_cats:personality");
   if (!personality) return;
   const last = cat.getDynamicProperty(LAST_TEMP);
   if (last) {
@@ -1267,41 +1412,40 @@ function restoreIdentity(cat) {
 }
 
 // scripts/logics/interact.ts
-var FAVORITE_TAME_CHANCE = 0.3;
-var NORMAL_TAME_CHANCE = 0.1;
-var EQUIPMENT_TO_FOOD = {
-  "tropical_fish": "tropical",
-  "pufferfish": "puffer"
-};
+import { MolangVariableMap } from "@minecraft/server";
+var FAVORITE_TAME_CHANCE = 0.45;
+var NORMAL_TAME_CHANCE = 0.2;
 function handleGiveItem(cat) {
   if (!cat.isValid) return;
   const equipment = cat.getProperty("clingy_cats:equipment");
   const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
-  console.warn(`[DEBUG:on_give_food] entity=${cat.typeId} id=${cat.id}`);
-  console.warn(`[DEBUG:on_give_food] equipment=${equipment} favoriteFood=${favoriteFood}`);
-  if (equipment === "none") {
-    console.warn(`[DEBUG:on_give_food] equipment is none \u2014 has_equipment filters missed or item not in slot yet`);
-    return;
-  }
-  const mappedEquip = EQUIPMENT_TO_FOOD[equipment] ?? equipment;
+  const mappedEquip = equipment;
   const isFavorite = mappedEquip === favoriteFood;
-  console.warn(`[DEBUG:on_give_food] mappedEquip=${mappedEquip} isFavorite=${isFavorite}`);
   const chance = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
   const success = Math.random() < chance;
-  console.warn(`[DEBUG:on_give_food] chance=${chance} success=${success}`);
   cat.setProperty("clingy_cats:equipment", "none");
   if (isFavorite) {
-    cat.dimension.spawnParticle("minecraft:heart_particle", cat.location);
+    const molang = new MolangVariableMap();
+    molang.setVector3("variable.direction", { x: 0, y: 1, z: 0 });
+    molang.setColorRGB("variable.color", { red: 1, green: 0.85, blue: 0.2 });
+    const loc = { ...cat.location, y: cat.location.y + 1 };
+    cat.dimension.spawnParticle("minecraft:wax_particle", loc, molang);
+    cat.dimension.spawnParticle("minecraft:wax_particle", { ...loc, x: loc.x + 0.3 }, molang);
+    cat.dimension.spawnParticle("minecraft:wax_particle", { ...loc, x: loc.x - 0.3 }, molang);
     cat.dimension.playSound("mob.cat.purreow", cat.location, { volume: 1, pitch: 1 });
   } else {
-    cat.dimension.spawnParticle("minecraft:villager_happy", cat.location);
+    const molang = new MolangVariableMap();
+    molang.setColorRGB("variable.note_color", { red: 0.5, green: 0.7, blue: 1 });
+    cat.dimension.spawnParticle("minecraft:note_particle", { ...cat.location, y: cat.location.y + 0.5 }, molang);
     cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 1, pitch: 1 });
+  }
+  const tameable = cat.getComponent("minecraft:tameable");
+  if (!tameable?.isTamed) {
+    behaviorTick(cat, "temp_follow_close");
   }
   if (!success) return;
   const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 10 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
-  console.warn(`[DEBUG:on_give_food] taming player=${player?.name ?? "NOT FOUND"}`);
   if (!player) return;
-  const tameable = cat.getComponent("minecraft:tameable");
   tameable?.tame(player);
   cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1, pitch: 1.2 });
 }
@@ -1353,9 +1497,243 @@ function handleAnchorExpire(anchor) {
   anchor.remove();
 }
 
+// scripts/logics/guideBook.ts
+import { ItemStack, system, world as world3 } from "@minecraft/server";
+import { ActionFormData } from "@minecraft/server-ui";
+var GUIDE_TAG = "clingy_cats:welcomed";
+function registerGuideBookEvents() {
+  world3.afterEvents.playerSpawn.subscribe((ev) => {
+    if (!ev.initialSpawn) return;
+    const player = ev.player;
+    if (player.hasTag(GUIDE_TAG)) return;
+    player.addTag(GUIDE_TAG);
+    system.runTimeout(() => {
+      const inv = player.getComponent("minecraft:inventory");
+      inv?.container?.addItem(new ItemStack("clingy_cats:guide_book", 1));
+    }, 60);
+  });
+}
+function showGuide(player) {
+  new ActionFormData().title("\xA76\xA7l\u25C6 Clingy Cats Guide \u25C6\xA7r").body(
+    `\xA7fA complete guide to living with Clingy Cats.
+\xA77Choose a topic below.`
+  ).button("\xA7eTaming Cats").button("\xA7dPersonalities").button("\xA7bTraits").button("\xA7aBreeds").button("\xA76Breeding & Genetics").button("\xA73Meownifier").button("\xA78Secrets...").button("\xA77Close").show(player).then((res) => {
+    if (res.canceled || res.selection === 7) return;
+    const pages = [pageTaming, pagePersonalities, pageTraits, pageBreeds, pageBreeding, pageMeownifier, pageSecrets];
+    pages[res.selection]?.(player);
+  });
+}
+function subPage(player, title, body) {
+  new ActionFormData().title(title).body(body).button("\xA77< Back").button("\xA78Close").show(player).then((res) => {
+    if (!res.canceled && res.selection === 0) showGuide(player);
+  });
+}
+function pageTaming(player) {
+  subPage(player, "\xA7e\xA7lTaming Cats\xA7r", [
+    `\xA77Where to find them\xA7r`,
+    `\xA7fCats spawn in plains, forests, taiga,`,
+    `\xA7fand savannas. They no longer live in villages.`,
+    `\xA7fRarer than vanilla \u2014 explore patiently.`,
+    ``,
+    `\xA77How to tame\xA7r`,
+    `\xA7fHold any food and right-click to offer it.`,
+    `\xA7fEach cat has a \xA7efavorite food\xA7f \u2014 offering it`,
+    `\xA7fgives \xA7a30%\xA7f tame chance per attempt.`,
+    `\xA7fAny other food still works at \xA7a10%\xA7f chance.`,
+    `\xA7fIt may take several tries. Keep trying.`,
+    ``,
+    `\xA77Foods cats accept\xA7r`,
+    `\xA7fcod \xB7 salmon \xB7 tropical fish \xB7 rabbit`,
+    `\xA7fchicken \xB7 beef \xB7 porkchop`,
+    `\xA7fcarrot \xB7 spider eye`,
+    ``,
+    `\xA77Tips\xA7r`,
+    `\xA7fSneak while approaching \u2014 \xA7eshy\xA7f and \xA7danxious\xA7f`,
+    `\xA7fpersonalities flee from non-sneaking players.`,
+    `\xA7fUse the \xA73Meownifier\xA7f to check favorite food`,
+    `\xA7fbefore spending your stock.`
+  ].join("\n"));
+}
+function pagePersonalities(player) {
+  subPage(player, "\xA7d\xA7lPersonalities\xA7r", [
+    `\xA7fPersonality shapes how a cat behaves \u2014`,
+    `\xA7fhow it moves, rests, and reacts to you.`,
+    `\xA7fIt does \xA7enot\xA7f change taming chance.`,
+    ``,
+    `\xA7d\xA7lAffectionate\xA7r`,
+    `\xA7fFollows owner closely. Looks at player often.`,
+    `\xA7fWill sleep near owner. Very attached.`,
+    ``,
+    `\xA7d\xA7lAloof\xA7r`,
+    `\xA7fRarely looks at players. Stays to itself.`,
+    `\xA7fSits and sleeps a lot. Independent feel.`,
+    ``,
+    `\xA7d\xA7lPlayful\xA7r`,
+    `\xA7fLooks at players frequently. Plays with`,
+    `\xA7fnearby cats often. Active and expressive.`,
+    ``,
+    `\xA7d\xA7lCalm\xA7r`,
+    `\xA7fPanics less \u2014 only flees extreme threats.`,
+    `\xA7fSteady and unbothered. Easy to be around.`,
+    ``,
+    `\xA7d\xA7lAnxious\xA7r`,
+    `\xA7fFlees non-sneaking non-owners on sight.`,
+    `\xA7fPanics from almost anything. Sneak always.`,
+    ``,
+    `\xA7d\xA7lConfident\xA7r`,
+    `\xA7fNever flees from players or mobs.`,
+    `\xA7fApproaches boldly. Looks at players often.`
+  ].join("\n"));
+}
+function pageTraits(player) {
+  subPage(player, "\xA7b\xA7lBehavior Traits\xA7r", [
+    `\xA7fTraits control day-to-day behavior \u2014`,
+    `\xA7fdifferent from personality which affects taming.`,
+    ``,
+    `\xA7b\xA7lLazy\xA7r`,
+    `\xA7fSits more, roams less. Long idle timers.`,
+    `\xA7fPerfect lap cat.`,
+    ``,
+    `\xA7b\xA7lActive\xA7r`,
+    `\xA7fRoams far, plays often, hunts more.`,
+    `\xA7fNeeds space and stimulation.`,
+    ``,
+    `\xA7b\xA7lCurious\xA7r`,
+    `\xA7fApproaches players and mobs to investigate.`,
+    `\xA7fExplores new blocks and areas.`,
+    ``,
+    `\xA7b\xA7lShy\xA7r`,
+    `\xA7fLarge flee radius around players.`,
+    `\xA7fFlees fast \u2014 sneak approach recommended.`,
+    ``,
+    `\xA7b\xA7lFriendly\xA7r`,
+    `\xA7fSmall flee radius. Approaches players sooner.`,
+    `\xA7fEasier to find in the open.`,
+    ``,
+    `\xA7b\xA7lIndependent\xA7r`,
+    `\xA7fLoose follower when tamed. Does its own thing.`,
+    `\xA7fNot ideal for tight companion roles.`
+  ].join("\n"));
+}
+function pageBreeds(player) {
+  subPage(player, "\xA7a\xA7lBreeds\xA7r", [
+    `\xA7a\xA7lRagdoll\xA7r \xA77\u2014 Largest breed. Fluffy pointed coat.`,
+    `\xA7fGentle giants. Spawns large to huge.`,
+    ``,
+    `\xA7a\xA7lSiamese\xA7r \xA77\u2014 Always pointed + cream. Slender`,
+    `\xA7fbuild. Elegant and recognizable.`,
+    ``,
+    `\xA7a\xA7lPersian\xA7r \xA77\u2014 Fluffy, flat face, round head.`,
+    `\xA7fTends toward larger sizes. Regal look.`,
+    ``,
+    `\xA7a\xA7lBritish\xA7r \xA77\u2014 Stocky with round head, short snout.`,
+    `\xA7fFavors larger builds. Dense coat variety.`,
+    ``,
+    `\xA7a\xA7lWhite\xA7r \xA77\u2014 Unique sphinx pattern, no hair.`,
+    `\xA7fSmall build. Striking and unusual.`,
+    ``,
+    `\xA7a\xA7lOcelot\xA7r \xA77\u2014 Smallest breed. Wild-looking spots.`,
+    `\xA7fOnly 1 texture. Rare and elusive.`,
+    ``,
+    `\xA7a\xA7lTabby\xA7r \xA77\u2014 Classic tabby orange. Medium build.`,
+    `\xA7fHair and tail vary. Common and friendly.`,
+    ``,
+    `\xA7a\xA7lAll Black\xA7r \xA77\u2014 Solid coat, gray and brown variants.`,
+    `\xA7fBobtail common. Mysterious look.`,
+    ``,
+    `\xA7a\xA7lBlack\xA7r \xA77\u2014 Tuxedo and bicolor patterns.`,
+    `\xA7fBlack and white contrast. Very charming.`,
+    ``,
+    `\xA7a\xA7lCalico\xA7r \xA77\u2014 Multi-color patches. Each one unique.`,
+    `\xA7fWide visual variety.`,
+    ``,
+    `\xA7a\xA7lJellie\xA7r \xA77\u2014 Special patterned textures.`,
+    `\xA7fDistinctive and collectible.`,
+    ``,
+    `\xA7a\xA7lRed\xA7r \xA77\u2014 Always tabby orange. Hair and tail vary.`,
+    `\xA7fMany texture options. Vibrant and warm.`
+  ].join("\n"));
+}
+function pageBreeding(player) {
+  subPage(player, "\xA76\xA7lBreeding & Genetics\xA7r", [
+    `\xA7fTwo \xA7dtamed\xA7f cats of \xA7eany breed\xA7f can breed`,
+    `\xA7fwhen fed their favorite food near each other.`,
+    `\xA7fBreed does not need to match.`,
+    ``,
+    `\xA77Baby breed\xA7r`,
+    `\xA7a45%\xA7f chance: mother's breed`,
+    `\xA7a45%\xA7f chance: father's breed`,
+    `\xA7a10%\xA7f chance: surprise \u2014 a \xA7emutation\xA7f breed`,
+    `\xA77that shares traits with both parents.`,
+    ``,
+    `\xA77Inheritance\xA7r`,
+    `\xA7fKittens inherit appearance from both parents`,
+    `\xA7fwith drift \u2014 they won't be identical copies.`,
+    ``,
+    `\xA76Pattern & Color    \xA7a85% \xA77inherit \xB7 15% random`,
+    `\xA76Hair & Tail        \xA7a80\u201395% \xA77inherit`,
+    `\xA76Eye Color          \xA7a90% \xA77inherit`,
+    `\xA76Eye Shape          \xA7a85% \xA77inherit \xB11 step`,
+    `\xA76Size               \xA7a85% \xA77inherit \xB11 tier`,
+    ``,
+    `\xA77Special chances\xA7r`,
+    `\xA7a1%\xA7f chance of \xA7bheterochromia\xA7f eyes`,
+    `\xA77(mismatched colors) on any born kitten.`,
+    ``,
+    `\xA77Baby growth\xA7r`,
+    `\xA7fKittens grow into adults over time.`,
+    `\xA7fSize tier is inherited \u2014 babies show a`,
+    `\xA7fsmaller version that scales up as they grow.`
+  ].join("\n"));
+}
+function pageMeownifier(player) {
+  subPage(player, "\xA73\xA7lMeownifier\xA7r", [
+    `\xA7fThe Meownifier is your cat inspection tool.`,
+    `\xA7fAim at any cat within \xA7e20 blocks\xA7f and use it`,
+    `\xA7fto reveal everything about them.`,
+    ``,
+    `\xA77Crafting\xA7r`,
+    `\xA7f  \xA77. \xA7eG \xA77.`,
+    `\xA7f  \xA7eG \xA7cE \xA7eG     \xA7eG\xA7f = Gold Ingot`,
+    `\xA7f  \xA77. \xA7bA \xA77.     \xA7cE\xA7f = Eye of Ender`,
+    `\xA7f               \xA7bA\xA7f = Amethyst Shard`,
+    ``,
+    `\xA77What it shows\xA7r`,
+    `\xA7fBreed \xB7 Life stage \xB7 Tame status`,
+    `\xA7fPersonality \xB7 Trait \xB7 Favorite food`,
+    `\xA7fFavorite block \xB7 Size \xB7 Current state`,
+    `\xA7fAffection & trust levels`,
+    `\xA7fEyes \xB7 Coat \xB7 Tail \xB7 Snout \xB7 Head`,
+    ``,
+    `\xA77Durability\xA7r`,
+    `\xA7f64 uses. Repair with \xA7bamethyst shards\xA7f`,
+    `\xA7for \xA7egold ingots\xA7f on an anvil.`,
+    `\xA7fEnchant with \xA7aMending\xA7f to keep it forever.`
+  ].join("\n"));
+}
+function pageSecrets(player) {
+  subPage(player, "\xA78\xA7l... Secrets ...\xA7r", [
+    `\xA78Some things are not written in any guide.`,
+    ``,
+    `\xA78Watch the sky. The moon keeps old promises.`,
+    `\xA78Pale coats and mismatched eyes walk at night`,
+    `\xA78when the world is brightest dark.`,
+    ``,
+    `\xA78A cat that has witnessed death`,
+    `\xA78and carries a golden ward\xA78...`,
+    `\xA78may never witness it again.`,
+    ``,
+    `\xA78The Meownifier reveals what the eye cannot see.`,
+    `\xA78Look closely at the numbers.`,
+    ``,
+    `\xA78\xA7o\u2014 that is all that will be said here.`
+  ].join("\n"));
+}
+
 // scripts/events/eventRegister.ts
 function registerCatsEvents() {
-  system.afterEvents.scriptEventReceive.subscribe((ev) => {
+  registerGuideBookEvents();
+  system2.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
@@ -1396,8 +1774,13 @@ function registerCatsEvents() {
       return;
     }
     if (id == "clingycats:on_give_food") {
-      behaviorTick(sourceEntity, "temp_follow_close");
       handleGiveItem(sourceEntity);
+    }
+    if (id == "clingycats:on_pick_up_event") {
+      const cat = sourceEntity;
+    }
+    if (id == "clingycats:on_pick_up_start_event") {
+      const cat = sourceEntity;
     }
     if (id === "clingycats:request_shoulder_mount") {
       handleRequestShoulderMount(sourceEntity);
@@ -1405,18 +1788,22 @@ function registerCatsEvents() {
     if (id === "clingycats:anchor_expire") {
       handleAnchorExpire(sourceEntity);
     }
+    if (id === "clingycats:grow_up") {
+      applyAdultSize(sourceEntity);
+    }
   });
 }
 
 // scripts/debug/catdebug.ts
-import { world as world2, system as system2, EquipmentSlot as EquipmentSlot2, EntityComponentTypes as EntityComponentTypes2 } from "@minecraft/server";
+import { world as world5, system as system3, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
 var DEBUG = true;
 function registerDebugRaycast() {
   if (!DEBUG) return;
-  system2.runInterval(() => {
-    for (const player of world2.getAllPlayers()) {
-      const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot2.Mainhand);
+  system3.runInterval(() => {
+    for (const player of world5.getAllPlayers()) {
+      const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
+      if (player.getGameMode() === GameMode.Creative) return;
       const hit = player.getEntitiesFromViewDirection({
         maxDistance: 10,
         ignoreBlockCollision: false
@@ -1424,7 +1811,7 @@ function registerDebugRaycast() {
       if (!hit?.entity) continue;
       const cat = hit.entity;
       if (!cat.typeId.startsWith("clingy_cats:")) continue;
-      const inventory = cat.getComponent(EntityComponentTypes2.Inventory);
+      const inventory = cat.getComponent(EntityComponentTypes.Inventory);
       const heldItem = inventory?.container?.getItem(0);
       const lines = [
         `\xA7e${cat.typeId.replace("clingy_cats:", "")} \xA77[${cat.id.slice(-6)}]`,
@@ -1445,8 +1832,99 @@ function registerDebugRaycast() {
   }, 10);
 }
 
+// scripts/logics/inspect.ts
+import { EquipmentSlot as EquipmentSlot2, GameMode as GameMode2, system as system4 } from "@minecraft/server";
+import { ActionFormData as ActionFormData2 } from "@minecraft/server-ui";
+function registerItemComponents() {
+  system4.beforeEvents.startup.subscribe((ev) => {
+    ev.itemComponentRegistry.registerCustomComponent("clingy_cats_component:guide_book", {
+      onUse(event) {
+        const player = event.source;
+        if (!player) return;
+        showGuide(player);
+      }
+    });
+    ev.itemComponentRegistry.registerCustomComponent("clingy_cats_component:meownifier", {
+      onUse(event) {
+        const player = event.source;
+        if (!player) return;
+        const hits = player.dimension.getEntitiesFromRay(
+          player.getHeadLocation(),
+          player.getViewDirection(),
+          { maxDistance: 20, excludeTypes: ["minecraft:item", "minecraft:xp_orb"] }
+        );
+        const hit = hits.find((h) => h.entity.typeId.startsWith("clingy_cats:") && h.entity !== player);
+        if (!hit) return;
+        const catSounds = ["mob.cat.meow", "mob.cat.purreow"];
+        const sound = catSounds[Math.floor(Math.random() * catSounds.length)];
+        player.dimension.playSound(sound, player.location, { volume: 1, pitch: 1.8 });
+        showCatForm(player, hit.entity);
+        reduceDurability(player);
+      }
+    });
+  });
+}
+function statBar(val, max, len = 10) {
+  const filled = Math.round(val / max * len);
+  return "\xA72" + "\u2588".repeat(filled) + "\xA78" + "\u2591".repeat(len - filled) + `\xA77 ${val}\xA78/${max}`;
+}
+function showCatForm(player, cat) {
+  const breed = cat.typeId.replace("clingy_cats:", "").replace(/_/g, " ");
+  const isBaby = cat.hasComponent("minecraft:is_baby");
+  const isTamed = cat.hasComponent("minecraft:is_tamed");
+  const isImmortal = cat.getProperty("clingy_cats:immortal");
+  const p = (key) => String(cat.getProperty(`clingy_cats:${key}`) ?? "?").replace(/_/g, " ");
+  const pi = (key) => cat.getProperty(`clingy_cats:${key}`) ?? 0;
+  const stageTag = isBaby ? "\xA7b\u2605 Baby" : "\xA7a\u2605 Adult";
+  const tameTag = isTamed ? "\xA7d\u2665 Tamed" : "\xA77  Wild";
+  const immortalLine = isImmortal ? `
+\xA78-=-=-=-=-=-\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\xA7r
+\xA7c\xA7l  \u2726 IMMORTAL  \xA7r\xA77  protected by totem` : "";
+  const body = [
+    `\xA7e\xA7l${breed.toUpperCase()}\xA7r`,
+    `\xA78  ${stageTag}\xA78  |  ${tameTag}`,
+    `\xA78- - - - - - - - - - - - - - -`,
+    `\xA76\xA7lIDENTITY`,
+    `\xA77  Personality  \xA7d${p("personality")}`,
+    `\xA77  Trait        \xA7b${p("behavior_trait")}`,
+    `\xA77  Fav. Food    \xA7e${p("favorite_food")}`,
+    `\xA77  Fav. Block   \xA73${p("favorite_block")}`,
+    `\xA78- - - - - - - - - - - - - - -`,
+    `\xA76\xA7lVITALS`,
+    `\xA77  Size   \xA7f${p("size")}\xA77   State  \xA7f${p("state")}`,
+    `\xA7d  Affection  ${statBar(pi("affection_level"), 1e3)}`,
+    `\xA7a  Trust      ${statBar(pi("trust_level"), 1e3)}`,
+    `\xA78- - - - - - - - - - - - - - -`,
+    `\xA76\xA7lAPPEARANCE`,
+    `\xA77  Eyes  \xA7f${p("eye_shape")} \xA78/ \xA7f${p("eye_color")}`,
+    `\xA77  Coat  \xA7f${p("pattern")} \xA78+ \xA7f${p("color")} \xA78+ \xA7f${p("hairs")} hair`,
+    `\xA77  Tail  \xA7f${p("tail")}  \xA77Snout  \xA7f${p("snout")}  \xA77Head  \xA7f${p("head")}`,
+    immortalLine
+  ].join("\n");
+  new ActionFormData2().title("\xA76\xA7l[ Meownifier ]\xA7r").body(body).button("\xA77Close").show(player);
+}
+function reduceDurability(player) {
+  if (player.getGameMode() === GameMode2.Creative) return;
+  const equippable = player.getComponent("minecraft:equippable");
+  if (!equippable) return;
+  const slot = equippable.getEquipmentSlot(EquipmentSlot2.Mainhand);
+  const item = slot.getItem();
+  if (!item) return;
+  const dur = item.getComponent("minecraft:durability");
+  if (!dur) return;
+  const next = dur.damage + 1;
+  if (next >= dur.maxDurability) {
+    slot.setItem(void 0);
+    player.dimension.playSound("random.break", player.location);
+  } else {
+    dur.damage = next;
+    slot.setItem(item);
+  }
+}
+
 // scripts/main.ts
-system3.run(() => {
+registerItemComponents();
+system5.run(() => {
   registerCatsEvents();
   registerDebugRaycast();
 });

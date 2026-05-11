@@ -1,7 +1,7 @@
 import { Entity, system } from '@minecraft/server';
 import { distanceSq } from './utils';
 import { ParentGeneData, ConceptionRecord, determineBabyBreed } from './genetics';
-import { assignInheritedAppearanceFromGenes, assignInheritedEyesAndWhiskersFromGenes } from './appearance';
+import { assignInheritedAppearanceFromGenes, assignInheritedEyesAndWhiskersFromGenes, assignInheritedSize } from './appearance';
 import { assignBreedPersonality } from './personality';
 
 // ============================================================
@@ -26,12 +26,13 @@ function captureGenes(entity: Entity): ParentGeneData {
         eyeColor: entity.getProperty("clingy_cats:eye_color") as string,
         eyeShape: entity.getProperty("clingy_cats:eye_shape") as string,
         whiskers: entity.getProperty("clingy_cats:whiskers")  as string,
+        size:     entity.getProperty("clingy_cats:size")      as string ?? "normal",
     };
 }
 
 function findFather(mother: Entity): Entity | undefined {
     return mother.dimension
-        .getEntities({ location: mother.location, maxDistance: 6, families: ["cat"] })
+        .getEntities({ location: mother.location, maxDistance: 6, families: ["clingy_cats"] })
         .filter(e => e.id !== mother.id && !e.hasComponent("minecraft:is_baby"))
         .sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother))[0];
 }
@@ -100,6 +101,7 @@ export function handleGiveBirth(mother: Entity): void {
 
         assignInheritedAppearanceFromGenes(baby, momGenes, dadGenes);
         assignInheritedEyesAndWhiskersFromGenes(baby, momGenes, dadGenes);
+        assignInheritedSize(baby, momGenes.size, dadGenes?.size);
         assignBreedPersonality(baby);
         
         baby.triggerEvent("clingy_cats:born");

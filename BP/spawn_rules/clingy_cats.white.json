@@ -22,11 +22,11 @@
           "max": "hard"
         },
         "minecraft:weight": {
-          "default": 5
+          "default": 6
         },
         "minecraft:herd": {
           "min_size": 1,
-          "max_size": 1
+          "max_size": 2
         },
         "minecraft:biome_filter": {
           "any_of": [

@@ -19,6 +19,7 @@
             { "walking":  "query.modified_move_speed > 0.01" }
           ]
         },
+
         "walking": {
           "animations": [
             { "walk": "query.modified_move_speed > 0.01" }
@@ -27,7 +28,10 @@
           "transitions": [
             { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
             { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
-            { "wait_idle": "query.modified_move_speed <= 0.01 && query.property('clingy_cats:state') == 'idle'" }
+            { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
+            { "grooming": "query.property('clingy_cats:state') == 'grooming'" },
+            { "rubbing":  "query.property('clingy_cats:state') == 'rubbing'" },
+            { "wait_idle": "query.modified_move_speed <= 0.01 && query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -39,8 +43,8 @@
           "transitions": [
             { "grooming": "query.property('clingy_cats:state') == 'grooming'" },
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
-            { "walking":  "query.modified_move_speed > 0.01 && query.property('clingy_cats:state') != 'sitting'" },
-            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
+            { "walking":  "query.modified_move_speed > 0.01 && !query.timer_flag_1" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -56,8 +60,8 @@
           "blend_transition": 0.5,
           "transitions": [
             { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
-            { "walking": "query.modified_move_speed > 0.01 && query.property('clingy_cats:state') != 'sleeping'" },
-            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
+            { "walking":  "query.modified_move_speed > 0.01 && !query.timer_flag_1" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -71,10 +75,10 @@
           ],
           "blend_transition": 0.1,
           "transitions": [
-            { "sitting": "query.property('clingy_cats:state') == 'sitting'" },
+            { "sitting":  "query.property('clingy_cats:state') == 'sitting'" },
             { "sleeping": "query.property('clingy_cats:state') == 'sleeping'" },
-            { "walking": "query.modified_move_speed > 0.01 && query.property('clingy_cats:state') != 'grooming'" },
-            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
+            { "walking":  "query.modified_move_speed > 0.01 && !query.timer_flag_1" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -84,8 +88,8 @@
           ],
           "blend_transition": 0.2,
           "transitions": [
-            { "walking": "query.modified_move_speed > 0.01 && query.property('clingy_cats:state') != 'purring' " },
-            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
+            { "walking":  "query.modified_move_speed > 0.01 && !query.timer_flag_1" },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -95,9 +99,9 @@
           ],
           "blend_transition": 0.1,
           "transitions": [
-            { "hunting": "query.property('clingy_cats:state') == 'hunting'" },
-            { "walking": "query.modified_move_speed > 0.01" },
-            { "wait_idle": "query.property('clingy_cats:state') == 'idle'" }
+            { "hunting":  "query.property('clingy_cats:state') == 'hunting'" },
+            { "walking":  "query.modified_move_speed > 0.01 " },
+            { "wait_idle": "query.property('clingy_cats:state') == 'idle' && !query.timer_flag_1" }
           ]
         },
 
@@ -118,8 +122,8 @@
           ],
           "blend_transition": 0.15,
           "transitions": [
-            { "hissing": "query.property('clingy_cats:state') == 'hissing'" },
-            { "walking": "query.property('clingy_cats:state') == 'idle' && query.modified_move_speed > 0.01" },
+            { "hissing":  "query.property('clingy_cats:state') == 'hissing'" },
+            { "walking":  "query.property('clingy_cats:state') == 'idle' && query.modified_move_speed > 0.01" },
             { "wait_idle": "query.property('clingy_cats:state') == 'idle' && query.modified_move_speed <= 0.01" }
           ]
         }

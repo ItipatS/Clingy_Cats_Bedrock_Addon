@@ -1,7 +1,7 @@
-import { Entity } from '@minecraft/server';
+import { Entity, world } from '@minecraft/server';
 import { BREED_TEXTURES, BREED_OFFSETS } from '../configs/catsbreed';
 import { randomFrom } from './utils';
-import { applyTextureData, assignRandomAppearance, assignRandomEyesAndWhiskers } from './appearance';
+import { applyTextureData, assignRandomAppearance, assignRandomEyesAndWhiskers, assignRandomSize, applyFullMoonOverrides } from './appearance';
 import { assignRandomPersonality, assignBreedPersonality } from './personality';
 
 /** Test entity spawn — picks a random breed catalog and applies a random flat-indexed texture. */
@@ -17,10 +17,14 @@ export function handleSpawnTestCats(cat: Entity): void {
     cat.triggerEvent("clingy_cats:visible_event");
 }
 
-/** Wild spawn — full random appearance + eyes + whiskers + breed-weighted personality. */
+/** Wild spawn — full random appearance + eyes + whiskers + breed-weighted personality + size. */
 export function handleWildSpawn(cat: Entity): void {
     assignRandomAppearance(cat);
     assignRandomEyesAndWhiskers(cat);
+    if (world.getMoonPhase() === 0) {
+        applyFullMoonOverrides(cat);
+    } else {
+        assignRandomSize(cat);
+    }
     assignBreedPersonality(cat);
-    cat.triggerEvent("clingy_cats:visible_event");
 }
