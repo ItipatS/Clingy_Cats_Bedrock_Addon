@@ -1,21 +1,29 @@
 import { Entity, MolangVariableMap, world } from "@minecraft/server";
+import { Personality } from "../configs/catsbreed";
 import { distanceSq } from "./utils";
 import { behaviorTick } from '../logics/states';
 
-const FAVORITE_TAME_CHANCE = 0.45;
-const NORMAL_TAME_CHANCE   = 0.2;
+const TAME_RATES: Record<Personality, { favorite: number; neutral: number }> = {
+    anxious:      { favorite: 0.20, neutral: 0.05 },
+    aloof:        { favorite: 0.25, neutral: 0.08 },
+    playful:      { favorite: 0.35, neutral: 0.15 },
+    calm:         { favorite: 0.40, neutral: 0.15 },
+    confident:    { favorite: 0.45, neutral: 0.20 },
+    affectionate: { favorite: 0.50, neutral: 0.20 },
+};
+const DEFAULT_RATES = { favorite: 0.45, neutral: 0.20 };
 
 export function handleGiveItem(cat: Entity): void {
     if (!cat.isValid) return;
 
     const equipment    = cat.getProperty("clingy_cats:equipment") as string;
     const favoriteFood = cat.getProperty("clingy_cats:favorite_food") as string;
+    const personality  = cat.getProperty("clingy_cats:personality")   as Personality;
 
-    const mappedEquip =  equipment;
-    const isFavorite  = mappedEquip === favoriteFood;
-
-    const chance  = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
-    const success = Math.random() < chance;
+    const isFavorite = equipment === favoriteFood;
+    const rates      = TAME_RATES[personality] ?? DEFAULT_RATES;
+    const chance     = isFavorite ? rates.favorite : rates.neutral;
+    const success    = Math.random() < chance;
 
     cat.setProperty("clingy_cats:equipment", "none");
 

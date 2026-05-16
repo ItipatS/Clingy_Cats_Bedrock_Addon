@@ -1468,15 +1468,23 @@ function restoreIdentity(cat) {
 
 // scripts/logics/interact.ts
 import { MolangVariableMap } from "@minecraft/server";
-var FAVORITE_TAME_CHANCE = 0.45;
-var NORMAL_TAME_CHANCE = 0.2;
+var TAME_RATES = {
+  anxious: { favorite: 0.2, neutral: 0.05 },
+  aloof: { favorite: 0.25, neutral: 0.08 },
+  playful: { favorite: 0.35, neutral: 0.15 },
+  calm: { favorite: 0.4, neutral: 0.15 },
+  confident: { favorite: 0.45, neutral: 0.2 },
+  affectionate: { favorite: 0.5, neutral: 0.2 }
+};
+var DEFAULT_RATES = { favorite: 0.45, neutral: 0.2 };
 function handleGiveItem(cat) {
   if (!cat.isValid) return;
   const equipment = cat.getProperty("clingy_cats:equipment");
   const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
-  const mappedEquip = equipment;
-  const isFavorite = mappedEquip === favoriteFood;
-  const chance = isFavorite ? FAVORITE_TAME_CHANCE : NORMAL_TAME_CHANCE;
+  const personality = cat.getProperty("clingy_cats:personality");
+  const isFavorite = equipment === favoriteFood;
+  const rates = TAME_RATES[personality] ?? DEFAULT_RATES;
+  const chance = isFavorite ? rates.favorite : rates.neutral;
   const success = Math.random() < chance;
   cat.setProperty("clingy_cats:equipment", "none");
   if (isFavorite) {
