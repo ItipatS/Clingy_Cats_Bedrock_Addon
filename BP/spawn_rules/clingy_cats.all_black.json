@@ -1,10 +1,10 @@
-﻿{
+{
   "format_version": "1.8.0",
   "minecraft:spawn_rules": {
     "description": { "identifier": "clingy_cats:all_black", "population_control": "cat" },
     "conditions": [{
       "minecraft:spawns_on_surface": {},
-      "minecraft:spawns_above_block_filter": { "blocks": ["grass_block","dirt","podzol","coarse_dirt"], "distance": 10 },
+      "minecraft:spawns_above_block_filter": { "blocks": ["grass_block","dirt","podzol","coarse_dirt","mud","muddy_mangrove_roots"], "distance": 10 },
       "minecraft:brightness_filter": { "min": 7, "max": 15, "adjust_for_weather": false },
       "minecraft:difficulty_filter": { "min": "peaceful", "max": "hard" },
       "minecraft:weight": { "default": 4 },

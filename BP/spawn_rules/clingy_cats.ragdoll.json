@@ -1,4 +1,4 @@
-﻿{
+{
   "format_version": "1.8.0",
   "minecraft:spawn_rules": {
     "description": { "identifier": "clingy_cats:ragdoll", "population_control": "cat" },
@@ -7,24 +7,11 @@
       "minecraft:spawns_above_block_filter": { "blocks": ["grass_block","dirt","podzol","coarse_dirt","snow_layer","snow"], "distance": 10 },
       "minecraft:brightness_filter": { "min": 7, "max": 15, "adjust_for_weather": false },
       "minecraft:difficulty_filter": { "min": "peaceful", "max": "hard" },
-      "minecraft:weight": { "default": 3 },
-      "minecraft:herd": { "min_size": 1, "max_size": 2 },
-      "minecraft:biome_filter": { "all_of": [
-        {
-              "test": "has_biome_tag",
-              "operator": "==",
-              "value": "snowy_slopes"
-            },
-            {
-              "test": "has_biome_tag",
-              "operator": "==",
-              "value": "jagged_peaks"
-            },
-            {
-              "test": "has_biome_tag",
-              "operator": "==",
-              "value": "frozen_peaks"
-            }
+      "minecraft:weight": { "default": 2 },
+      "minecraft:herd": { "min_size": 1, "max_size": 1 },
+      "minecraft:biome_filter": { "any_of": [
+        { "test": "has_biome_tag", "value": "snowy_slopes" },
+        { "test": "has_biome_tag", "value": "grove" }
       ]}
     }]
   }
