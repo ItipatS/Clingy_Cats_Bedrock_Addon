@@ -1,541 +1,327 @@
-Clingy Cats — Full Design Reference
-Updated April 2026 — captures all decisions from architecture session
+# Clingy Cats — Project Reference
 
-Project Identity
+Last updated: 2026-05-16. Reflects the current state of code on `main`.
 
-Developer: Itipat — Unity/C++ → Bedrock addon dev, targeting Overtales (Thai Mojang Marketplace studio)
-Project: Clingy Cats — breed-specific cat behavior addon
-Format version: 1.26.10
-Key feedback from head dev: BP/RP JSON first, Script only when BP genuinely cannot express it
+## Project Identity
 
+- **Developer:** Itipat — Unity/C++ → Bedrock addon dev, targeting Overtales (Thai Mojang Marketplace studio).
+- **Project:** Clingy Cats — breed-specific cat behavior addon.
+- **Build chain:** authored via Bridge v2.7.54 + Dash 0.11.7; BP/RP under `BP/` and `RP/`. Compiled JS lands in `dist/scripts/main.js` (sourcemap in `dist/debug/`).
+- **Engine versions seen in files:**
+  - `BP/manifest.json` → `min_engine_version: [1,26,10]`.
+  - Breed BP entities → `"format_version": "1.26.10"` for `cat.json`, but cloned breed files use `"1.26.20"`. Items + recipes use `1.26.10`. The mix is intentional-ish but should be confirmed against the version actually targeted.
+- **Head dev guidance:** BP/RP JSON first, Script only when BP genuinely cannot express it. Still the rule.
 
-Architecture Fundamentals
-One entity per breed — no god entity
-clingy_cats:british, clingy_cats:siamese, clingy_cats:tabby,
-clingy_cats:persian, clingy_cats:ragdoll, clingy_cats:all_black,
-clingy_cats:black, clingy_cats:calico, clingy_cats:jellie,
-clingy_cats:red, clingy_cats:ocelot, clingy_cats:white
-Each breed has its own BP entity file, own spawn rules file. Shared RP (one render controller per breed, shared animation file copied into project RP — never reference vanilla directly).
-Script Boundary
-Only use Script for:
+## Repo Layout
 
-sub_variant int assignment on spawn (BP can't pick from 100+ range cleanly)
-Appearance inheritance from mother on breed (needs to read parent entity properties)
-Tame probability calculation (personality × favorite_food interaction)
-Relative height check for favorite_block_high
-Custom item effects if complex
+```
+BP/
+  manifest.json
+  entities/
+    cat.json                         # vanilla cat override (sound_variant + base behaviors)
+    cats/
+      <breed>.json                   # per-breed entity (12 breeds + test_BP)
+      shoulder_anchor.json           # invisible mount entity for shoulder riding
+  spawn_rules/
+    cat.json                         # vanilla cat spawn override
+    clingy_cats.<breed>.json         # per-breed spawn rules (no spawn rule for `test`)
+  items/
+    meownifier.json                  # custom inspect item
+    guide_book.json                  # custom guide item
+  recipes/<item>.json
+  loot_tables/
+    empty.json
+    entities/clingy_cat_gift.json    # cat-gift pool (string/feather/etc., emerald @ weight 1)
+  functions/tick.json                # empty placeholder
+  texts/languages.json
 
-Everything else is pure BP.
+RP/
+  entity/<breed>_RP.json             # client_entity per breed (12 breeds + test)
+  (render controllers, animations, textures, models elsewhere in RP/)
 
-Property System (complete — all client_sync: true)
-Property Budget
-Hard limit: 32 properties per entity type
-Currently using ~15 → 17 slots remaining
+scripts/                             # TypeScript source (compiled by Bridge/Dash → dist/scripts/main.js)
+  main.ts
+  configs/catsbreed.ts               # texture catalogs, pools, breed maps, types
+  events/eventRegister.ts            # scriptevent → handler dispatch
+  logics/
+    appearance.ts                    # applyTextureData/eyes/whiskers, size assignment, full-moon overrides
+    breed.ts                         # handleWildSpawn / handleSpawnTestCats (biome bias)
+    genetics.ts                      # inheritTrait/inheritPattern/pickTexture/findMutationBreed
+    interact.ts                      # tame on food (handleGiveItem)
+    inspect.ts                       # registerItemComponents (meownifier + guide_book), showCatForm
+    pregnancy.ts                     # handleConception / handleGiveBirth
+    personality.ts                   # assignRandomPersonality / assignBreedPersonality
+    riding.ts                        # shoulder anchor management
+    states.ts                        # behaviorTick (state machine) + restoreIdentity
+    guideBook.ts                     # multi-page ActionFormData
+    utils.ts                         # randomFrom, weightedRandom, findBothParents, distanceSq
+  debug/catdebug.ts                  # debug HUD on stick (DEBUG=true currently!)
+```
 
-json"clingy_cats:sub_variant":    { "type": "int",  "range": [0, 126], "default": 0 }
-"clingy_cats:pattern":        { "type": "enum",  "values": ["solid","tabby","tuxedo","bicolor","calico","tortoiseshell","pointed","sphinx"] }
-"clingy_cats:color":          { "type": "enum",  "values": ["black","white","gray","brown","orange","chocolate","cream"] }
-"clingy_cats:hairs":          { "type": "enum",  "values": ["short","fluffy","none"] }
-"clingy_cats:tail":           { "type": "enum",  "values": ["normal","bobtail"] }
-"clingy_cats:snout":          { "type": "enum",  "values": ["normal","short"] }
-"clingy_cats:head":           { "type": "enum",  "values": ["round","flat"] }
-"clingy_cats:whiskers":       { "type": "enum",  "values": ["short","medium","long"] }
-"clingy_cats:eye_shape":      { "type": "enum",  "values": ["narrow","round","almond"] }
-"clingy_cats:eye_color":      { "type": "enum",  "values": ["green","yellow","blue","brown","orange","teal","gray","heterochromia"] }
-"clingy_cats:behavior_trait": { "type": "enum",  "values": ["lazy","active","curious","shy","friendly","independent"] }
-"clingy_cats:personality":    { "type": "enum",  "values": ["affectionate","aloof","playful","calm","anxious","confident"] }
-"clingy_cats:state":          { "type": "enum",  "values": ["idle","sitting","purring","hissing","meowing","stretching","jumping","climbing","swimming","sleeping","playing","hunting","grooming","begging"] }
-"clingy_cats:emotion":        { "type": "enum",  "values": ["happy","sad","angry","scared","curious","playful"] }
-"clingy_cats:sound_variant":  { "type": "enum",  "values": ["default","royal"] }
-RP reads all via q.property('clingy_cats:X')
-Enums return their index as int in RP — array order in BP = array index in RP render controller
+## Breeds & Per-Breed Files
 
-Texture Catalog System
-What the artist did
-All body traits are baked into texture UV — pattern + color + hairs + tail + snout + head are painted into each texture file. They are NOT independent geometry pieces (except whiskers and eyes which are separate models).
-Vocabulary (locked)
-pattern:  solid, tabby, tuxedo, bicolor, calico, tortoiseshell, pointed, sphinx
-color:    black, white, gray, brown, orange, chocolate, cream
-hairs:    short, fluffy, none
-tail:     normal, bobtail
-snout:    normal, short
-head:     round, flat
-sub_variant int
-Each breed has a catalog Record<number, TextureData> where the index = RP array position = texture file. The int property sub_variant selects which texture to display.
-tstype TextureData = {
-    pattern: string; color: string; hairs: string;
-    tail: string;    snout: string; head: string;
-};
-RP render controller pattern
-json"Array.body[q.property('clingy_cats:sub_variant')]"
-"Array.whiskers[q.property('clingy_cats:whiskers')]"
-"Array.eye_shape[q.property('clingy_cats:eye_shape')]"
-"Array.eye_color[q.property('clingy_cats:eye_color')]"
-Whiskers and eye_shape/eye_color are separate overlay models, not baked — fully independent from sub_variant.
+12 breeds: `all_black`, `black`, `british`, `calico`, `jellie`, `ocelot`, `persian`, `ragdoll`, `red`, `siamese`, `tabby`, `white`. Plus `test` (summon-only, no spawn rule). Texture counts: all_black 24, black 20, british 27, calico 16, jellie 24, ocelot 1, persian 8, ragdoll 5, red 28, siamese 6, tabby 22, white 4. Total ~185 textures.
 
-Breed Catalogs (complete from artist spreadsheet)
-Texture counts per breed
-all_black: 24  |  black: 20    |  british: 27  |  calico: 16
-jellie: 24     |  ocelot: 1    |  persian: 8   |  ragdoll: 5
-red: 28        |  siamese: 6   |  tabby: 22    |  white: 4
-Breed trait locks (what artist painted — these are breed constraints)
-ragdoll:  always pointed+fluffy+normal tail+normal snout+round head — only color drifts
-siamese:  always pointed+cream+normal tail+normal snout+round head — only hairs drifts
-persian:  always fluffy+short snout+round head — pattern and color vary
-british:  always short snout+round head+normal tail — pattern and color vary
-white:    always sphinx+none hairs+flat head — only color drifts
-red:      always tabby+orange — only hairs and tail vary
+**Each breed has its own ~2089-line BP file.** They share a common skeleton but **diverge intentionally per breed**: identifier, per-tier `minecraft:scale`/`scale_by_age` values, trait timer ranges, anchor timers, target lists, and behavior numbers are tuned per breed (e.g. ocelot is the smallest with shorter random_stroll intervals; ragdoll runs larger with longer rest timers; jellie/persian have their own pacing). When making cross-cutting changes, you must update every breed file but **never blindly homogenize them** — the numeric differences are design intent, not duplication.
 
-Spawn & Inheritance Script
-File: scripts/catInheritance.ts
-Two BP events trigger Script:
+**Test entity** uses `BREED_OFFSETS` to flatten every breed's catalog into one 0..~185 index space so a single entity can sample all textures.
 
-clingy_cats:needs_wild_variant — fired at end of entity_spawned, sets full random appearance
-clingy_cats:needs_variant_inheritance — fired at end of entity_born, finds nearest adult same-type (= mother), applies drift
+## Property Set (current, per-breed entity)
 
-Drift logic:
+All `client_sync: true` except where noted. ~24 properties used → ~8 slots left of the 32-property entity budget.
 
-sub_variant int: ±10 drift, 85% inherit near mother, 15% full random
-pattern: 85% inherit, 15% random from breed's valid patterns
-color: 85% inherit, 15% random from breed's valid colors
-hairs: 80% inherit, 20% random (drift ±1 step in ordered array)
-tail: 95% inherit (strong breed marker)
-snout: 95% inherit (strong breed marker)
-head: 95% inherit (strong breed marker)
-eye_color: 90% exact inherit, 9% random non-heterochromia, 1% heterochromia
-whiskers: 90% inherit, drift ±1 ordered step
+```
+clingy_cats:sub_variant        int  [0,300]          # texture index (or flat index for test)
+clingy_cats:sound_variant      enum default|royal
+clingy_cats:state              enum idle|sitting|purring|sleeping|playing|hunting|grooming|fleeing|rubbing
+clingy_cats:sub_state          int  [0,5]            # picks sleep/groom variants
+clingy_cats:emotion            enum happy|sad|angry|scared|curious|playful
+clingy_cats:behavior_trait     enum lazy|active|curious|shy|friendly|independent
+clingy_cats:personality        enum affectionate|aloof|playful|calm|anxious|confident
+clingy_cats:hairs              enum short|fluffy|none
+clingy_cats:tail               enum normal|bobtail
+clingy_cats:snout              enum normal|short
+clingy_cats:head               enum round|flat
+clingy_cats:whiskers           enum short_white|short_black|medium_white|medium_black|long_white|long_black
+clingy_cats:eye_shape          enum almond|narrow|round
+clingy_cats:eye_color          enum emerald|green|yellow|orange|teal|blue|gray|brown|heterochromia1|heterochromia2|heterochromia3
+clingy_cats:color              enum black|white|gray|brown|orange|chocolate|cream
+clingy_cats:pattern            enum solid|tabby|tuxedo|bicolor|calico|tortoiseshell|pointed|sphinx
+clingy_cats:favorite_food      enum porkchop|beef|spider_eye|carrot|cod|salmon|tropical_fish|rabbit|chicken|treat_fish|treat_meat|treat_fancy   (client_sync: false)
+clingy_cats:favorite_block     enum bed|soft|warm|high|owner|sun                                                                                (client_sync: false)
+clingy_cats:whisker_index      int  [0,5]
+clingy_cats:eye_index          int  [0,33]           # shape_idx * len(eye_color) + color_idx
+clingy_cats:affection_level    int  [0,1000]                                                                                                    (client_sync: false)
+clingy_cats:trust_level        int  [0,1000]                                                                                                    (client_sync: false)
+clingy_cats:frequency          int  [0,100]   default 50                                                                                        (client_sync: false)
+clingy_cats:equipment          enum (mirrors favorite_food, plus "none")                                                                        (client_sync: false)
+clingy_cats:size               enum tiny|small|normal|large|huge                                                                                (client_sync: false)
+clingy_cats:immortal           bool                                                                                                             (client_sync: false)
+```
 
-pickTexture() function — selects sub_variant index matching target traits, relaxes constraints if artist didn't paint that exact combo (drops color first, then hairs, keeps structural traits).
-applyTextureData() — sets sub_variant + all 6 baked traits as properties simultaneously so BP and RP stay in sync.
+Enum values map to indices in render controllers — **array order in BP = array index in RP**. Don't reorder.
 
-Behavior Architecture
-Component Group Layers
-SPAWN-ASSIGNED (set once on entity_spawned, never swap):
-  trait:      lazy / active / curious / shy / friendly / independent
-  personality: affectionate / aloof / playful / calm / anxious / confident
-  favorite_food: cod / salmon / tropical / puffer / rabbit / chicken /
-                 treat_fish / treat_meat / treat_fancy
-  favorite_block: bed / soft / warm / high / owner / sun
+## Texture / Appearance System
 
-LIFE STAGE (swap once on grow_up):
-  baby / adult
+**TextureData**: `{ pattern, color, hairs, tail, snout, head }` — all six baked into the texture UV by the artist. Whiskers, eyes shape, eyes color are separate overlay models read via independent properties.
 
-TAME STATE (swap once on tame):
-  wild / tamed
+`scripts/configs/catsbreed.ts` holds:
+- `BREED_TEXTURES` — `Record<breedTypeId, Record<localIdx, TextureData>>`
+- `BREED_OFFSETS` — flat-index offsets used only by the `test` entity
+- `TEST_TEXTURES` — derived flat catalog, registered as `BREED_TEXTURES["clingy_cats:test"]`
+- `PATTERN_DRIFT` — per-pattern mutation pools, biased toward genetic plausibility (solid↔bicolor↔tuxedo, tabby↔tortoiseshell↔calico, pointed/sphinx stable)
+- `BIOME_COLOR_BIAS` — biome-id → preferred color list (snowy → white/gray/cream, badlands → orange/brown, etc.)
+- `BREED_SPAWN_POOLS` — per-breed weighted pools for `trait` / `personality` / `block` / `size`
+- `EYE_COLORS` / `EYE_SHAPES` / `WHISKERS` — index-stable arrays (`eye_index = shapeIdx * EYE_COLORS.length + colorIdx`)
 
-BEHAVIOR STATES (swap frequently via timers/sensors):
-  state_idle / state_sitting / state_sleeping / state_grooming /
-  state_playing / state_hunting / state_begging
+`scripts/logics/appearance.ts` provides `applyTextureData`, `applyEyesData`, `applyWhiskerData`. These set the integer index property **and** all the trait properties simultaneously so BP filters and RP render controllers agree.
 
-RIDING STATE (parrot sensor pattern):
-  not_riding_player / riding_player
+## Genetics
 
-HEALTH TIER:
-  health_wild  → 10hp
-  health_tamed → 20hp, slow regen near owner
-Trait × Behavior
-lazy        → sits more, moves less, longer timer between roams
-active      → roams far, plays more, hunts more
-curious     → approaches players/mobs, investigates blocks
-shy         → large avoid_mob_type range on players, flees fast
-friendly    → small avoid range, approaches player sooner
-independent → loose follow when tamed, does own thing
-Personality × Interaction
-affectionate → tames faster, follows tighter when tamed
-aloof        → tames slower, loose follow, sits alone often
-playful      → triggered by held toys/items, play behavior more frequent
-calm         → rarely hisses, doesn't flee as fast
-anxious      → hisses often, flees fast, needs calm approach
-confident    → doesn't flee at all, approaches player boldly
-Favorite Food Pool
-cooked_cod          → common, baseline tame chance
-cooked_salmon       → common, baseline tame chance
-tropical_fish       → uncommon, good tame chance
-pufferfish          → rare, high tame boost when it works
-rabbit              → uncommon, preferred by active/hunting trait
-chicken             → uncommon
-clingy_cats:treat_fish  → custom item, works well on most cats
-clingy_cats:treat_meat  → custom item, works well on hunting trait cats
-clingy_cats:treat_fancy → rare custom, works on any cat regardless of favorite
-Tame Probability — Script-driven
-minecraft:interact fires event → Script reads personality + favorite_food properties → calculates probability → calls tame or flee event back via entity.triggerEvent().
-Probability matrix concept:
-                    favorite food   neutral food   wrong food
-anxious             0.20            0.05           flee+hiss
-calm                0.40            0.15           0.02
-affectionate        0.50            0.20           0.05
-confident           0.45            0.20           0.05
-aloof               0.25            0.08           0.02
-playful             0.35            0.15           0.05
-Favorite Block Behavior (tamed, move_to_block)
-favorite_bed    → targets bed block types, on_stay_completed → state:sleeping
-favorite_soft   → targets wool/carpet/moss, on_stay_completed → state:sitting
-favorite_warm   → targets furnace/campfire proximity, on_stay_completed → state:purring
-favorite_high   → Script height check, move to highest reachable nearby block
-favorite_owner  → tighter follow params, no block seeking
-favorite_sun    → grass/sand + environment_sensor daytime → state:sitting
-Wild State Behavior
-idle_timer → randomize: sit / groom / roam / investigate
-player_nearby sensor:
-  shy/anxious     → flee (large radius)
-  curious         → approach
-  confident       → approach boldly, no flee
-  friendly        → tempt-ready
-player holds item:
-  wrong food      → hiss event (state:hissing)
-  neutral food    → low tame chance
-  favorite food   → personality-weighted tame chance (Script)
-on tame:
-  remove: wild + health_wild
-  add: tamed + health_tamed
-  trigger: randomize_tamed_behaviors
-Shoulder Riding (parrot sensor pattern — pure BP)
-json"clingy_cats:not_riding_player": {
-    "minecraft:entity_sensor": {
-        "subsensors": [{
-            "event_filters": { "all_of": [
-                { "test": "is_riding", "subject": "self", "value": true }
-            ]},
-            "event": "clingy_cats:on_riding_player"
-        }]
-    },
-    "minecraft:behavior.find_mount": { "priority": 1, "within_radius": 2.0 }
-},
-"clingy_cats:riding_player": {
-    "minecraft:entity_sensor": {
-        "subsensors": [{
-            "event_filters": {
-                "test": "is_riding", "subject": "self", "value": false
-            },
-            "event": "clingy_cats:on_not_riding_player"
-        }]
-    }
-}
-Guardian Trait (tamed only)
-minecraft:behavior.owner_hurt_by_target  → retaliates when owner hit
-minecraft:behavior.owner_hurt_target     → attacks what owner attacks
-minecraft:behavior.nearest_prioritized_attackable_target → hostiles near home
+`scripts/logics/genetics.ts`:
+- `inheritTrait(a, b, rate, valid)` — 50/50 parent pick, then `rate` chance to keep, else random.
+- `inheritPattern(...)` — uses `PATTERN_DRIFT` + a color gate (calico requires white base, tortoiseshell requires non-white) + fallback chain.
+- `pickTexture(catalog, target)` — finds index matching target traits; relaxes color first, then hairs, then keeps only structural traits (pattern/tail/snout/head).
+- `findMutationBreed(mom, dad)` — picks a third breed whose catalog shares at least one (pattern, color) pair with parents.
+- `determineBabyBreed(mom, dad)` — **45% mom / 45% dad / 10% mutation breed**.
 
-Spawn Event Chain
-json"minecraft:entity_spawned": {
-    "sequence": [
-        { "add": { "component_groups": ["clingy_cats:adult", "clingy_cats:wild", "clingy_cats:health_wild"] } },
-        { "trigger": "clingy_cats:randomize_behavior_trait" },
-        { "trigger": "clingy_cats:randomize_personality" },
-        { "trigger": "clingy_cats:randomize_favorite_food" },
-        { "trigger": "clingy_cats:randomize_favorite_block" },
-        { "trigger": "clingy_cats:randomize_sound_variant" },
-        { "trigger": "clingy_cats:randomize_eye_color" },
-        { "trigger": "clingy_cats:randomize_eye_shape" },
-        { "trigger": "clingy_cats:randomize_whiskers" },
-        { "trigger": "clingy_cats:needs_wild_variant" }
-    ]
-},
-"minecraft:entity_born": {
-    "sequence": [
-        { "add": { "component_groups": ["clingy_cats:baby", "clingy_cats:wild", "clingy_cats:health_wild"] } },
-        { "trigger": "clingy_cats:randomize_behavior_trait" },
-        { "trigger": "clingy_cats:randomize_personality" },
-        { "trigger": "clingy_cats:randomize_favorite_food" },
-        { "trigger": "clingy_cats:randomize_favorite_block" },
-        { "trigger": "clingy_cats:randomize_sound_variant" },
-        { "trigger": "clingy_cats:randomize_eye_color" },
-        { "trigger": "clingy_cats:randomize_eye_shape" },
-        { "trigger": "clingy_cats:randomize_whiskers" },
-        { "trigger": "clingy_cats:needs_variant_inheritance" }
-    ]
-}
+Drift rates (in `appearance.ts:assignInheritedAppearanceFromGenes`):
+- color 0.85, pattern 0.85, hairs 0.80, tail 0.95, snout 0.95, head 0.95
+- eye_color 0.90 exact, 0.09 random non-hetero, 0.01 heterochromia
+- eye_shape 0.85 inherit ±1 step
+- whiskers 0.90 inherit ±1 step
+- size 0.85 inherit ±1 tier
 
-Vanilla Reference Patterns Used
-PatternSourceUsed forTrait randomize chainWolfbehavior_trait / personality assignmentSound variantWolf/Catsound_variant propertyShoulder riding sensor loopParrotriding groupsmove_to_block + on_stay_completedBeefavorite_block seekingentity_born + mutation_factorAxolotlreference only — not used, replaced by Script driftdataDrivenEntityTriggerEventScript APIinheritance + tame probability
+## Size System
 
-Build Order (remaining work)
-1. Fix base.json properties (pattern/color values, add sub_variant int, add head)
-2. Shared components block (movement, physics, navigation, family, sensors)
-3. Wild group (health, avoid, tempt — parameterized per trait)
-4. Trait groups × 6
-5. Personality groups × 6
-6. Favorite food interact groups × 9
-7. Favorite block groups × 6
-8. Tamed group (follow, leash, health regen)
-9. Behavior state groups (idle/sit/sleep/groom/play/hunt cycling)
-10. Riding groups (parrot pattern)
-11. entity_spawned / entity_born event chains
-12. Script: tame probability handler (extend catInheritance.ts)
-13. Per-breed entity files (inherit base, override breed-specific params)
-14. Spawn rules per breed
-15. RP render controllers per breed
+Five tiers: `tiny / small / normal / large / huge`. Each breed BP has its own absolute scale values for each tier and for the `baby_size_*` (`scale_by_age`) variants — e.g. ocelot huge ≈ 0.94, british huge = 1.13, ragdoll likely larger.
 
-also fetch from these site or revelence
-https://bedrock.dev/docs/stable/Entities#Components
+Pipeline:
+- `assignRandomSize(cat)` uses `BREED_SPAWN_POOLS[breed].size` (weighted).
+- `assignInheritedSize(baby, mom, dad)` 50/50 parent pick, ±1 tier 85%, full random 15%. **Always emits the baby variant** on birth.
+- `applyAdultSize(cat)` is fired by the `clingycats:grow_up` scriptevent (queued from `clingy_cats:ageable_grow_up` BP event) and swaps to the adult `clingy_cats:size_<tier>` group.
 
-#Behaviors
-https://bedrock.dev/docs/stable/Entities#AI%20Goals
+Full moon override (`world.getMoonPhase() === 0`): 80% chance to swap to a pale (white/cream) sub_variant from the breed's catalog, force heterochromia eye color, force `size_huge`. Triggers from `handleWildSpawn`.
 
-#Events and Conditioning filters
-https://bedrock.dev/docs/stable/Entity%20Events
-https://bedrock.dev/docs/stable/Entities#Filters 
-https://wiki.bedrock.dev/entities/entity-events
+## Spawn & Birth Flow
 
-BP Knowledge Corrections Learned
+### Wild spawn
+1. BP `minecraft:entity_spawned` (per-breed):
+   - 3:1 randomize adult/baby + add `clingy_cats:wild`.
+   - Add `clingy_cats:on_weather_clear` + `clingy_cats:not_riding_player`.
+   - Trigger `clingy_cats:randomize_sound_variant`.
+   - `queue_command: scriptevent clingycats:catspawn`.
+2. Script `clingycats:catspawn` → `handleWildSpawn(cat)`:
+   - If `clingy_cats:not_wild_spawn` tag set (used by birth path) → strip tag and skip.
+   - If `typeId === clingy_cats:test` → `handleSpawnTestCats` (random breed catalog × flat index).
+   - Else → `assignRandomAppearance` (biome-biased), `assignRandomEyesAndWhiskers`, full-moon check or random size, `assignBreedPersonality` (sets behavior_trait, personality, favorite_food, favorite_block + fires `set_trait_*` and `set_personality_*` BP events to add the matching component group).
+   - Then `behaviorTick(cat)` chooses first state.
 
-Molang expressions → only work in fields explicitly typed as Molang (like experience_reward). Decimal/Integer/Boolean fields are hardcoded only
-is_sneaking → valid BP filter test with subject: "other" or subject: "player"
-is_sneak_held → checks if sneak key is physically held. Different from is_sneaking
-follow_mob with filters + preferred_actor_type → baby following mother pure BP, no Script needed
-parent subject → documented but unusable for custom entities (no component to set parent relationship)
-bool_property / enum_property / float_property / int_property → all valid BP filter tests with operators (>, <, != etc.)
-random_chance filter → probabilistic gating without Script
+### Birth flow (Script-driven litter)
+1. BP `minecraft:behavior.breed` triggers `clingy_cats:become_pregnant` on partner contact.
+2. `clingy_cats:become_pregnant` event:
+   - Add `clingy_cats:pregnant` component group (`is_pregnant` + `lay_egg` behavior targeting beds/wool/carpets/etc.).
+   - `scriptevent clingycats:conception` → `handleConception(mother)`:
+     - Capture both parents' genes (nearest non-baby family member ≠ self).
+     - Store as `ConceptionRecord` in both an in-memory `Map<motherId, record>` and a `dynamic_property("clingy_cats:conception_data")` (JSON) for crash safety.
+     - Roll `babyCount` from `LITTER_WEIGHTS = [40,30,15,8,5,2]` (1–6 babies, most often 1–2).
+3. `lay_egg` fires → BP `clingy_cats:give_birth` → `scriptevent clingycats:givebirth` → `handleGiveBirth(mother)`:
+   - Load record from map or dynamic property.
+   - Spawn `determineBabyBreed(...)` baby × **5 (hardcoded loop), not `babyCount` — see Known Issues**.
+   - Tag baby `clingy_cats:not_wild_spawn` so the `entity_spawned` script handler skips random appearance.
+   - Apply inherited appearance / eyes / whiskers / size, then `assignBreedPersonality`.
+   - If a player is within 10 blocks, `tameable.tame(player)`.
+   - Trigger `clingy_cats:born` BP event (swaps to baby + visible_baby + sleep state + correct wild/tamed group).
 
-Filter Subject Domains
-self     — the entity calling the test
-other    — the other member of interaction
-player   — the player involved
-damager  — the damaging actor
-target   — caller's current target
-parent   — caller's parent (unusable for custom)
-block    — the block involved
-Components With Event Hooks (full map)
-INTERACTION
-minecraft:interact              → on_interact (+ target: other context!)
-minecraft:damage_sensor         → on_damage (can fire on OTHER entity too)
-minecraft:trusting              → trust_event
-minecraft:tameable              → tame_event
-minecraft:ageable               → grow_up event
-minecraft:healable              → on_heal
+## Tame Flow
 
-MOVEMENT/GOAL
-behavior.avoid_mob_type         → on_escape_event
-behavior.avoid_block            → on_escape_event
-behavior.move_to_block          → on_stay_completed, on_reach, on_failed
-behavior.go_home                → on_home, on_failed
-behavior.drop_item_for          → on_drop_attempt
-behavior.tempt                  → no hook
+Wild cats have `tameable.probability = 0.0` and empty `tame_items` — **taming is entirely script-driven**.
 
-DETECTION
-minecraft:environment_sensor    → triggers[]
-minecraft:entity_sensor         → subsensors[]
-minecraft:block_sensor          → on_break
-minecraft:target_nearby_sensor  → on_inside_range, on_outside_range, on_vision_lost_inside_range
-minecraft:timer                 → time_down_event
+1. Player crouches + holds food + interacts. BP `clingy_cats:wild` has a `minecraft:interact` that, when filters pass (`is_food` tag in player main hand, cat's own hand empty), fires `clingy_cats:on_give`.
+2. `on_give` is a per-item filter chain that sets `clingy_cats:equipment` to whichever food the cat now holds, then `scriptevent clingycats:on_give_food` → `handleGiveItem`.
+3. `handleGiveItem`:
+   - Read `clingy_cats:equipment` + `clingy_cats:favorite_food`.
+   - **0.45 if equipment === favorite_food, 0.20 otherwise.** (CLAUDE.md previously described a personality matrix — that's not implemented; only food-match matters today.)
+   - Particle + sound on success/failure.
+   - If not tamed, `behaviorTick(cat, "temp_follow_close")` to make it follow.
+   - On success, `tameable.tame(nearestPlayer)` which fires BP `clingy_cats:on_tame` → swap `wild`→`tamed` + `scriptevent clingycats:restore_identity` (re-applies set_trait + set_personality groups since they were not in the wild group).
 
-TRANSFORMATION/MISC
-minecraft:transformation        → event via identifier string
-minecraft:on_target_acquired    → direct event
-minecraft:on_wake_with_owner    → direct event
-Avoid Components (3 exist)
+Wild HP = 20, Tamed HP = 40. (Both higher than vanilla cat's 10/20 — this is intentional.)
 
-behavior.avoid_mob_type → flee from entities
-behavior.avoid_block → flee from blocks
-Both accept on_escape_event hook
-All movement params (max_dist, sprint_speed_multiplier etc.) live inside each entity_types entry, NOT at component root
+## Behavior Tick State Machine
 
-Wild Encounter Design
-One clingy_cats:wild component group. Trait properties filter behavior from inside via enum_property test. No explosion of separate trait groups needed.
-Priority ladder:
-0  — behavior.float
-1  — behavior.panic
-4  — behavior.avoid_mob_type (shy/independent filtered)
-5  — behavior.tempt
-6  — behavior.look_at_player (curious/friendly only via filter)
-7  — behavior.random_look_around_and_sit
-8  — behavior.random_stroll
-9  — behavior.random_look_around
-Tame vs Trust
+`scripts/logics/states.ts:behaviorTick(cat, state?)`:
+- Removes the previous `temp_*` component group (tracked via `dynamic_property clingy_cats:last_temp_group`).
+- Merges three weighted pools by behavior key:
+  - `TRAIT_POOLS[trait]` — e.g. `lazy` favors sleep/sit/move_to_soft.
+  - `PERSONALITY_POOLS[personality]` — e.g. `affectionate` favors `temp_follow_close`.
+  - `BLOCK_POOLS[favorite_block]` — e.g. `bed` favors `temp_move_to_bed`.
+- Picks one. If `enter_*_state` (still state), fires the matching trigger and clears `last_temp_group`. If `temp_*`, fires `clingy_cats:add_<x>` and records it for cleanup next tick.
 
-minecraft:trusting → cat trusts first (stops fleeing, allows approach)
-minecraft:tameable → full tame after trust
-Matches real cat behavior — trust before bond
-Tame probability matrix → Script (personality × favorite_food interaction)
+Cycle is driven by BP `minecraft:timer` (looping, random interval) **inside each trait component group** — each `trait_*` group has its own pace (`trait_lazy` 70–130s, `trait_active` 20–50s, etc.) that fires `clingy_cats:behavior_tick` → `scriptevent clingycats:behavior_tick`.
 
-Example of complex sequence/filter in components/ai goal
+Still-state groups (`state_sitting`, `state_sleeping`, `state_grooming`, `state_rubbing`) each use `minecraft:behavior.timer_flag_1` with `on_start` → `on_<state>` (sets `state` property) and `on_end` → `on_idle` (sets idle + re-queues `behavior_tick`).
+
+`restoreIdentity(cat)` re-applies `set_trait_*` and `set_personality_*` after group transitions (`on_tame`, `off_riding_player`) that drop those groups.
+
+## Shoulder Riding
+
+**Not the parrot sensor pattern from previous design notes** — replaced with a dedicated invisible entity.
+
+`BP/entities/cats/shoulder_anchor.json` (`clingy_cats:shoulder_anchor`):
+- Scale 0.001, invisible, `is_summonable: true`.
+- `rideable` family_types `["clingy_cats"]`, `pull_in_entities: true`.
+- Six per-trait timer component groups (`anchor_timer_<trait>`) that fire `clingy_cats:anchor_expire` after some seconds (lazy 40–60s, active 10–20s, …, independent 8–12s).
+
+Flow:
+- Owner sneak-empty-hand-interacts a tamed cat → BP `clingy_cats:want_to_ride` adds `clingy_cats:can_mount` (behavior.find_mount) and `scriptevent clingycats:request_shoulder_mount`.
+- `riding.ts:handleRequestShoulderMount(cat)` spawns a `shoulder_anchor` at the player's location, fires `clingy_cats:anchor_timer_<trait>`, stores anchor id in the player's `dynamic_property clingy_cats:anchor_ids` (JSON list, cap 2 anchors).
+- When the cat reaches the anchor, BP entity_sensor in `not_riding_player` triggers `clingy_cats:on_riding_player` → swap to `riding_player` + `riding_tick`.
+- When the anchor's timer expires, `scriptevent clingycats:anchor_expire` removes anchor id from the player's list and removes the anchor.
+
+## Items
+
+### `clingy_cats:meownifier`
+- Custom `clingy_cats_component:meownifier` registered in `inspect.ts`.
+- Raycast 20 blocks, hit first entity in `clingy_cats:` family, open ActionFormData with: breed, life stage, tame status, personality/trait/fav. food/fav. block, size + state, affection/trust bars, eyes/coat/tail/snout/head.
+- Durability 32, repairable with amethyst_shard or gold_ingot. Enchantable in `fishing_rod` slot (so Mending works). 0.5s cooldown.
+- Crafting (`recipes/meownifier.json`):
+  ```
+  . G .
+  G E G   E = ender_eye, G = gold_ingot, A = amethyst_shard
+  . A .
+  ```
+
+### `clingy_cats:guide_book`
+- Given automatically on first player spawn (60-tick delay) via `playerSpawn` listener + `clingy_cats:welcomed` tag.
+- `clingy_cats_component:guide_book` opens a multi-page ActionFormData: Taming · Personalities · Traits · Breeds · Breeding & Genetics · The Meownifier · Secrets · Close.
+- Recipe defined in `recipes/guide_book.json`.
+
+## Script ↔ BP Event Protocol
+
+BP fires `{ "queue_command": { "command": "scriptevent clingycats:<id>" } }`. `eventRegister.ts` dispatches by id. Current ids and their handlers:
+
+| scriptevent id                             | Handler                            | Purpose                                                                    |
+|--------------------------------------------|------------------------------------|----------------------------------------------------------------------------|
+| `clingycats:catspawn`                      | `handleWildSpawn` / `handleSpawnTestCats` | first appearance assignment                                                |
+| `clingycats:conception`                    | `handleConception`                 | capture both parents' genes                                                |
+| `clingycats:givebirth`                     | `handleGiveBirth`                  | spawn babies, apply inherited traits                                       |
+| `clingycats:restore_identity`              | `restoreIdentity`                  | re-apply trait + personality groups after tame / dismount                  |
+| `clingycats:behavior_tick`                 | `behaviorTick`                     | choose next behavior                                                       |
+| `clingycats:enter_still_state_event`       | `behaviorTick(cat, "enter_still_state")` | force still-state choice                                                   |
+| `clingycats:on_give_food`                  | `handleGiveItem`                   | tame chance roll                                                           |
+| `clingycats:on_pick_up_event` / `_start_event` | no-op (commented log)         | reserved                                                                   |
+| `clingycats:request_shoulder_mount`        | `handleRequestShoulderMount`       | spawn anchor + start timer                                                 |
+| `clingycats:anchor_expire`                 | `handleAnchorExpire`               | clean up anchor                                                            |
+| `clingycats:grow_up`                       | `applyAdultSize`                   | swap baby→adult scale group                                                |
+| `clingycats:interact`                      | placeholder                        | not wired                                                                  |
+
+## BP Knowledge References (keep)
+
+- Molang expressions only work in Molang-typed fields (e.g. `experience_reward`). Decimal/Integer/Bool fields are literals.
+- `is_sneaking` (BP filter) ≠ `is_sneak_held` (key currently held).
+- `follow_mob` + `filters` + `preferred_actor_type` does baby-follows-mother pure BP.
+- `parent` filter subject doesn't work for custom entities (no component sets the parent relationship).
+- `bool_property` / `enum_property` / `float_property` / `int_property` are valid filter tests with operators.
+- `random_chance` is a real filter (probabilistic gate, no Script needed).
+
+### Filter subjects
+`self`, `other`, `player`, `damager`, `target`, `parent` (unusable for custom), `block`.
+
+### Components with event hooks
+- Interaction: `minecraft:interact (on_interact)`, `damage_sensor (on_damage)`, `trusting (trust_event)`, `tameable (tame_event)`, `ageable (grow_up)`, `healable (on_heal)`.
+- Movement/Goal: `behavior.avoid_mob_type (on_escape_event)`, `avoid_block (on_escape_event)`, `move_to_block (on_reach / on_stay_completed / on_failed)`, `go_home (on_home / on_failed)`, `drop_item_for (on_drop_attempt)`, `tempt` (no hook).
+- Detection: `environment_sensor (triggers[])`, `entity_sensor (subsensors[])`, `block_sensor (on_break)`, `target_nearby_sensor (on_inside_range / on_outside_range / on_vision_lost_inside_range)`, `timer (time_down_event)`, `behavior.timer_flag_1..3 (on_start / on_end)`.
+- Misc: `transformation` (event via identifier), `on_target_acquired`, `on_wake_with_owner`.
+- Avoid: both `behavior.avoid_mob_type` (entities) and `behavior.avoid_block` (blocks) accept `on_escape_event`. Movement params (`max_dist`, `sprint_speed_multiplier`, etc.) live inside each `entity_types` entry, not at component root.
+
+### Vanilla patterns adopted
+Wolf-style trait randomize chain · Cat sound_variant · Parrot-style sensor loop (superseded by anchor entity here) · Bee-style `move_to_block` + `on_reach`/`on_stay_completed` · Axolotl `entity_born` (no longer used; full Script drift instead).
+
+### Reference docs
+- https://bedrock.dev/docs/stable/Entities#Components
+- https://bedrock.dev/docs/stable/Entities#AI%20Goals
+- https://bedrock.dev/docs/stable/Entity%20Events
+- https://bedrock.dev/docs/stable/Entities#Filters
+- https://wiki.bedrock.dev/entities/entity-events
+
+### Example complex sequence/filter (reference)
+```json
 "wiki:on_hit": {
-    "randomize":[
-        // 60% chance nothing happens
-        {
-            "weight": 60
-        },
-        // 40% chance this entry is run
-        {
-            "weight": 40,
-            "sequence": [
-                // Runs separate event required for all attacks
-                {
-                    "trigger": "attack_event"
-                },
-                // Runs if entity is not sheared (entity becomes sheared if under half health)
-                {
-                    "filters": {
-                        "test": "has_component",
-                        "operator": "!=",
-                        "value": "minecraft:is_sheared"
-                    },
-                    "sequence": [
-                        // Runs if player is within 5 blocks
-                        {
-                            "filters": {
-                                "test": "distance_to_nearest_player",
-                                "operator": "<=",
-                                "value": 5.0
-                            },
-                            "randomize": [
-                                {
-                                    "weight": 10,
-                                    "add": {
-                                        "component_groups": [
-                                            "explode"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 60,
-                                    "add": {
-                                        "component_groups": [
-                                            "attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 20,
-                                    "add": {
-                                        "component_groups": [
-                                            "range_attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 10
-                                }
-                            ]
-                        },
-                        // Runs if player is farther than 5 blocks and entity still has a target
-                        {
-                            "filters": {
-                                "all_of": [
-                                    {
-                                        "test": "distance_to_nearest_player",
-                                        "operator": ">",
-                                        "value": 5.0
-                                    },
-                                    {
-                                        "test": "has_target",
-                                        "operator": "equals",
-                                        "value": true
-                                    }
-                                ]
-                            },
-                            "randomize": [
-                                {
-                                    "weight": 30,
-                                    "add": {
-                                        "component_groups": [
-                                            "attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 60,
-                                    "add":{
-                                        "component_groups": [
-                                            "range_attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 10
-                                }
-                            ]
-                        }
-                    ]
-                },
-                // Runs if entity is sheared (under half health)
-                {
-                    "filters": {
-                        "test": "has_component",
-                        "value": "minecraft:is_sheared"
-                    },
-                    "sequence": [
-                        // Runs if player is within 5 blocks
-                        {
-                            "filters": {
-                                "test": "distance_to_nearest_player",
-                                "operator": "<=",
-                                "value": 5.0
-                            },
-                            "randomize": [
-                                {
-                                    "weight": 20,
-                                    "add":{
-                                        "component_groups": [
-                                            "explode"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 60,
-                                    "add": {
-                                        "component_groups": [
-                                            "strong_attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 20,
-                                    "add": {
-                                        "component_groups": [
-                                            "strong_range_attack"
-                                        ]
-                                    }
-                                }
-                            ]
-                        },
-                        // Runs if player is farther than 5 blocks and entity still has a target
-                        {
-                            "filters": {
-                                "all_of": [
-                                    {
-                                        "test": "distance_to_nearest_player",
-                                        "operator": ">",
-                                        "value": 5.0
-                                    },
-                                    {
-                                        "test": "has_target",
-                                        "operator": "equals",
-                                        "value": true
-                                    }
-                                ]
-                            },
-                            "randomize": [
-                                {
-                                    "weight": 60,
-                                    "add": {
-                                        "component_groups": [
-                                            "strong_range_attack"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "weight": 40,
-                                    "randomize": [
-                                        {
-                                            "weight": 30,
-                                            "trigger": "rapid_fire"
-                                        },
-                                        {
-                                            "weight": 70,
-                                            "add": {
-                                                "component_groups": [
-                                                    "strong_blast"
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+  "randomize": [
+    { "weight": 60 },
+    { "weight": 40,
+      "sequence": [
+        { "trigger": "attack_event" },
+        { "filters": { "test": "has_component", "operator": "!=", "value": "minecraft:is_sheared" },
+          "sequence": [
+            { "filters": { "test": "distance_to_nearest_player", "operator": "<=", "value": 5.0 },
+              "randomize": [
+                { "weight": 10, "add": { "component_groups": ["explode"] } },
+                { "weight": 60, "add": { "component_groups": ["attack"] } },
+                { "weight": 20, "add": { "component_groups": ["range_attack"] } },
+                { "weight": 10 }
+              ]
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }
+```
+
+## Known Issues / Future Work
+
+1. **`format_version` mismatch** — breed entities are at `1.26.20` but manifest `min_engine_version` is `1.26.10`. Items and the vanilla `cat.json` use `1.26.10`. Hasn't broken anything yet but worth confirming the engine you're actually targeting and aligning all files.
+2. **`treat_*` planned-but-unimplemented** — `clingy_cats:favorite_food` and `clingy_cats:equipment` enums include `treat_fish` / `treat_meat` / `treat_fancy`, but: (a) no item is defined for them under `BP/items/`, (b) the `on_give` BP filter chain has no entry that matches them, (c) they were removed from `FAVORITE_FOOD_POOL` so they can't be assigned as a favorite. The enum slots are reserved for the planned items; nothing will actually use them until the items are added and on_give entries are written.
+3. **No spawn rule for `clingy_cats:test`** — by design (summon-only); just noting.
+4. **Wild HP 20 / Tamed HP 40** — much higher than vanilla cat's 10/20. Confirmed by the dev as intentional design.
+
+## Working With This Codebase (notes for future Claude)
+
+- Prefer BP/RP JSON over Script when adding behavior. Script is for: appearance assignment (random + inheritance), gene capture, tame-roll, anchor lifecycle, custom items, guide UI.
+- When adding a property: also bump the breed BP enum value list AND update `RP/entity/<breed>_RP.json` materials/textures/render controllers AND check the render controller's `Array.<name>[q.property(...)]` index expectations — order matters.
+- When adding a new `temp_*` or `state_*` group: also add the matching `clingy_cats:add_<x>` and `clingy_cats:remove_<x>` (or `clingy_cats:enter_<x>_state` / `clingy_cats:on_<x>`) events, **in every breed BP**.
+- When adding a scriptevent: declare it in `eventRegister.ts` AND `queue_command` it from the relevant BP event.
+- For one-off tests, summon `clingy_cats:test` to see catalog variants quickly.

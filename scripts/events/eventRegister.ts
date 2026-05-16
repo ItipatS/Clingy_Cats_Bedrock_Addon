@@ -42,10 +42,6 @@ export function registerCatsEvents(): void {
             return;
         }
 
-        if (id === "clingycats:interact") {
-            return;
-        }
-
         if (id === "clingycats:restore_identity") {
             restoreIdentity(sourceEntity);
             return;

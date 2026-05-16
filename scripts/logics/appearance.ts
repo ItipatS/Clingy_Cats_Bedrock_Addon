@@ -96,10 +96,20 @@ export function applyWhiskerData(cat: Entity, idx: number, data: WhiskerData): v
 // RANDOM ASSIGNMENT
 // ============================================================
 
-export function assignRandomAppearance(cat: Entity): void {
+export function assignRandomAppearance(cat: Entity, preferredColors?: string[]): void {
     const catalog = BREED_TEXTURES[cat.typeId];
-    const maxIdx = Object.keys(catalog).length - 1;
-    const idx = Math.floor(Math.random() * (maxIdx + 1));
+    const keys = Object.keys(catalog).map(Number);
+
+    if (preferredColors && preferredColors.length > 0) {
+        const exclusive = keys.filter(k => preferredColors.includes(catalog[k].color));
+        if (exclusive.length > 0) {
+            const idx = exclusive[Math.floor(Math.random() * exclusive.length)];
+            applyTextureData(cat, idx, catalog[idx]);
+            return;
+        }
+    }
+
+    const idx = keys[Math.floor(Math.random() * keys.length)];
     applyTextureData(cat, idx, catalog[idx]);
 }
 

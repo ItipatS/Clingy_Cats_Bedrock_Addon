@@ -408,9 +408,6 @@ export const FAVORITE_FOOD_POOL = [
     { weight: 2, food: "tropical_fish"  },
     { weight: 2, food: "rabbit"    },
     { weight: 3, food: "chicken"    },
-    /*{ weight: 2, food: "treat_fish"},
-    { weight: 2, food: "treat_meat"},
-    { weight: 1, food: "treat_fancy"},*/
 ] as const;
 
 export const FAVORITE_BLOCK_POOL = [
@@ -421,6 +418,49 @@ export const FAVORITE_BLOCK_POOL = [
     { weight: 1, block: "owner"},
     { weight: 1, block: "sun"},
 ] as const;
+
+export const BIOME_COLOR_BIAS: Readonly<Record<string, string[]>> = {
+    // Snowy / icy
+    "minecraft:snowy_plains":              ["white", "gray", "cream"],
+    "minecraft:snowy_taiga":               ["white", "gray", "cream"],
+    "minecraft:snowy_slopes":              ["white", "gray", "cream"],
+    "minecraft:grove":                     ["white", "gray"],
+    "minecraft:frozen_peaks":              ["white", "gray"],
+    "minecraft:jagged_peaks":              ["white", "gray"],
+    "minecraft:ice_spikes":                ["white", "gray"],
+    "minecraft:frozen_river":              ["white", "gray"],
+    // Pale garden
+    "minecraft:pale_garden":               ["white", "gray"],
+    // Cherry grove
+    "minecraft:cherry_grove":              ["white", "cream"],
+    // Dark forest / swamp
+    "minecraft:dark_forest":               ["black", "brown", "gray"],
+    "minecraft:swamp":                     ["brown", "gray", "black"],
+    "minecraft:mangrove_swamp":            ["brown", "gray", "black"],
+    // Desert / badlands / savanna
+    "minecraft:desert":                    ["orange", "brown", "cream"],
+    "minecraft:badlands":                  ["orange", "brown"],
+    "minecraft:eroded_badlands":           ["orange", "brown"],
+    "minecraft:wooded_badlands":           ["orange", "brown"],
+    "minecraft:savanna":                   ["orange", "brown", "cream"],
+    "minecraft:savanna_plateau":           ["orange", "brown", "cream"],
+    "minecraft:windswept_savanna":         ["orange", "brown"],
+    // Jungle
+    "minecraft:jungle":                    ["orange", "brown"],
+    "minecraft:sparse_jungle":             ["orange", "brown"],
+    "minecraft:bamboo_jungle":             ["orange", "brown"],
+    // Flower / meadow
+    "minecraft:meadow":                    ["white", "cream", "gray"],
+    "minecraft:flower_forest":             ["white", "cream", "orange"],
+    "minecraft:sunflower_plains":          ["orange", "cream", "white"],
+    // Forest / taiga
+    "minecraft:forest":                    ["brown", "gray", "chocolate"],
+    "minecraft:birch_forest":              ["white", "gray"],
+    "minecraft:old_growth_birch_forest":   ["white", "gray"],
+    "minecraft:taiga":                     ["gray", "brown", "white"],
+    "minecraft:old_growth_spruce_taiga":   ["gray", "brown"],
+    "minecraft:old_growth_pine_taiga":     ["gray", "brown"],
+};
 
 export type BehaviorTrait = "lazy" | "active" | "curious" | "shy" | "friendly" | "independent";
 export type Personality   = "affectionate" | "aloof" | "playful" | "calm" | "anxious" | "confident";

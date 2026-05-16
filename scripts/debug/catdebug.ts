@@ -1,6 +1,6 @@
 import { world, system, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
 
-const DEBUG = true;
+const DEBUG = false;
 
 export function registerDebugRaycast(): void {
     if (!DEBUG) return;

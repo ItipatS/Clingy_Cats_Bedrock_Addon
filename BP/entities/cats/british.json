@@ -940,7 +940,8 @@
 						"minecraft:fern",
 						"minecraft:podzol",
 						"minecraft:coarse_dirt",
-						"minecraft:rooted_dirt"
+						"minecraft:rooted_dirt",
+						"minecraft:pale_oak_leaf_litter"
 					],
 					"target_materials_above_block": [
 						"Air"

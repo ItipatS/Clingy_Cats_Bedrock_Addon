@@ -1,8 +1,17 @@
 import { Entity, world } from '@minecraft/server';
-import { BREED_TEXTURES, BREED_OFFSETS } from '../configs/catsbreed';
+import { BREED_TEXTURES, BREED_OFFSETS, BIOME_COLOR_BIAS } from '../configs/catsbreed';
 import { randomFrom } from './utils';
 import { applyTextureData, assignRandomAppearance, assignRandomEyesAndWhiskers, assignRandomSize, applyFullMoonOverrides } from './appearance';
 import { assignRandomPersonality, assignBreedPersonality } from './personality';
+
+function getBiomeColors(cat: Entity): string[] | undefined {
+    try {
+        const biome = cat.dimension.getBiome(cat.location);
+        return BIOME_COLOR_BIAS[biome.id];
+    } catch {
+        return undefined;
+    }
+}
 
 /** Test entity spawn — picks a random breed catalog and applies a random flat-indexed texture. */
 export function handleSpawnTestCats(cat: Entity): void {
@@ -19,7 +28,7 @@ export function handleSpawnTestCats(cat: Entity): void {
 
 /** Wild spawn — full random appearance + eyes + whiskers + breed-weighted personality + size. */
 export function handleWildSpawn(cat: Entity): void {
-    assignRandomAppearance(cat);
+    assignRandomAppearance(cat, getBiomeColors(cat));
     assignRandomEyesAndWhiskers(cat);
     if (world.getMoonPhase() === 0) {
         applyFullMoonOverrides(cat);

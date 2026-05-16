@@ -560,9 +560,6 @@ var FAVORITE_FOOD_POOL = [
   { weight: 2, food: "tropical_fish" },
   { weight: 2, food: "rabbit" },
   { weight: 3, food: "chicken" }
-  /*{ weight: 2, food: "treat_fish"},
-  { weight: 2, food: "treat_meat"},
-  { weight: 1, food: "treat_fancy"},*/
 ];
 var FAVORITE_BLOCK_POOL = [
   { weight: 1, block: "bed" },
@@ -572,6 +569,48 @@ var FAVORITE_BLOCK_POOL = [
   { weight: 1, block: "owner" },
   { weight: 1, block: "sun" }
 ];
+var BIOME_COLOR_BIAS = {
+  // Snowy / icy
+  "minecraft:snowy_plains": ["white", "gray", "cream"],
+  "minecraft:snowy_taiga": ["white", "gray", "cream"],
+  "minecraft:snowy_slopes": ["white", "gray", "cream"],
+  "minecraft:grove": ["white", "gray"],
+  "minecraft:frozen_peaks": ["white", "gray"],
+  "minecraft:jagged_peaks": ["white", "gray"],
+  "minecraft:ice_spikes": ["white", "gray"],
+  "minecraft:frozen_river": ["white", "gray"],
+  // Pale garden
+  "minecraft:pale_garden": ["white", "gray"],
+  // Cherry grove
+  "minecraft:cherry_grove": ["white", "cream"],
+  // Dark forest / swamp
+  "minecraft:dark_forest": ["black", "brown", "gray"],
+  "minecraft:swamp": ["brown", "gray", "black"],
+  "minecraft:mangrove_swamp": ["brown", "gray", "black"],
+  // Desert / badlands / savanna
+  "minecraft:desert": ["orange", "brown", "cream"],
+  "minecraft:badlands": ["orange", "brown"],
+  "minecraft:eroded_badlands": ["orange", "brown"],
+  "minecraft:wooded_badlands": ["orange", "brown"],
+  "minecraft:savanna": ["orange", "brown", "cream"],
+  "minecraft:savanna_plateau": ["orange", "brown", "cream"],
+  "minecraft:windswept_savanna": ["orange", "brown"],
+  // Jungle
+  "minecraft:jungle": ["orange", "brown"],
+  "minecraft:sparse_jungle": ["orange", "brown"],
+  "minecraft:bamboo_jungle": ["orange", "brown"],
+  // Flower / meadow
+  "minecraft:meadow": ["white", "cream", "gray"],
+  "minecraft:flower_forest": ["white", "cream", "orange"],
+  "minecraft:sunflower_plains": ["orange", "cream", "white"],
+  // Forest / taiga
+  "minecraft:forest": ["brown", "gray", "chocolate"],
+  "minecraft:birch_forest": ["white", "gray"],
+  "minecraft:old_growth_birch_forest": ["white", "gray"],
+  "minecraft:taiga": ["gray", "brown", "white"],
+  "minecraft:old_growth_spruce_taiga": ["gray", "brown"],
+  "minecraft:old_growth_pine_taiga": ["gray", "brown"]
+};
 var BREED_SPAWN_POOLS = {
   ragdoll: {
     trait: [
@@ -1062,10 +1101,18 @@ function applyWhiskerData(cat, idx, data) {
   cat.setProperty("clingy_cats:whiskers", data.length);
   cat.setProperty("clingy_cats:whisker_index", idx);
 }
-function assignRandomAppearance(cat) {
+function assignRandomAppearance(cat, preferredColors) {
   const catalog = BREED_TEXTURES[cat.typeId];
-  const maxIdx = Object.keys(catalog).length - 1;
-  const idx = Math.floor(Math.random() * (maxIdx + 1));
+  const keys = Object.keys(catalog).map(Number);
+  if (preferredColors && preferredColors.length > 0) {
+    const exclusive = keys.filter((k) => preferredColors.includes(catalog[k].color));
+    if (exclusive.length > 0) {
+      const idx2 = exclusive[Math.floor(Math.random() * exclusive.length)];
+      applyTextureData(cat, idx2, catalog[idx2]);
+      return;
+    }
+  }
+  const idx = keys[Math.floor(Math.random() * keys.length)];
   applyTextureData(cat, idx, catalog[idx]);
 }
 function assignRandomEyesAndWhiskers(cat) {
@@ -1155,6 +1202,14 @@ function assignBreedPersonality(cat) {
 }
 
 // scripts/logics/breed.ts
+function getBiomeColors(cat) {
+  try {
+    const biome = cat.dimension.getBiome(cat.location);
+    return BIOME_COLOR_BIAS[biome.id];
+  } catch {
+    return void 0;
+  }
+}
 function handleSpawnTestCats(cat) {
   const breedIds = Object.keys(BREED_OFFSETS);
   const chosenBreed = randomFrom(breedIds);
@@ -1167,7 +1222,7 @@ function handleSpawnTestCats(cat) {
   cat.triggerEvent("clingy_cats:visible_event");
 }
 function handleWildSpawn(cat) {
-  assignRandomAppearance(cat);
+  assignRandomAppearance(cat, getBiomeColors(cat));
   assignRandomEyesAndWhiskers(cat);
   if (world.getMoonPhase() === 0) {
     applyFullMoonOverrides(cat);
@@ -1230,7 +1285,7 @@ function handleGiveBirth(mother) {
   pregnancyMap.delete(mother.id);
   mother.setDynamicProperty("clingy_cats:conception_data", void 0);
   const { mother: momGenes, father: dadGenes, babyCount = 1 } = record ?? { mother: captureGenes(mother), father: void 0, babyCount: 1 };
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < babyCount; i++) {
     const babyBreed = determineBabyBreed(momGenes, dadGenes);
     const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
     const owner = mother.dimension.getPlayers({ location: mother.location, maxDistance: 10 })[0];
@@ -1514,10 +1569,12 @@ function registerGuideBookEvents() {
   });
 }
 function showGuide(player) {
-  new ActionFormData().title("\xA76\xA7l\u25C6 Clingy Cats Guide \u25C6\xA7r").body(
-    `\xA7fA complete guide to living with Clingy Cats.
-\xA77Choose a topic below.`
-  ).button("\xA7eTaming Cats").button("\xA7dPersonalities").button("\xA7bTraits").button("\xA7aBreeds").button("\xA76Breeding & Genetics").button("\xA73Meownifier").button("\xA78Secrets...").button("\xA77Close").show(player).then((res) => {
+  new ActionFormData().title("\xA76\xA7l\u25C6 Clingy Cats \u2014 Field Notes \u25C6\xA7r").body(
+    `\xA7fNotes on finding, befriending, and
+\xA7fliving with Clingy Cats.
+
+\xA77Pick a topic to read.`
+  ).button("\xA7eTaming Cats").button("\xA7dPersonalities").button("\xA7bTraits").button("\xA7aBreeds").button("\xA76Breeding & Genetics").button("\xA73The Meownifier").button("\xA78Secrets...").button("\xA77Close").show(player).then((res) => {
     if (res.canceled || res.selection === 7) return;
     const pages = [pageTaming, pagePersonalities, pageTraits, pageBreeds, pageBreeding, pageMeownifier, pageSecrets];
     pages[res.selection]?.(player);
@@ -1530,167 +1587,175 @@ function subPage(player, title, body) {
 }
 function pageTaming(player) {
   subPage(player, "\xA7e\xA7lTaming Cats\xA7r", [
-    `\xA77Where to find them\xA7r`,
-    `\xA7fCats spawn in plains, forests, taiga,`,
-    `\xA7fand savannas. They no longer live in villages.`,
-    `\xA7fRarer than vanilla \u2014 explore patiently.`,
+    `\xA7fThese cats aren't village strays. They're`,
+    `\xA7fwild, rarer, and they won't just walk up`,
+    `\xA7fto you. Each breed has its own biome \u2014`,
+    `\xA7fsee \xA7aBreeds\xA7f for where to look.`,
     ``,
     `\xA77How to tame\xA7r`,
-    `\xA7fHold any food and right-click to offer it.`,
-    `\xA7fEach cat has a \xA7efavorite food\xA7f \u2014 offering it`,
-    `\xA7fgives \xA7a30%\xA7f tame chance per attempt.`,
-    `\xA7fAny other food still works at \xA7a10%\xA7f chance.`,
-    `\xA7fIt may take several tries. Keep trying.`,
+    `\xA7fCrouch, hold food, and right-click to offer.`,
+    `\xA7fEvery cat has a \xA7efavorite food\xA7f \u2014 offer`,
+    `\xA7fthat and you get a \xA7a45%\xA7f chance per try.`,
+    `\xA7fOther foods still work, just at \xA7a20%.\xA7f`,
+    `\xA7fIt might take a few attempts. That's normal.`,
     ``,
-    `\xA77Foods cats accept\xA7r`,
+    `\xA77Foods they'll accept\xA7r`,
     `\xA7fcod \xB7 salmon \xB7 tropical fish \xB7 rabbit`,
     `\xA7fchicken \xB7 beef \xB7 porkchop`,
     `\xA7fcarrot \xB7 spider eye`,
     ``,
     `\xA77Tips\xA7r`,
-    `\xA7fSneak while approaching \u2014 \xA7eshy\xA7f and \xA7danxious\xA7f`,
-    `\xA7fpersonalities flee from non-sneaking players.`,
-    `\xA7fUse the \xA73Meownifier\xA7f to check favorite food`,
-    `\xA7fbefore spending your stock.`
+    `\xA7fSome personalities flee from non-sneaking`,
+    `\xA7fplayers \u2014 always crouch when approaching`,
+    `\xA7fa wild cat just to be safe.`,
+    `\xA7fUse the \xA73Meownifier\xA7f to check a cat's`,
+    `\xA7ffavorite food before burning your supplies.`
   ].join("\n"));
 }
 function pagePersonalities(player) {
   subPage(player, "\xA7d\xA7lPersonalities\xA7r", [
-    `\xA7fPersonality shapes how a cat behaves \u2014`,
-    `\xA7fhow it moves, rests, and reacts to you.`,
-    `\xA7fIt does \xA7enot\xA7f change taming chance.`,
+    `\xA7fPersonality is set at birth and affects`,
+    `\xA7fhow a cat behaves \u2014 not taming odds.`,
     ``,
     `\xA7d\xA7lAffectionate\xA7r`,
-    `\xA7fFollows owner closely. Looks at player often.`,
-    `\xA7fWill sleep near owner. Very attached.`,
+    `\xA7fWatches you a lot. Seeks you out at`,
+    `\xA7fbedtime to sleep nearby. Very attached.`,
     ``,
     `\xA7d\xA7lAloof\xA7r`,
-    `\xA7fRarely looks at players. Stays to itself.`,
-    `\xA7fSits and sleeps a lot. Independent feel.`,
+    `\xA7fRarely looks your way. Sits with its`,
+    `\xA7fback to you sometimes. It's just how`,
+    `\xA7fthey are \u2014 don't take it personally.`,
     ``,
     `\xA7d\xA7lPlayful\xA7r`,
-    `\xA7fLooks at players frequently. Plays with`,
-    `\xA7fnearby cats often. Active and expressive.`,
+    `\xA7fAlways paying attention. Approaches`,
+    `\xA7fplayers often just to look at them.`,
     ``,
     `\xA7d\xA7lCalm\xA7r`,
-    `\xA7fPanics less \u2014 only flees extreme threats.`,
-    `\xA7fSteady and unbothered. Easy to be around.`,
+    `\xA7fHardly panics. Only lava and lightning`,
+    `\xA7freally bother it. Easy to be around.`,
     ``,
     `\xA7d\xA7lAnxious\xA7r`,
-    `\xA7fFlees non-sneaking non-owners on sight.`,
-    `\xA7fPanics from almost anything. Sneak always.`,
+    `\xA7fFlees anyone who isn't sneaking, isn't`,
+    `\xA7fthe owner, and isn't another cat.`,
+    `\xA7fAlways sneak when approaching these.`,
     ``,
     `\xA7d\xA7lConfident\xA7r`,
-    `\xA7fNever flees from players or mobs.`,
-    `\xA7fApproaches boldly. Looks at players often.`
+    `\xA7fDoesn't flee from anything. Will stare`,
+    `\xA7fat you from across the room. Bold cat.`
   ].join("\n"));
 }
 function pageTraits(player) {
   subPage(player, "\xA7b\xA7lBehavior Traits\xA7r", [
-    `\xA7fTraits control day-to-day behavior \u2014`,
-    `\xA7fdifferent from personality which affects taming.`,
+    `\xA7fTraits govern day-to-day habits \u2014`,
+    `\xA7fdifferent from personality.`,
     ``,
     `\xA7b\xA7lLazy\xA7r`,
-    `\xA7fSits more, roams less. Long idle timers.`,
-    `\xA7fPerfect lap cat.`,
+    `\xA7fSits a lot, roams rarely. Long gaps`,
+    `\xA7fbetween activity. Great homebody.`,
     ``,
     `\xA7b\xA7lActive\xA7r`,
-    `\xA7fRoams far, plays often, hunts more.`,
-    `\xA7fNeeds space and stimulation.`,
+    `\xA7fRoams far, hunts often. Needs space`,
+    `\xA7fand something to do.`,
     ``,
     `\xA7b\xA7lCurious\xA7r`,
-    `\xA7fApproaches players and mobs to investigate.`,
-    `\xA7fExplores new blocks and areas.`,
+    `\xA7fApproaches players and mobs to`,
+    `\xA7finvestigate. Gets into things.`,
     ``,
     `\xA7b\xA7lShy\xA7r`,
-    `\xA7fLarge flee radius around players.`,
-    `\xA7fFlees fast \u2014 sneak approach recommended.`,
+    `\xA7fBig personal-space bubble, flees fast.`,
+    `\xA7fAlways crouch when getting close.`,
     ``,
     `\xA7b\xA7lFriendly\xA7r`,
-    `\xA7fSmall flee radius. Approaches players sooner.`,
-    `\xA7fEasier to find in the open.`,
+    `\xA7fRelaxed around players. Small flee`,
+    `\xA7fradius. Usually easy to approach.`,
     ``,
     `\xA7b\xA7lIndependent\xA7r`,
-    `\xA7fLoose follower when tamed. Does its own thing.`,
-    `\xA7fNot ideal for tight companion roles.`
+    `\xA7fFollows when tamed, but loosely.`,
+    `\xA7fDoes its own thing. Respect that.`
   ].join("\n"));
 }
 function pageBreeds(player) {
   subPage(player, "\xA7a\xA7lBreeds\xA7r", [
-    `\xA7a\xA7lRagdoll\xA7r \xA77\u2014 Largest breed. Fluffy pointed coat.`,
-    `\xA7fGentle giants. Spawns large to huge.`,
+    `\xA7fTwelve breeds, each with its own home`,
+    `\xA7fbiome. Coat colors shift by region too \u2014`,
+    `\xA7fthe same breed can look quite different`,
+    `\xA7fdepending on where you find it.`,
     ``,
-    `\xA7a\xA7lSiamese\xA7r \xA77\u2014 Always pointed + cream. Slender`,
-    `\xA7fbuild. Elegant and recognizable.`,
+    `\xA7a\xA7lTabby\xA7r \xA77\xB7 Plains \xB7 Forest \xB7 Village`,
+    `\xA7fClassic tabby orange, hair and tail vary.`,
+    `\xA7fMost common breed.`,
     ``,
-    `\xA7a\xA7lPersian\xA7r \xA77\u2014 Fluffy, flat face, round head.`,
-    `\xA7fTends toward larger sizes. Regal look.`,
+    `\xA7a\xA7lBlack\xA7r \xA77\xB7 Plains \xB7 Forest \xB7 Taiga \xB7 Village`,
+    `\xA7fTuxedo and bicolor patterns.`,
     ``,
-    `\xA7a\xA7lBritish\xA7r \xA77\u2014 Stocky with round head, short snout.`,
-    `\xA7fFavors larger builds. Dense coat variety.`,
+    `\xA7a\xA7lSiamese\xA7r \xA77\xB7 Village \xB7 Desert \xB7 Savanna`,
+    `\xA7fAlways pointed cream. Very recognizable.`,
     ``,
-    `\xA7a\xA7lWhite\xA7r \xA77\u2014 Unique sphinx pattern, no hair.`,
-    `\xA7fSmall build. Striking and unusual.`,
+    `\xA7a\xA7lRed\xA7r \xA77\xB7 Savanna \xB7 Badlands \xB7 Desert`,
+    `\xA7fTabby orange, lots of texture variety.`,
     ``,
-    `\xA7a\xA7lOcelot\xA7r \xA77\u2014 Smallest breed. Wild-looking spots.`,
-    `\xA7fOnly 1 texture. Rare and elusive.`,
+    `\xA7a\xA7lBritish\xA7r \xA77\xB7 Taiga \xB7 Cold biomes`,
+    `\xA7fStocky, round head. Tends toward big.`,
     ``,
-    `\xA7a\xA7lTabby\xA7r \xA77\u2014 Classic tabby orange. Medium build.`,
-    `\xA7fHair and tail vary. Common and friendly.`,
+    `\xA7a\xA7lAll Black\xA7r \xA77\xB7 Dark Oak Forest \xB7 Swamp`,
+    `\xA7fSolid coat, bobtail common.`,
     ``,
-    `\xA7a\xA7lAll Black\xA7r \xA77\u2014 Solid coat, gray and brown variants.`,
-    `\xA7fBobtail common. Mysterious look.`,
+    `\xA7a\xA7lCalico\xA7r \xA77\xB7 Cherry Grove \xB7 Sunflower Plains \xB7 Meadow`,
+    `\xA7fEvery one looks different. Rare.`,
     ``,
-    `\xA7a\xA7lBlack\xA7r \xA77\u2014 Tuxedo and bicolor patterns.`,
-    `\xA7fBlack and white contrast. Very charming.`,
+    `\xA7a\xA7lRagdoll\xA7r \xA77\xB7 Mountain Peaks`,
+    `\xA7fLargest breed. Fluffy, pointed coat.`,
+    `\xA7fFound on snowy slopes and high ridges.`,
     ``,
-    `\xA7a\xA7lCalico\xA7r \xA77\u2014 Multi-color patches. Each one unique.`,
-    `\xA7fWide visual variety.`,
+    `\xA7a\xA7lPersian\xA7r \xA77\xB7 Mountain Peaks`,
+    `\xA7fFlat face, round head. Prefers altitude.`,
+    `\xA7fFound on snowy slopes and frozen peaks.`,
     ``,
-    `\xA7a\xA7lJellie\xA7r \xA77\u2014 Special patterned textures.`,
-    `\xA7fDistinctive and collectible.`,
+    `\xA7a\xA7lWhite\xA7r \xA77\xB7 Snowy \xB7 Pale Garden \xA78(rare, spawns alone)`,
+    `\xA7fSphinx pattern, no hair. Unusual look.`,
     ``,
-    `\xA7a\xA7lRed\xA7r \xA77\u2014 Always tabby orange. Hair and tail vary.`,
-    `\xA7fMany texture options. Vibrant and warm.`
+    `\xA7a\xA7lJellie\xA7r \xA77\xB7 Swamp \xB7 Mushroom Island \xA78(rare)`,
+    `\xA7fSpecial patterned textures. Worth finding.`,
+    ``,
+    `\xA7a\xA7lOcelot\xA7r \xA77\xB7 Jungle only \xA78(rare)`,
+    `\xA7fSmallest breed. Only one texture. Elusive.`
   ].join("\n"));
 }
 function pageBreeding(player) {
   subPage(player, "\xA76\xA7lBreeding & Genetics\xA7r", [
-    `\xA7fTwo \xA7dtamed\xA7f cats of \xA7eany breed\xA7f can breed`,
-    `\xA7fwhen fed their favorite food near each other.`,
-    `\xA7fBreed does not need to match.`,
+    `\xA7fTwo tamed cats fed their favorite food`,
+    `\xA7fnear each other will have a kitten.`,
+    `\xA7fBreed doesn't need to match.`,
     ``,
     `\xA77Baby breed\xA7r`,
-    `\xA7a45%\xA7f chance: mother's breed`,
-    `\xA7a45%\xA7f chance: father's breed`,
-    `\xA7a10%\xA7f chance: surprise \u2014 a \xA7emutation\xA7f breed`,
-    `\xA77that shares traits with both parents.`,
+    `\xA7a45%\xA7f mother's breed`,
+    `\xA7a45%\xA7f father's breed`,
+    `\xA7a10%\xA7f neither \u2014 a \xA7emutation\xA7f breed`,
     ``,
-    `\xA77Inheritance\xA7r`,
-    `\xA7fKittens inherit appearance from both parents`,
-    `\xA7fwith drift \u2014 they won't be identical copies.`,
+    `\xA77Inherited traits\xA7r`,
+    `\xA7fKittens take after both parents with`,
+    `\xA7fa little drift. Not identical copies.`,
     ``,
-    `\xA76Pattern & Color    \xA7a85% \xA77inherit \xB7 15% random`,
-    `\xA76Hair & Tail        \xA7a80\u201395% \xA77inherit`,
-    `\xA76Eye Color          \xA7a90% \xA77inherit`,
-    `\xA76Eye Shape          \xA7a85% \xA77inherit \xB11 step`,
-    `\xA76Size               \xA7a85% \xA77inherit \xB11 tier`,
+    `\xA76Pattern & Color   \xA7a85% \xA77inherit`,
+    `\xA76Tail \xB7 Snout \xB7 Head   \xA7a95% \xA77inherit`,
+    `\xA76Eye Color   \xA7a90% \xA77inherit`,
+    `\xA76Eye Shape   \xA7a85% \xA77inherit \xB11 step`,
+    `\xA76Size   \xA7a85% \xA77inherit \xB11 tier`,
     ``,
-    `\xA77Special chances\xA7r`,
-    `\xA7a1%\xA7f chance of \xA7bheterochromia\xA7f eyes`,
-    `\xA77(mismatched colors) on any born kitten.`,
+    `\xA7fAlso a \xA7a1%\xA7f chance of \xA7bheterochromia\xA7f \u2014`,
+    `\xA7fone eye a different color. Very rare.`,
     ``,
-    `\xA77Baby growth\xA7r`,
-    `\xA7fKittens grow into adults over time.`,
-    `\xA7fSize tier is inherited \u2014 babies show a`,
-    `\xA7fsmaller version that scales up as they grow.`
+    `\xA77Growth\xA7r`,
+    `\xA7fKittens grow into their size tier over time.`,
+    `\xA7fA huge cat starts small and fills out slowly.`
   ].join("\n"));
 }
 function pageMeownifier(player) {
-  subPage(player, "\xA73\xA7lMeownifier\xA7r", [
-    `\xA7fThe Meownifier is your cat inspection tool.`,
-    `\xA7fAim at any cat within \xA7e20 blocks\xA7f and use it`,
-    `\xA7fto reveal everything about them.`,
+  subPage(player, "\xA73\xA7lThe Meownifier\xA7r", [
+    `\xA7fA tool for reading everything about a cat`,
+    `\xA7fthat you can't see with the naked eye.`,
+    `\xA7fAim at any cat within \xA7e20 blocks\xA7f and use it.`,
+    `\xA7fWon't disturb them.`,
     ``,
     `\xA77Crafting\xA7r`,
     `\xA7f  \xA77. \xA7eG \xA77.`,
@@ -1706,9 +1771,9 @@ function pageMeownifier(player) {
     `\xA7fEyes \xB7 Coat \xB7 Tail \xB7 Snout \xB7 Head`,
     ``,
     `\xA77Durability\xA7r`,
-    `\xA7f64 uses. Repair with \xA7bamethyst shards\xA7f`,
-    `\xA7for \xA7egold ingots\xA7f on an anvil.`,
-    `\xA7fEnchant with \xA7aMending\xA7f to keep it forever.`
+    `\xA7f64 uses. Repair with \xA7bamethyst\xA7f or \xA7egold\xA7f`,
+    `\xA7fon an anvil. Enchant with \xA7aMending\xA7f`,
+    `\xA7fto make it last forever.`
   ].join("\n"));
 }
 function pageSecrets(player) {
@@ -1758,9 +1823,6 @@ function registerCatsEvents() {
       handleGiveBirth(sourceEntity);
       return;
     }
-    if (id === "clingycats:interact") {
-      return;
-    }
     if (id === "clingycats:restore_identity") {
       restoreIdentity(sourceEntity);
       return;
@@ -1796,7 +1858,7 @@ function registerCatsEvents() {
 
 // scripts/debug/catdebug.ts
 import { world as world5, system as system3, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
-var DEBUG = true;
+var DEBUG = false;
 function registerDebugRaycast() {
   if (!DEBUG) return;
   system3.runInterval(() => {

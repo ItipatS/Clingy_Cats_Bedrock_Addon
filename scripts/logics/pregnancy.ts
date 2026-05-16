@@ -85,7 +85,7 @@ export function handleGiveBirth(mother: Entity): void {
 
     const { mother: momGenes, father: dadGenes, babyCount = 1 } = record ?? { mother: captureGenes(mother), father: undefined, babyCount: 1 };
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < babyCount; i++) {
         const babyBreed = determineBabyBreed(momGenes, dadGenes);
         const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
 

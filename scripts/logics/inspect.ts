@@ -36,10 +36,6 @@ export function registerItemComponents(): void {
     });
 }
 
-export function registerMeownifierEvents(): void {
-    // routing now handled by clingy_cats:meownifier_use custom component
-}
-
 function statBar(val: number, max: number, len = 10): string {
     const filled = Math.round((val / max) * len);
     return "§2" + "█".repeat(filled) + "§8" + "░".repeat(len - filled) + `§7 ${val}§8/${max}`;
