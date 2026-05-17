@@ -1,8 +1,8 @@
 // scripts/main.ts
-import { system as system5 } from "@minecraft/server";
+import { system as system6 } from "@minecraft/server";
 
 // scripts/events/eventRegister.ts
-import { system as system2 } from "@minecraft/server";
+import { system as system3 } from "@minecraft/server";
 
 // scripts/logics/breed.ts
 import { world } from "@minecraft/server";
@@ -1302,6 +1302,75 @@ function handleGiveBirth(mother) {
   }
 }
 
+// scripts/logics/bond.ts
+import { system, world as world2 } from "@minecraft/server";
+var AFF = "clingy_cats:affection_level";
+var TRU = "clingy_cats:trust_level";
+var AFF_MAX = 1e3;
+var TRU_MAX = 1e3;
+var TRU_REST = 500;
+function getAffection(cat) {
+  return cat.getProperty(AFF) ?? 0;
+}
+function setAffection(cat, v) {
+  cat.setProperty(AFF, Math.max(0, Math.min(AFF_MAX, Math.round(v))));
+}
+function addAffection(cat, d) {
+  setAffection(cat, getAffection(cat) + d);
+}
+function getTrust(cat) {
+  return cat.getProperty(TRU) ?? TRU_REST;
+}
+function setTrust(cat, v) {
+  cat.setProperty(TRU, Math.max(0, Math.min(TRU_MAX, Math.round(v))));
+}
+function addTrust(cat, d) {
+  setTrust(cat, getTrust(cat) + d);
+}
+function registerBondLoop() {
+  system.runInterval(() => {
+    for (const player of world2.getAllPlayers()) {
+      const cats = player.dimension.getEntities({
+        location: player.location,
+        maxDistance: 64,
+        families: ["clingy_cats"]
+      });
+      for (const cat of cats) {
+        if (!cat.isValid) continue;
+        const t = getTrust(cat);
+        if (t !== TRU_REST) setTrust(cat, t + (t < TRU_REST ? 1 : -1));
+        const tame = cat.getComponent("minecraft:tameable");
+        if (!tame?.isTamed) continue;
+        if (tame.tamedToPlayerId !== player.id) continue;
+        const dx = cat.location.x - player.location.x;
+        const dy = cat.location.y - player.location.y;
+        const dz = cat.location.z - player.location.z;
+        if (dx * dx + dy * dy + dz * dz > 256) continue;
+        addAffection(cat, 1);
+      }
+    }
+  }, 20);
+}
+function handlePet(cat) {
+  if (!cat.isValid) return;
+  addAffection(cat, 5);
+  addTrust(cat, 2);
+  cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 0.8, pitch: 1.2 });
+}
+function handleCatHurt(cat) {
+  if (!cat.isValid) return;
+  addTrust(cat, -15);
+}
+var SLEEP_GATE = "clingy_cats:last_sleep_bump";
+function handleOwnerSleeping(cat) {
+  if (!cat.isValid) return;
+  const now = system.currentTick;
+  const last = cat.getDynamicProperty(SLEEP_GATE) ?? -9999;
+  if (now - last < 200) return;
+  cat.setDynamicProperty(SLEEP_GATE, now);
+  addAffection(cat, 3);
+}
+
 // scripts/logics/states.ts
 var LAST_TEMP = "clingy_cats:last_temp_group";
 var TRAIT_POOLS = {
@@ -1398,6 +1467,15 @@ var BLOCK_POOLS = {
     { behavior: "enter_sleep_state", weight: 1 }
   ]
 };
+function applyBondMultipliers(cat, pool) {
+  const aff = getAffection(cat);
+  if (aff <= 0) return;
+  for (const e of pool) {
+    if (e.behavior === "temp_follow_close") e.weight *= 1 + aff / 500;
+    else if (e.behavior === "enter_sleep_state") e.weight *= 1 + aff / 800;
+    else if (e.behavior === "enter_sit_state") e.weight *= 1 + aff / 1e3;
+  }
+}
 function weightedRandom2(pool) {
   const total = pool.reduce((sum, e) => sum + e.weight, 0);
   let roll = Math.random() * total;
@@ -1438,6 +1516,7 @@ function behaviorTick(cat, state) {
     PERSONALITY_POOLS[personality] ?? [],
     BLOCK_POOLS[block] ?? []
   );
+  applyBondMultipliers(cat, pool);
   const chosen = state || weightedRandom2(pool);
   if (chosen === "enter_still_state" || chosen === "enter_sit_state" || chosen === "enter_sleep_state" || chosen === "enter_groom_state") {
     cat.triggerEvent(`clingy_cats:${chosen}`);
@@ -1505,12 +1584,20 @@ function handleGiveItem(cat) {
   const tameable = cat.getComponent("minecraft:tameable");
   if (!tameable?.isTamed) {
     behaviorTick(cat, "temp_follow_close");
+  } else if (isFavorite) {
+    addAffection(cat, 20);
+    addTrust(cat, 5);
   }
   if (!success) return;
   const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 10 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
   if (!player) return;
+  const wasTamed = tameable?.isTamed;
   tameable?.tame(player);
   cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1, pitch: 1.2 });
+  if (!wasTamed) {
+    cat.setProperty("clingy_cats:affection_level", 100);
+    cat.setProperty("clingy_cats:trust_level", 500);
+  }
 }
 
 // scripts/logics/riding.ts
@@ -1561,16 +1648,16 @@ function handleAnchorExpire(anchor) {
 }
 
 // scripts/logics/guideBook.ts
-import { ItemStack, system, world as world3 } from "@minecraft/server";
+import { ItemStack, system as system2, world as world4 } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 var GUIDE_TAG = "clingy_cats:welcomed";
 function registerGuideBookEvents() {
-  world3.afterEvents.playerSpawn.subscribe((ev) => {
+  world4.afterEvents.playerSpawn.subscribe((ev) => {
     if (!ev.initialSpawn) return;
     const player = ev.player;
     if (player.hasTag(GUIDE_TAG)) return;
     player.addTag(GUIDE_TAG);
-    system.runTimeout(() => {
+    system2.runTimeout(() => {
       const inv = player.getComponent("minecraft:inventory");
       inv?.container?.addItem(new ItemStack("clingy_cats:guide_book", 1));
     }, 60);
@@ -1808,7 +1895,7 @@ function pageSecrets(player) {
 // scripts/events/eventRegister.ts
 function registerCatsEvents() {
   registerGuideBookEvents();
-  system2.afterEvents.scriptEventReceive.subscribe((ev) => {
+  system3.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, message, sourceEntity } = ev;
     if (!sourceEntity || !sourceEntity.isValid) return;
     if (id === "clingycats:catspawn") {
@@ -1863,16 +1950,28 @@ function registerCatsEvents() {
     if (id === "clingycats:grow_up") {
       applyAdultSize(sourceEntity);
     }
+    if (id === "clingycats:pet") {
+      handlePet(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:cat_hurt") {
+      handleCatHurt(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:owner_sleeping") {
+      handleOwnerSleeping(sourceEntity);
+      return;
+    }
   });
 }
 
 // scripts/debug/catdebug.ts
-import { world as world5, system as system3, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
+import { world as world6, system as system4, EquipmentSlot, GameMode, EntityComponentTypes } from "@minecraft/server";
 var DEBUG = false;
 function registerDebugRaycast() {
   if (!DEBUG) return;
-  system3.runInterval(() => {
-    for (const player of world5.getAllPlayers()) {
+  system4.runInterval(() => {
+    for (const player of world6.getAllPlayers()) {
       const held = player.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand);
       if (held?.typeId !== "minecraft:stick") continue;
       if (player.getGameMode() === GameMode.Creative) return;
@@ -1905,10 +2004,10 @@ function registerDebugRaycast() {
 }
 
 // scripts/logics/inspect.ts
-import { EquipmentSlot as EquipmentSlot2, GameMode as GameMode2, system as system4 } from "@minecraft/server";
+import { EquipmentSlot as EquipmentSlot2, GameMode as GameMode2, system as system5 } from "@minecraft/server";
 import { ActionFormData as ActionFormData2 } from "@minecraft/server-ui";
 function registerItemComponents() {
-  system4.beforeEvents.startup.subscribe((ev) => {
+  system5.beforeEvents.startup.subscribe((ev) => {
     ev.itemComponentRegistry.registerCustomComponent("clingy_cats_component:guide_book", {
       onUse(event) {
         const player = event.source;
@@ -1996,9 +2095,10 @@ function reduceDurability(player) {
 
 // scripts/main.ts
 registerItemComponents();
-system5.run(() => {
+system6.run(() => {
   registerCatsEvents();
   registerDebugRaycast();
+  registerBondLoop();
 });
 
 //# sourceMappingURL=../debug/main.js.map

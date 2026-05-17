@@ -2,6 +2,7 @@ import { Entity, MolangVariableMap, world } from "@minecraft/server";
 import { Personality } from "../configs/catsbreed";
 import { distanceSq } from "./utils";
 import { behaviorTick } from '../logics/states';
+import { addAffection, addTrust } from "./bond";
 
 const TAME_RATES: Record<Personality, { favorite: number; neutral: number }> = {
     anxious:      { favorite: 0.20, neutral: 0.05 },
@@ -47,6 +48,10 @@ export function handleGiveItem(cat: Entity): void {
 
     if (!tameable?.isTamed) {
         behaviorTick(cat, "temp_follow_close")
+    } else if (isFavorite) {
+        // already-tamed cats: favorite-food acceptance reinforces the bond
+        addAffection(cat, 20);
+        addTrust(cat, 5);
     }
     //world.sendMessage(`§e${cat.typeId.replace("clingy_cats:", "")} §7[${favoriteFood}] 7[${chance}] 7success? [${success}] `);
     if (!success) return;
@@ -57,6 +62,13 @@ export function handleGiveItem(cat: Entity): void {
 
     if (!player) return;
 
+    const wasTamed = tameable?.isTamed;
     tameable?.tame(player);
     cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1.0, pitch: 1.2 });
+
+    if (!wasTamed) {
+        // fresh tame: seed bond stats
+        cat.setProperty("clingy_cats:affection_level", 100);
+        cat.setProperty("clingy_cats:trust_level", 500);
+    }
 }

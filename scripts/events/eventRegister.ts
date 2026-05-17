@@ -6,6 +6,7 @@ import { restoreIdentity, behaviorTick } from '../logics/states';
 import { handleGiveItem } from "../logics/interact";
 import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
 import { registerGuideBookEvents } from "../logics/guideBook";
+import { handlePet, handleCatHurt, handleOwnerSleeping } from "../logics/bond";
 
 export function registerCatsEvents(): void {
     registerGuideBookEvents();
@@ -81,6 +82,21 @@ export function registerCatsEvents(): void {
 
         if (id === "clingycats:grow_up") {
             applyAdultSize(sourceEntity);
+        }
+
+        if (id === "clingycats:pet") {
+            handlePet(sourceEntity);
+            return;
+        }
+
+        if (id === "clingycats:cat_hurt") {
+            handleCatHurt(sourceEntity);
+            return;
+        }
+
+        if (id === "clingycats:owner_sleeping") {
+            handleOwnerSleeping(sourceEntity);
+            return;
         }
 
     });

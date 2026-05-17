@@ -1,5 +1,6 @@
 import { Entity, world } from "@minecraft/server";
 import { BehaviorTrait, Personality, FavoriteBlock } from "../configs/catsbreed";
+import { getAffection } from "./bond";
 
 export type TempBehavior =
     | "temp_follow_close"
@@ -124,6 +125,18 @@ const BLOCK_POOLS: Record<FavoriteBlock, BehaviorEntry[]> = {
 // WEIGHTED RANDOM
 // ============================================================
 
+// Bond drives behavior: bonded cats follow the owner, settle near them, and sleep more often.
+// Tamed-but-cold (aff=100) cats are roughly baseline; high-aff (aff=1000) cats are visibly clingy.
+function applyBondMultipliers(cat: Entity, pool: BehaviorEntry[]): void {
+    const aff = getAffection(cat);
+    if (aff <= 0) return;
+    for (const e of pool) {
+        if (e.behavior === "temp_follow_close")  e.weight *= 1 + aff / 500;
+        else if (e.behavior === "enter_sleep_state") e.weight *= 1 + aff / 800;
+        else if (e.behavior === "enter_sit_state")   e.weight *= 1 + aff / 1000;
+    }
+}
+
 function weightedRandom(pool: BehaviorEntry[]): BehaviorEntry["behavior"] {
     const total = pool.reduce((sum, e) => sum + e.weight, 0);
     let roll = Math.random() * total;
@@ -175,6 +188,7 @@ export function behaviorTick(cat: Entity, state?: string): void {
         PERSONALITY_POOLS[personality] ?? [],
         BLOCK_POOLS[block]       ?? [],
     );
+    applyBondMultipliers(cat, pool);
     const chosen = state || weightedRandom(pool);
 
     if (chosen === "enter_still_state" || chosen === "enter_sit_state" || chosen === "enter_sleep_state" || chosen === "enter_groom_state") {

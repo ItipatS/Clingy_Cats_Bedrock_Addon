@@ -699,6 +699,29 @@
 				},
 				"minecraft:on_wake_with_owner": {
 				},
+				"minecraft:damage_sensor": {
+					"triggers": [
+						{ "cause": "all", "deals_damage": "yes",
+						  "on_damage": { "event": "clingy_cats:on_tamed_hurt" }
+						}
+					]
+				},
+				"minecraft:entity_sensor": {
+					"subsensors": [
+						{
+							"range": [8, 8],
+							"minimum_count": 1,
+							"event": "clingy_cats:owner_sleeping_nearby",
+							"event_filters": {
+								"all_of": [
+									{ "test": "is_family", "subject": "other", "value": "player" },
+									{ "test": "is_sleeping", "subject": "other", "value": true },
+									{ "test": "is_owner", "subject": "other", "value": true }
+								]
+							}
+						}
+					]
+				},
 				"minecraft:interact": {
 					"interactions": [
 						{
@@ -777,7 +800,7 @@
 										}
 									]
 								},
-							"event": "clingy_cats:enter_rub_state"
+							"event": "clingy_cats:on_pet"
 							},
 							"particle_on_start": {
 								"particle_type": "heart",
@@ -2093,6 +2116,21 @@
 					{ "queue_command": { "command": "playsound mob.totem.use @s" } },
 					{ "queue_command": { "command": "particle minecraft:totem_particle ~ ~1 ~" } }
 				]
+			},
+
+			"clingy_cats:on_pet": {
+				"sequence": [
+					{ "trigger": "clingy_cats:enter_rub_state" },
+					{ "queue_command": { "command": "scriptevent clingycats:pet" } }
+				]
+			},
+
+			"clingy_cats:on_tamed_hurt": {
+				"queue_command": { "command": "scriptevent clingycats:cat_hurt" }
+			},
+
+			"clingy_cats:owner_sleeping_nearby": {
+				"queue_command": { "command": "scriptevent clingycats:owner_sleeping" }
 			}
 
 		}
