@@ -1762,6 +1762,13 @@ function handleAnchorExpire(anchor) {
 import { ItemStack, system as system2, world as world4 } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 var GUIDE_TAG = "clingy_cats:welcomed";
+var ICON_GUIDE = "textures/items/guidebook";
+var ICON_MEOW = "textures/items/meownifier";
+var ICON_TABBY = "textures/items/spawn_eggs/tabby_spawn_egg";
+var ICON_PERSIAN = "textures/items/spawn_eggs/persian_spawn_egg";
+var ICON_OCELOT = "textures/items/spawn_eggs/ocelot_spawn_egg";
+var ICON_CALICO = "textures/items/spawn_eggs/calico_spawn_egg";
+var ICON_RAGDOLL = "textures/items/spawn_eggs/ragdoll_spawn_egg";
 function registerGuideBookEvents() {
   world4.afterEvents.playerSpawn.subscribe((ev) => {
     if (!ev.initialSpawn) return;
@@ -1775,232 +1782,251 @@ function registerGuideBookEvents() {
   });
 }
 function showGuide(player) {
-  new ActionFormData().title("\xA76\xA7l\u25C6 Clingy Cats \u2014 Field Notes \u25C6\xA7r").body(
-    `\xA7fNotes on finding, befriending, and
-\xA7fliving with Clingy Cats.
-
-\xA77Pick a topic to read.`
-  ).button("\xA7eTaming Cats").button("\xA7dPersonalities").button("\xA7bTraits").button("\xA7aBreeds").button("\xA76Breeding & Genetics").button("\xA73The Meownifier").button("\xA78Secrets...").button("\xA77Close").show(player).then((res) => {
-    if (res.canceled || res.selection === 7) return;
-    const pages = [pageTaming, pagePersonalities, pageTraits, pageBreeds, pageBreeding, pageMeownifier, pageSecrets];
+  new ActionFormData().title("\xA76\xA7l\u25C6 Field Notes \u25C6\xA7r").body("\xA77These are notes I've kept\n\xA77while learning the cats.").button("\xA7e\xA7lOn Taming", ICON_TABBY).button("\xA7d\xA7lKinds I've Met", ICON_CALICO).button("\xA7b\xA7lHow They Live", ICON_OCELOT).button("\xA7a\xA7lWhere I Found Them", ICON_RAGDOLL).button("\xA76\xA7lOn Kittens", ICON_PERSIAN).button("\xA73\xA7lThe Meownifier", ICON_MEOW).button("\xA79\xA7lSigns They Leave", ICON_GUIDE).button("\xA78\xA7l... Loose Pages ...").button("\xA77Close the book").show(player).then((res) => {
+    if (res.canceled || res.selection === 8) return;
+    const pages = [
+      pageTaming,
+      pagePersonalities,
+      pageTraits,
+      pageBreeds,
+      pageBreeding,
+      pageMeownifier,
+      pageMoodSignals,
+      pageSecrets
+    ];
     pages[res.selection]?.(player);
   });
 }
-function subPage(player, title, body) {
-  new ActionFormData().title(title).body(body).button("\xA77< Back").button("\xA78Close").show(player).then((res) => {
+function H(text) {
+  return { kind: "header", text };
+}
+function L(text) {
+  return { kind: "label", text };
+}
+function D() {
+  return { kind: "divider" };
+}
+function buildPage(player, title, intro, blocks) {
+  const form = new ActionFormData().title(title).body(intro);
+  for (const b of blocks) {
+    if (b.kind === "header") form.header(b.text);
+    else if (b.kind === "label") form.label(b.text);
+    else form.divider();
+  }
+  form.button("\xA77< Back").button("\xA78Close").show(player).then((res) => {
     if (!res.canceled && res.selection === 0) showGuide(player);
   });
 }
 function pageTaming(player) {
-  subPage(player, "\xA7e\xA7lTaming Cats\xA7r", [
-    `\xA7fThese cats aren't village strays. They're`,
-    `\xA7fwild, rarer, and they won't just walk up`,
-    `\xA7fto you. Each breed has its own biome \u2014`,
-    `\xA7fsee \xA7aBreeds\xA7f for where to look.`,
-    ``,
-    `\xA77How to tame\xA7r`,
-    `\xA7fCrouch, hold food, and right-click to offer.`,
-    `\xA7fEvery cat has a \xA7efavorite food\xA7f \u2014 offer`,
-    `\xA7fthat and you get a \xA7a45%\xA7f chance per try.`,
-    `\xA7fOther foods still work, just at \xA7a20%.\xA7f`,
-    `\xA7fIt might take a few attempts. That's normal.`,
-    ``,
-    `\xA77Foods they'll accept\xA7r`,
-    `\xA7fcod \xB7 salmon \xB7 tropical fish \xB7 rabbit`,
-    `\xA7fchicken \xB7 beef \xB7 porkchop`,
-    `\xA7fcarrot \xB7 spider eye`,
-    ``,
-    `\xA77Tips\xA7r`,
-    `\xA7fSome personalities flee from non-sneaking`,
-    `\xA7fplayers \u2014 always crouch when approaching`,
-    `\xA7fa wild cat just to be safe.`,
-    `\xA7fUse the \xA73Meownifier\xA7f to check a cat's`,
-    `\xA7ffavorite food before burning your supplies.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA7e\xA7lOn Taming\xA7r",
+    "\xA7fIt took me a while to learn that not every cat wants the same thing. Some run off if you crowd them. Some won't even glance at food.",
+    [
+      H("\xA7eThings I've tried that worked\xA7r"),
+      L("\xA77Crouching nearby and just waiting."),
+      L("\xA77Holding out their favorite \u2014 you can"),
+      L("\xA77see which one by their face."),
+      L("\xA77Reaching slowly with an empty hand."),
+      D(),
+      H("\xA7eWhat I had to unlearn\xA7r"),
+      L("\xA77It's never a coin flip. Each cat"),
+      L("\xA77keeps its own quiet count."),
+      L("\xA77Some I tried for weeks. Petting did"),
+      L("\xA77nothing \u2014 they only wanted food."),
+      L("\xA77Others followed me home after one"),
+      L("\xA77slow afternoon."),
+      D(),
+      H("\xA7eHeads-up\xA7r"),
+      L("\xA77If a cat warms up to you, it's yours."),
+      L("\xA77Friends who try to feed it get hissed at.")
+    ]
+  );
 }
 function pagePersonalities(player) {
-  subPage(player, "\xA7d\xA7lPersonalities\xA7r", [
-    `\xA7fPersonality is set at birth and affects`,
-    `\xA7fhow a cat behaves \u2014 not taming odds.`,
-    ``,
-    `\xA7d\xA7lAffectionate\xA7r`,
-    `\xA7fWatches you a lot. Seeks you out at`,
-    `\xA7fbedtime to sleep nearby. Very attached.`,
-    ``,
-    `\xA7d\xA7lAloof\xA7r`,
-    `\xA7fRarely looks your way. Sits with its`,
-    `\xA7fback to you sometimes. It's just how`,
-    `\xA7fthey are \u2014 don't take it personally.`,
-    ``,
-    `\xA7d\xA7lPlayful\xA7r`,
-    `\xA7fAlways paying attention. Approaches`,
-    `\xA7fplayers often just to look at them.`,
-    ``,
-    `\xA7d\xA7lCalm\xA7r`,
-    `\xA7fHardly panics. Only lava and lightning`,
-    `\xA7freally bother it. Easy to be around.`,
-    ``,
-    `\xA7d\xA7lAnxious\xA7r`,
-    `\xA7fFlees anyone who isn't sneaking, isn't`,
-    `\xA7fthe owner, and isn't another cat.`,
-    `\xA7fAlways sneak when approaching these.`,
-    ``,
-    `\xA7d\xA7lConfident\xA7r`,
-    `\xA7fDoesn't flee from anything. Will stare`,
-    `\xA7fat you from across the room. Bold cat.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA7d\xA7lKinds I've Met\xA7r",
+    "\xA7fEvery cat is its own creature, but I've started to notice kinds.",
+    [
+      H("\xA7dAffectionate\xA7r"),
+      L("\xA77Watches you. Will leave a warm spot"),
+      L("\xA77to sleep next to a cold one, if you're in it."),
+      D(),
+      H("\xA7dAloof\xA7r"),
+      L("\xA77Sits with its back to you. It's not"),
+      L("\xA77personal \u2014 they're like that with everyone."),
+      D(),
+      H("\xA7dPlayful\xA7r"),
+      L("\xA77Comes close just to look. Pounces"),
+      L("\xA77on string like it owes them money."),
+      D(),
+      H("\xA7dCalm\xA7r"),
+      L("\xA77Doesn't startle. Lightning, water,"),
+      L("\xA77dogs barking \u2014 nothing fazes them."),
+      D(),
+      H("\xA7dAnxious\xA7r"),
+      L("\xA77Flees anything that isn't sneaking."),
+      L("\xA77Make yourself small."),
+      D(),
+      H("\xA7dConfident\xA7r"),
+      L("\xA77Stares from across the room. Owns"),
+      L("\xA77the place. Easy if you feed them right.")
+    ]
+  );
 }
 function pageTraits(player) {
-  subPage(player, "\xA7b\xA7lBehavior Traits\xA7r", [
-    `\xA7fTraits govern day-to-day habits \u2014`,
-    `\xA7fdifferent from personality.`,
-    ``,
-    `\xA7b\xA7lLazy\xA7r`,
-    `\xA7fSits a lot, roams rarely. Long gaps`,
-    `\xA7fbetween activity. Great homebody.`,
-    ``,
-    `\xA7b\xA7lActive\xA7r`,
-    `\xA7fRoams far, hunts often. Needs space`,
-    `\xA7fand something to do.`,
-    ``,
-    `\xA7b\xA7lCurious\xA7r`,
-    `\xA7fApproaches players and mobs to`,
-    `\xA7finvestigate. Gets into things.`,
-    ``,
-    `\xA7b\xA7lShy\xA7r`,
-    `\xA7fBig personal-space bubble, flees fast.`,
-    `\xA7fAlways crouch when getting close.`,
-    ``,
-    `\xA7b\xA7lFriendly\xA7r`,
-    `\xA7fRelaxed around players. Small flee`,
-    `\xA7fradius. Usually easy to approach.`,
-    ``,
-    `\xA7b\xA7lIndependent\xA7r`,
-    `\xA7fFollows when tamed, but loosely.`,
-    `\xA7fDoes its own thing. Respect that.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA7b\xA7lHow They Live\xA7r",
+    "\xA7fPersonality is who they are. Traits are how they spend their days. Different thing.",
+    [
+      H("\xA7bThe homebodies\xA7r"),
+      L("\xA77Some cats sit for hours. Long naps,"),
+      L("\xA77slow stretches. Nothing much pulls them out."),
+      D(),
+      H("\xA7bThe wanderers\xA7r"),
+      L("\xA77Others can't sit still. Always pacing,"),
+      L("\xA77always somewhere just past the door."),
+      D(),
+      H("\xA7bThe nosy ones\xA7r"),
+      L("\xA77Some come up to investigate everything."),
+      L("\xA77Sit quietly near one and they notice you."),
+      D(),
+      H("\xA7bThe skittish ones\xA7r"),
+      L("\xA77Big personal-space bubble. Sneak"),
+      L("\xA77or they're gone."),
+      D(),
+      H("\xA7bThe loose followers\xA7r"),
+      L("\xA77Tame, but on their own schedule."),
+      L("\xA77They'll come back. Eventually.")
+    ]
+  );
 }
 function pageBreeds(player) {
-  subPage(player, "\xA7a\xA7lBreeds\xA7r", [
-    `\xA7fTwelve breeds, each in its own home`,
-    `\xA7fbiome. Coat colors shift by region too \u2014`,
-    `\xA7fthe same breed can look quite different`,
-    `\xA7fdepending on where you find it.`,
-    ``,
-    `\xA7a\xA7lTabby\xA7r \xA77\xB7 Forest \xB7 Birch Forest`,
-    `\xA7fClassic tabby orange, hair and tail vary.`,
-    `\xA7fMost common breed.`,
-    ``,
-    `\xA7a\xA7lBlack\xA7r \xA77\xB7 Plains \xB7 Sunflower Plains`,
-    `\xA7fTuxedo and bicolor patterns. Lives where`,
-    `\xA7fpeople live \u2014 common around villages.`,
-    ``,
-    `\xA7a\xA7lSiamese\xA7r \xA77\xB7 Savanna`,
-    `\xA7fAlways pointed cream. Very recognizable.`,
-    ``,
-    `\xA7a\xA7lRed\xA7r \xA77\xB7 Desert \xB7 Badlands`,
-    `\xA7fTabby orange, lots of texture variety.`,
-    ``,
-    `\xA7a\xA7lBritish\xA7r \xA77\xB7 Taiga (not mega)`,
-    `\xA7fStocky, round head. Tends toward big.`,
-    ``,
-    `\xA7a\xA7lAll Black\xA7r \xA77\xB7 Dark Oak Forest \xB7 Swamp`,
-    `\xA7fSolid coat, bobtail common.`,
-    ``,
-    `\xA7a\xA7lCalico\xA7r \xA77\xB7 Cherry Grove \xB7 Meadow \xB7 Flower Forest`,
-    `\xA7fEvery one looks different. Uncommon.`,
-    ``,
-    `\xA7a\xA7lRagdoll\xA7r \xA77\xB7 Snowy Slopes \xB7 Grove \xA78(rare)`,
-    `\xA7fLargest breed. Fluffy, pointed coat.`,
-    `\xA7fFound on the lower snowy mountainsides.`,
-    ``,
-    `\xA7a\xA7lPersian\xA7r \xA77\xB7 Jagged Peaks \xB7 Frozen Peaks \xA78(rare)`,
-    `\xA7fFlat face, round head. Prefers altitude \u2014`,
-    `\xA7fonly the highest peaks.`,
-    ``,
-    `\xA7a\xA7lJellie\xA7r \xA77\xB7 Mangrove Swamp \xB7 Mushroom Island \xA78(rare)`,
-    `\xA7fSpecial patterned textures. Worth finding.`,
-    ``,
-    `\xA7a\xA7lOcelot\xA7r \xA77\xB7 Jungle (not edges) \xA78(rare)`,
-    `\xA7fSmallest breed. Only one texture. Elusive.`,
-    ``,
-    `\xA7a\xA7lWhite\xA7r \xA77\xB7 Pale Garden \xB7 Ice Spikes \xA78(very rare)`,
-    `\xA7fSphinx pattern, no hair. The rarest cat.`,
-    `\xA7fSpawns alone in the strangest places.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA7a\xA7lWhere I Found Them\xA7r",
+    "\xA7fTwelve coats, twelve homes. I've found them all eventually. The same breed can look different depending where you stand.",
+    [
+      H("\xA7aThe common ones\xA7r"),
+      L("\xA77Tabby \u2014 forest, birch forest"),
+      L("\xA77Black \u2014 plains, sunflower plains"),
+      L("\xA77Siamese \u2014 savanna"),
+      L("\xA77Red \u2014 desert, badlands"),
+      L("\xA77British \u2014 taiga (not mega)"),
+      L("\xA77All Black \u2014 dark oak, swamp"),
+      L("\xA77Calico \u2014 cherry, meadow, flower forest"),
+      D(),
+      H("\xA76Harder to find\xA7r"),
+      L("\xA77Ragdoll \u2014 snowy slopes, grove"),
+      L("\xA77Persian \u2014 high peaks only"),
+      L("\xA77Jellie \u2014 mangrove, mushroom island"),
+      L("\xA77Ocelot \u2014 deep jungle, not the edges"),
+      D(),
+      H("\xA75The strange one\xA7r"),
+      L("\xA77White \u2014 pale garden, ice spikes."),
+      L("\xA77Sphinx pattern, no hair. Spawns"),
+      L("\xA77alone in the strangest places.")
+    ]
+  );
 }
 function pageBreeding(player) {
-  subPage(player, "\xA76\xA7lBreeding & Genetics\xA7r", [
-    `\xA7fTwo tamed cats fed their favorite food`,
-    `\xA7fnear each other will have a kitten.`,
-    `\xA7fBreed doesn't need to match.`,
-    ``,
-    `\xA77Baby breed\xA7r`,
-    `\xA7a45%\xA7f mother's breed`,
-    `\xA7a45%\xA7f father's breed`,
-    `\xA7a10%\xA7f neither \u2014 a \xA7emutation\xA7f breed`,
-    ``,
-    `\xA77Inherited traits\xA7r`,
-    `\xA7fKittens take after both parents with`,
-    `\xA7fa little drift. Not identical copies.`,
-    ``,
-    `\xA76Pattern & Color   \xA7a85% \xA77inherit`,
-    `\xA76Tail \xB7 Snout \xB7 Head   \xA7a95% \xA77inherit`,
-    `\xA76Eye Color   \xA7a90% \xA77inherit`,
-    `\xA76Eye Shape   \xA7a85% \xA77inherit \xB11 step`,
-    `\xA76Size   \xA7a85% \xA77inherit \xB11 tier`,
-    ``,
-    `\xA7fAlso a \xA7a1%\xA7f chance of \xA7bheterochromia\xA7f \u2014`,
-    `\xA7fone eye a different color. Very rare.`,
-    ``,
-    `\xA77Growth\xA7r`,
-    `\xA7fKittens grow into their size tier over time.`,
-    `\xA7fA huge cat starts small and fills out slowly.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA76\xA7lOn Kittens\xA7r",
+    "\xA7fTwo of mine, both content, both fed what they love \u2014 there will be a kitten. Doesn't matter if they match.",
+    [
+      H("\xA76Whose kitten is it\xA7r"),
+      L("\xA77Mostly it looks like one of them."),
+      L("\xA77Now and then, neither. Something"),
+      L("\xA77older pulls through."),
+      D(),
+      H("\xA76What they keep\xA7r"),
+      L("\xA77Coat patterns and colors usually carry."),
+      L("\xA77Tail, ear shape, face \u2014 almost always."),
+      L("\xA77Eye color, almost always. Shape drifts."),
+      L("\xA77Size mostly carries. Sometimes a runt"),
+      L("\xA77or a giant turns up."),
+      D(),
+      H("\xA76Rare\xA7r"),
+      L("\xA77Now and then a kitten has mismatched"),
+      L("\xA77eyes. They tell me that's lucky."),
+      D(),
+      H("\xA76Growing up\xA7r"),
+      L("\xA77A huge cat starts small. Fills out slowly.")
+    ]
+  );
 }
 function pageMeownifier(player) {
-  subPage(player, "\xA73\xA7lThe Meownifier\xA7r", [
-    `\xA7fA tool for reading everything about a cat`,
-    `\xA7fthat you can't see with the naked eye.`,
-    `\xA7fAim at any cat within \xA7e20 blocks\xA7f and use it.`,
-    `\xA7fWon't disturb them.`,
-    ``,
-    `\xA77Crafting\xA7r`,
-    `\xA7f  \xA77. \xA7eG \xA77.`,
-    `\xA7f  \xA7eG \xA7cE \xA7eG     \xA7eG\xA7f = Gold Ingot`,
-    `\xA7f  \xA77. \xA7bA \xA77.     \xA7cE\xA7f = Eye of Ender`,
-    `\xA7f               \xA7bA\xA7f = Amethyst Shard`,
-    ``,
-    `\xA77What it shows\xA7r`,
-    `\xA7fBreed \xB7 Life stage \xB7 Tame status`,
-    `\xA7fPersonality \xB7 Trait \xB7 Favorite food`,
-    `\xA7fFavorite block \xB7 Size \xB7 Current state`,
-    `\xA7fAffection & trust levels`,
-    `\xA7fEyes \xB7 Coat \xB7 Tail \xB7 Snout \xB7 Head`,
-    ``,
-    `\xA77Durability\xA7r`,
-    `\xA7f64 uses. Repair with \xA7bamethyst\xA7f or \xA7egold\xA7f`,
-    `\xA7fon an anvil. Enchant with \xA7aMending\xA7f`,
-    `\xA7fto make it last forever.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA73\xA7lThe Meownifier\xA7r",
+    "\xA7fA pocket telescope for the things a cat won't say. Aim at any cat within a few houses' distance and click. They don't notice.",
+    [
+      H("\xA73How to build one\xA7r"),
+      L("\xA7f  \xA77. \xA7eG \xA77."),
+      L("\xA7f  \xA7eG \xA7cE \xA7eG     \xA7eG\xA7f Gold \xB7 \xA7cE\xA7f Eye of Ender"),
+      L("\xA7f  \xA77. \xA7bA \xA77.     \xA7bA\xA7f Amethyst"),
+      D(),
+      H("\xA73What it tells me\xA7r"),
+      L("\xA77Breed. Who they love best."),
+      L("\xA77What they like to eat, where they sit."),
+      L("\xA77Their state, their feelings, the numbers."),
+      D(),
+      H("\xA73Keeping it sharp\xA7r"),
+      L("\xA77Sixty-some uses before it dulls."),
+      L("\xA77Amethyst or gold sharpens it on an anvil."),
+      L("\xA77Mending keeps it forever.")
+    ]
+  );
+}
+function pageMoodSignals(player) {
+  buildPage(
+    player,
+    "\xA79\xA7lSigns They Leave\xA7r",
+    "\xA7fCats don't make faces. They make signs. I've started to notice them in the air around them.",
+    [
+      H("\xA79What I've seen\xA7r"),
+      L("\xA7c\u2665\xA77 hearts \u2014 they love it here. Usually me."),
+      L("\xA7agreen sparkles\xA77 \u2014 content. The most common."),
+      L("\xA7ewhite puff\xA77 \u2014 startled. I crowded them."),
+      L("\xA7bsoft glow\xA77 \u2014 curious. They're watching."),
+      L("\xA75dark wisp\xA77 \u2014 deep peace. Always sleeping."),
+      L("\xA79blue mist\xA77 \u2014 they don't trust me. Something hurt them."),
+      D(),
+      H("\xA79What I haven't figured out\xA7r"),
+      L("\xA77Some cats show nothing at all."),
+      L("\xA77Aloof ones, mostly. That seems to be"),
+      L("\xA77its own kind of mood."),
+      L("\xA77The signs come when they decide"),
+      L("\xA77what to do next. Not all the time.")
+    ]
+  );
 }
 function pageSecrets(player) {
-  subPage(player, "\xA78\xA7l... Secrets ...\xA7r", [
-    `\xA78Some things are not written in any guide.`,
-    ``,
-    `\xA78Watch the sky. The moon keeps old promises.`,
-    `\xA78Pale coats and mismatched eyes walk at night`,
-    `\xA78when the world is brightest dark.`,
-    ``,
-    `\xA78A cat that has witnessed death`,
-    `\xA78and carries a golden ward\xA78...`,
-    `\xA78may never witness it again.`,
-    ``,
-    `\xA78The Meownifier reveals what the eye cannot see.`,
-    `\xA78Look closely at the numbers.`,
-    ``,
-    `\xA78\xA7o\u2014 that is all that will be said here.`
-  ].join("\n"));
+  buildPage(
+    player,
+    "\xA78\xA7l... Loose Pages ...\xA7r",
+    "\xA78Some things I've written down only once.",
+    [
+      H("\xA78On the moon\xA7r"),
+      L("\xA78Watch the sky. The moon keeps old promises."),
+      L("\xA78Pale coats and mismatched eyes walk at night"),
+      L("\xA78when the world is brightest dark."),
+      D(),
+      H("\xA78On death\xA7r"),
+      L("\xA78A cat that has witnessed death"),
+      L("\xA78and carries a golden ward..."),
+      L("\xA78may never witness it again."),
+      D(),
+      H("\xA78On the telescope\xA7r"),
+      L("\xA78It reveals what the eye cannot see."),
+      L("\xA78Look closely at the numbers."),
+      D(),
+      L("\xA78\xA7o\u2014 that is all that will be said here.")
+    ]
+  );
 }
 
 // scripts/events/eventRegister.ts

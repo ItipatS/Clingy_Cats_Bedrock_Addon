@@ -3,6 +3,14 @@ import { ActionFormData } from "@minecraft/server-ui";
 
 const GUIDE_TAG = "clingy_cats:welcomed";
 
+const ICON_GUIDE   = "textures/items/guidebook";
+const ICON_MEOW    = "textures/items/meownifier";
+const ICON_TABBY   = "textures/items/spawn_eggs/tabby_spawn_egg";
+const ICON_PERSIAN = "textures/items/spawn_eggs/persian_spawn_egg";
+const ICON_OCELOT  = "textures/items/spawn_eggs/ocelot_spawn_egg";
+const ICON_CALICO  = "textures/items/spawn_eggs/calico_spawn_egg";
+const ICON_RAGDOLL = "textures/items/spawn_eggs/ragdoll_spawn_egg";
+
 export function registerGuideBookEvents(): void {
     world.afterEvents.playerSpawn.subscribe((ev) => {
         if (!ev.initialSpawn) return;
@@ -18,254 +26,251 @@ export function registerGuideBookEvents(): void {
 
 export function showGuide(player: Player): void {
     new ActionFormData()
-        .title("§6§l◆ Clingy Cats — Field Notes ◆§r")
-        .body(
-            `§fNotes on finding, befriending, and\n` +
-            `§fliving with Clingy Cats.\n\n` +
-            `§7Pick a topic to read.`
-        )
-        .button("§eTaming Cats")
-        .button("§dPersonalities")
-        .button("§bTraits")
-        .button("§aBreeds")
-        .button("§6Breeding & Genetics")
-        .button("§3The Meownifier")
-        .button("§8Secrets...")
-        .button("§7Close")
+        .title("§6§l◆ Field Notes ◆§r")
+        .body("§7These are notes I've kept\n§7while learning the cats.")
+        .button("§e§lOn Taming", ICON_TABBY)
+        .button("§d§lKinds I've Met", ICON_CALICO)
+        .button("§b§lHow They Live", ICON_OCELOT)
+        .button("§a§lWhere I Found Them", ICON_RAGDOLL)
+        .button("§6§lOn Kittens", ICON_PERSIAN)
+        .button("§3§lThe Meownifier", ICON_MEOW)
+        .button("§9§lSigns They Leave", ICON_GUIDE)
+        .button("§8§l... Loose Pages ...")
+        .button("§7Close the book")
         .show(player)
         .then((res) => {
-            if (res.canceled || res.selection === 7) return;
-            const pages = [pageTaming, pagePersonalities, pageTraits, pageBreeds, pageBreeding, pageMeownifier, pageSecrets];
+            if (res.canceled || res.selection === 8) return;
+            const pages = [
+                pageTaming,
+                pagePersonalities,
+                pageTraits,
+                pageBreeds,
+                pageBreeding,
+                pageMeownifier,
+                pageMoodSignals,
+                pageSecrets,
+            ];
             pages[res.selection!]?.(player);
         });
 }
 
-function subPage(player: Player, title: string, body: string): void {
-    new ActionFormData()
-        .title(title)
-        .body(body)
-        .button("§7< Back")
-        .button("§8Close")
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+interface Block {
+    kind: "header" | "label" | "divider";
+    text?: string;
+}
+function H(text: string): Block { return { kind: "header", text }; }
+function L(text: string): Block { return { kind: "label", text }; }
+function D(): Block             { return { kind: "divider" }; }
+
+function buildPage(player: Player, title: string, intro: string, blocks: Block[]): void {
+    const form = new ActionFormData().title(title).body(intro);
+    for (const b of blocks) {
+        if (b.kind === "header") form.header(b.text!);
+        else if (b.kind === "label") form.label(b.text!);
+        else form.divider();
+    }
+    form.button("§7< Back").button("§8Close")
         .show(player)
         .then((res) => {
             if (!res.canceled && res.selection === 0) showGuide(player);
         });
 }
 
+// ─── pages ──────────────────────────────────────────────────────────────────
+
 function pageTaming(player: Player): void {
-    subPage(player, "§e§lTaming Cats§r", [
-        `§fThese cats aren't village strays. They're`,
-        `§fwild, rarer, and they won't just walk up`,
-        `§fto you. Each breed has its own biome —`,
-        `§fsee §aBreeds§f for where to look.`,
-        ``,
-        `§7How to tame§r`,
-        `§fCrouch, hold food, and right-click to offer.`,
-        `§fEvery cat has a §efavorite food§f — offer`,
-        `§fthat and you get a §a45%§f chance per try.`,
-        `§fOther foods still work, just at §a20%.§f`,
-        `§fIt might take a few attempts. That's normal.`,
-        ``,
-        `§7Foods they'll accept§r`,
-        `§fcod · salmon · tropical fish · rabbit`,
-        `§fchicken · beef · porkchop`,
-        `§fcarrot · spider eye`,
-        ``,
-        `§7Tips§r`,
-        `§fSome personalities flee from non-sneaking`,
-        `§fplayers — always crouch when approaching`,
-        `§fa wild cat just to be safe.`,
-        `§fUse the §3Meownifier§f to check a cat's`,
-        `§ffavorite food before burning your supplies.`,
-    ].join("\n"));
+    buildPage(player, "§e§lOn Taming§r",
+        "§fIt took me a while to learn that not every cat wants the same thing. Some run off if you crowd them. Some won't even glance at food.",
+        [
+            H("§eThings I've tried that worked§r"),
+            L("§7Crouching nearby and just waiting."),
+            L("§7Holding out their favorite — you can"),
+            L("§7see which one by their face."),
+            L("§7Reaching slowly with an empty hand."),
+            D(),
+            H("§eWhat I had to unlearn§r"),
+            L("§7It's never a coin flip. Each cat"),
+            L("§7keeps its own quiet count."),
+            L("§7Some I tried for weeks. Petting did"),
+            L("§7nothing — they only wanted food."),
+            L("§7Others followed me home after one"),
+            L("§7slow afternoon."),
+            D(),
+            H("§eHeads-up§r"),
+            L("§7If a cat warms up to you, it's yours."),
+            L("§7Friends who try to feed it get hissed at."),
+        ]);
 }
 
 function pagePersonalities(player: Player): void {
-    subPage(player, "§d§lPersonalities§r", [
-        `§fPersonality is set at birth and affects`,
-        `§fhow a cat behaves — not taming odds.`,
-        ``,
-        `§d§lAffectionate§r`,
-        `§fWatches you a lot. Seeks you out at`,
-        `§fbedtime to sleep nearby. Very attached.`,
-        ``,
-        `§d§lAloof§r`,
-        `§fRarely looks your way. Sits with its`,
-        `§fback to you sometimes. It's just how`,
-        `§fthey are — don't take it personally.`,
-        ``,
-        `§d§lPlayful§r`,
-        `§fAlways paying attention. Approaches`,
-        `§fplayers often just to look at them.`,
-        ``,
-        `§d§lCalm§r`,
-        `§fHardly panics. Only lava and lightning`,
-        `§freally bother it. Easy to be around.`,
-        ``,
-        `§d§lAnxious§r`,
-        `§fFlees anyone who isn't sneaking, isn't`,
-        `§fthe owner, and isn't another cat.`,
-        `§fAlways sneak when approaching these.`,
-        ``,
-        `§d§lConfident§r`,
-        `§fDoesn't flee from anything. Will stare`,
-        `§fat you from across the room. Bold cat.`,
-    ].join("\n"));
+    buildPage(player, "§d§lKinds I've Met§r",
+        "§fEvery cat is its own creature, but I've started to notice kinds.",
+        [
+            H("§dAffectionate§r"),
+            L("§7Watches you. Will leave a warm spot"),
+            L("§7to sleep next to a cold one, if you're in it."),
+            D(),
+            H("§dAloof§r"),
+            L("§7Sits with its back to you. It's not"),
+            L("§7personal — they're like that with everyone."),
+            D(),
+            H("§dPlayful§r"),
+            L("§7Comes close just to look. Pounces"),
+            L("§7on string like it owes them money."),
+            D(),
+            H("§dCalm§r"),
+            L("§7Doesn't startle. Lightning, water,"),
+            L("§7dogs barking — nothing fazes them."),
+            D(),
+            H("§dAnxious§r"),
+            L("§7Flees anything that isn't sneaking."),
+            L("§7Make yourself small."),
+            D(),
+            H("§dConfident§r"),
+            L("§7Stares from across the room. Owns"),
+            L("§7the place. Easy if you feed them right."),
+        ]);
 }
 
 function pageTraits(player: Player): void {
-    subPage(player, "§b§lBehavior Traits§r", [
-        `§fTraits govern day-to-day habits —`,
-        `§fdifferent from personality.`,
-        ``,
-        `§b§lLazy§r`,
-        `§fSits a lot, roams rarely. Long gaps`,
-        `§fbetween activity. Great homebody.`,
-        ``,
-        `§b§lActive§r`,
-        `§fRoams far, hunts often. Needs space`,
-        `§fand something to do.`,
-        ``,
-        `§b§lCurious§r`,
-        `§fApproaches players and mobs to`,
-        `§finvestigate. Gets into things.`,
-        ``,
-        `§b§lShy§r`,
-        `§fBig personal-space bubble, flees fast.`,
-        `§fAlways crouch when getting close.`,
-        ``,
-        `§b§lFriendly§r`,
-        `§fRelaxed around players. Small flee`,
-        `§fradius. Usually easy to approach.`,
-        ``,
-        `§b§lIndependent§r`,
-        `§fFollows when tamed, but loosely.`,
-        `§fDoes its own thing. Respect that.`,
-    ].join("\n"));
+    buildPage(player, "§b§lHow They Live§r",
+        "§fPersonality is who they are. Traits are how they spend their days. Different thing.",
+        [
+            H("§bThe homebodies§r"),
+            L("§7Some cats sit for hours. Long naps,"),
+            L("§7slow stretches. Nothing much pulls them out."),
+            D(),
+            H("§bThe wanderers§r"),
+            L("§7Others can't sit still. Always pacing,"),
+            L("§7always somewhere just past the door."),
+            D(),
+            H("§bThe nosy ones§r"),
+            L("§7Some come up to investigate everything."),
+            L("§7Sit quietly near one and they notice you."),
+            D(),
+            H("§bThe skittish ones§r"),
+            L("§7Big personal-space bubble. Sneak"),
+            L("§7or they're gone."),
+            D(),
+            H("§bThe loose followers§r"),
+            L("§7Tame, but on their own schedule."),
+            L("§7They'll come back. Eventually."),
+        ]);
 }
 
 function pageBreeds(player: Player): void {
-    subPage(player, "§a§lBreeds§r", [
-        `§fTwelve breeds, each in its own home`,
-        `§fbiome. Coat colors shift by region too —`,
-        `§fthe same breed can look quite different`,
-        `§fdepending on where you find it.`,
-        ``,
-        `§a§lTabby§r §7· Forest · Birch Forest`,
-        `§fClassic tabby orange, hair and tail vary.`,
-        `§fMost common breed.`,
-        ``,
-        `§a§lBlack§r §7· Plains · Sunflower Plains`,
-        `§fTuxedo and bicolor patterns. Lives where`,
-        `§fpeople live — common around villages.`,
-        ``,
-        `§a§lSiamese§r §7· Savanna`,
-        `§fAlways pointed cream. Very recognizable.`,
-        ``,
-        `§a§lRed§r §7· Desert · Badlands`,
-        `§fTabby orange, lots of texture variety.`,
-        ``,
-        `§a§lBritish§r §7· Taiga (not mega)`,
-        `§fStocky, round head. Tends toward big.`,
-        ``,
-        `§a§lAll Black§r §7· Dark Oak Forest · Swamp`,
-        `§fSolid coat, bobtail common.`,
-        ``,
-        `§a§lCalico§r §7· Cherry Grove · Meadow · Flower Forest`,
-        `§fEvery one looks different. Uncommon.`,
-        ``,
-        `§a§lRagdoll§r §7· Snowy Slopes · Grove §8(rare)`,
-        `§fLargest breed. Fluffy, pointed coat.`,
-        `§fFound on the lower snowy mountainsides.`,
-        ``,
-        `§a§lPersian§r §7· Jagged Peaks · Frozen Peaks §8(rare)`,
-        `§fFlat face, round head. Prefers altitude —`,
-        `§fonly the highest peaks.`,
-        ``,
-        `§a§lJellie§r §7· Mangrove Swamp · Mushroom Island §8(rare)`,
-        `§fSpecial patterned textures. Worth finding.`,
-        ``,
-        `§a§lOcelot§r §7· Jungle (not edges) §8(rare)`,
-        `§fSmallest breed. Only one texture. Elusive.`,
-        ``,
-        `§a§lWhite§r §7· Pale Garden · Ice Spikes §8(very rare)`,
-        `§fSphinx pattern, no hair. The rarest cat.`,
-        `§fSpawns alone in the strangest places.`,
-    ].join("\n"));
+    buildPage(player, "§a§lWhere I Found Them§r",
+        "§fTwelve coats, twelve homes. I've found them all eventually. The same breed can look different depending where you stand.",
+        [
+            H("§aThe common ones§r"),
+            L("§7Tabby — forest, birch forest"),
+            L("§7Black — plains, sunflower plains"),
+            L("§7Siamese — savanna"),
+            L("§7Red — desert, badlands"),
+            L("§7British — taiga (not mega)"),
+            L("§7All Black — dark oak, swamp"),
+            L("§7Calico — cherry, meadow, flower forest"),
+            D(),
+            H("§6Harder to find§r"),
+            L("§7Ragdoll — snowy slopes, grove"),
+            L("§7Persian — high peaks only"),
+            L("§7Jellie — mangrove, mushroom island"),
+            L("§7Ocelot — deep jungle, not the edges"),
+            D(),
+            H("§5The strange one§r"),
+            L("§7White — pale garden, ice spikes."),
+            L("§7Sphinx pattern, no hair. Spawns"),
+            L("§7alone in the strangest places."),
+        ]);
 }
 
 function pageBreeding(player: Player): void {
-    subPage(player, "§6§lBreeding & Genetics§r", [
-        `§fTwo tamed cats fed their favorite food`,
-        `§fnear each other will have a kitten.`,
-        `§fBreed doesn't need to match.`,
-        ``,
-        `§7Baby breed§r`,
-        `§a45%§f mother's breed`,
-        `§a45%§f father's breed`,
-        `§a10%§f neither — a §emutation§f breed`,
-        ``,
-        `§7Inherited traits§r`,
-        `§fKittens take after both parents with`,
-        `§fa little drift. Not identical copies.`,
-        ``,
-        `§6Pattern & Color   §a85% §7inherit`,
-        `§6Tail · Snout · Head   §a95% §7inherit`,
-        `§6Eye Color   §a90% §7inherit`,
-        `§6Eye Shape   §a85% §7inherit ±1 step`,
-        `§6Size   §a85% §7inherit ±1 tier`,
-        ``,
-        `§fAlso a §a1%§f chance of §bheterochromia§f —`,
-        `§fone eye a different color. Very rare.`,
-        ``,
-        `§7Growth§r`,
-        `§fKittens grow into their size tier over time.`,
-        `§fA huge cat starts small and fills out slowly.`,
-    ].join("\n"));
+    buildPage(player, "§6§lOn Kittens§r",
+        "§fTwo of mine, both content, both fed what they love — there will be a kitten. Doesn't matter if they match.",
+        [
+            H("§6Whose kitten is it§r"),
+            L("§7Mostly it looks like one of them."),
+            L("§7Now and then, neither. Something"),
+            L("§7older pulls through."),
+            D(),
+            H("§6What they keep§r"),
+            L("§7Coat patterns and colors usually carry."),
+            L("§7Tail, ear shape, face — almost always."),
+            L("§7Eye color, almost always. Shape drifts."),
+            L("§7Size mostly carries. Sometimes a runt"),
+            L("§7or a giant turns up."),
+            D(),
+            H("§6Rare§r"),
+            L("§7Now and then a kitten has mismatched"),
+            L("§7eyes. They tell me that's lucky."),
+            D(),
+            H("§6Growing up§r"),
+            L("§7A huge cat starts small. Fills out slowly."),
+        ]);
 }
 
 function pageMeownifier(player: Player): void {
-    subPage(player, "§3§lThe Meownifier§r", [
-        `§fA tool for reading everything about a cat`,
-        `§fthat you can't see with the naked eye.`,
-        `§fAim at any cat within §e20 blocks§f and use it.`,
-        `§fWon't disturb them.`,
-        ``,
-        `§7Crafting§r`,
-        `§f  §7. §eG §7.`,
-        `§f  §eG §cE §eG     §eG§f = Gold Ingot`,
-        `§f  §7. §bA §7.     §cE§f = Eye of Ender`,
-        `§f               §bA§f = Amethyst Shard`,
-        ``,
-        `§7What it shows§r`,
-        `§fBreed · Life stage · Tame status`,
-        `§fPersonality · Trait · Favorite food`,
-        `§fFavorite block · Size · Current state`,
-        `§fAffection & trust levels`,
-        `§fEyes · Coat · Tail · Snout · Head`,
-        ``,
-        `§7Durability§r`,
-        `§f64 uses. Repair with §bamethyst§f or §egold§f`,
-        `§fon an anvil. Enchant with §aMending§f`,
-        `§fto make it last forever.`,
-    ].join("\n"));
+    buildPage(player, "§3§lThe Meownifier§r",
+        "§fA pocket telescope for the things a cat won't say. Aim at any cat within a few houses' distance and click. They don't notice.",
+        [
+            H("§3How to build one§r"),
+            L("§f  §7. §eG §7."),
+            L("§f  §eG §cE §eG     §eG§f Gold · §cE§f Eye of Ender"),
+            L("§f  §7. §bA §7.     §bA§f Amethyst"),
+            D(),
+            H("§3What it tells me§r"),
+            L("§7Breed. Who they love best."),
+            L("§7What they like to eat, where they sit."),
+            L("§7Their state, their feelings, the numbers."),
+            D(),
+            H("§3Keeping it sharp§r"),
+            L("§7Sixty-some uses before it dulls."),
+            L("§7Amethyst or gold sharpens it on an anvil."),
+            L("§7Mending keeps it forever."),
+        ]);
+}
+
+function pageMoodSignals(player: Player): void {
+    buildPage(player, "§9§lSigns They Leave§r",
+        "§fCats don't make faces. They make signs. I've started to notice them in the air around them.",
+        [
+            H("§9What I've seen§r"),
+            L("§c♥§7 hearts — they love it here. Usually me."),
+            L("§agreen sparkles§7 — content. The most common."),
+            L("§ewhite puff§7 — startled. I crowded them."),
+            L("§bsoft glow§7 — curious. They're watching."),
+            L("§5dark wisp§7 — deep peace. Always sleeping."),
+            L("§9blue mist§7 — they don't trust me. Something hurt them."),
+            D(),
+            H("§9What I haven't figured out§r"),
+            L("§7Some cats show nothing at all."),
+            L("§7Aloof ones, mostly. That seems to be"),
+            L("§7its own kind of mood."),
+            L("§7The signs come when they decide"),
+            L("§7what to do next. Not all the time."),
+        ]);
 }
 
 function pageSecrets(player: Player): void {
-    subPage(player, "§8§l... Secrets ...§r", [
-        `§8Some things are not written in any guide.`,
-        ``,
-        `§8Watch the sky. The moon keeps old promises.`,
-        `§8Pale coats and mismatched eyes walk at night`,
-        `§8when the world is brightest dark.`,
-        ``,
-        `§8A cat that has witnessed death`,
-        `§8and carries a golden ward§8...`,
-        `§8may never witness it again.`,
-        ``,
-        `§8The Meownifier reveals what the eye cannot see.`,
-        `§8Look closely at the numbers.`,
-        ``,
-        `§8§o— that is all that will be said here.`,
-    ].join("\n"));
+    buildPage(player, "§8§l... Loose Pages ...§r",
+        "§8Some things I've written down only once.",
+        [
+            H("§8On the moon§r"),
+            L("§8Watch the sky. The moon keeps old promises."),
+            L("§8Pale coats and mismatched eyes walk at night"),
+            L("§8when the world is brightest dark."),
+            D(),
+            H("§8On death§r"),
+            L("§8A cat that has witnessed death"),
+            L("§8and carries a golden ward..."),
+            L("§8may never witness it again."),
+            D(),
+            H("§8On the telescope§r"),
+            L("§8It reveals what the eye cannot see."),
+            L("§8Look closely at the numbers."),
+            D(),
+            L("§8§o— that is all that will be said here."),
+        ]);
 }
