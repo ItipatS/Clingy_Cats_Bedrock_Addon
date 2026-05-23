@@ -1,6 +1,8 @@
 import { Entity, world } from "@minecraft/server";
 import { BehaviorTrait, Personality, FavoriteBlock } from "../configs/catsbreed";
-import { getAffection } from "./bond";
+import { getAffection, getTrust } from "./bond";
+
+type Emotion = "happy" | "sad" | "angry" | "scared" | "curious" | "playful";
 
 export type TempBehavior =
     | "temp_follow_close"
@@ -164,6 +166,63 @@ function mergePools(...pools: BehaviorEntry[][]): BehaviorEntry[] {
 }
 
 // ============================================================
+// MOOD REACTION
+// ============================================================
+
+// 40% chance per behaviorTick to emit a mood particle + set emotion property,
+// keyed to (trust, affection, personality/trait, chosen behavior). Particle is
+// the only readable mood signal since cats have no facial expressions.
+function spawnMoodReaction(cat: Entity, behavior: BehaviorEntry["behavior"]): void {
+    if (Math.random() >= 0.4) return;
+
+    const personality = cat.getProperty("clingy_cats:personality")    as Personality;
+    const trait       = cat.getProperty("clingy_cats:behavior_trait") as BehaviorTrait;
+    const aff   = getAffection(cat);
+    const trust = getTrust(cat);
+
+    let emotion: Emotion = "happy";
+    let particle: string | null = null;
+
+    if (trust < 300) {
+        // shaken cat — overrides personality
+        emotion = "scared";
+        particle = "minecraft:mobspell_ambient";
+    } else if (aff > 600 && (behavior === "enter_sleep_state" || behavior === "enter_sit_state" || behavior === "temp_follow_close")) {
+        // strongly bonded + cozy behavior
+        emotion = "happy";
+        particle = "minecraft:heart_particle";
+    } else if (personality === "playful" && (behavior === "temp_play" || behavior === "temp_follow_loose")) {
+        emotion = "playful";
+        particle = "minecraft:villager_happy";
+    } else if (personality === "anxious") {
+        emotion = "scared";
+        particle = "minecraft:sneeze";
+    } else if (personality === "affectionate" && behavior === "temp_follow_close") {
+        emotion = "happy";
+        particle = "minecraft:heart_particle";
+    } else if (trait === "curious" && (behavior === "temp_follow_loose" || behavior === "enter_groom_state")) {
+        emotion = "curious";
+        particle = "minecraft:glow_particle";
+    } else if (personality === "aloof") {
+        // aloof cats rarely emote — emotion stays happy but no particle 70% of the time
+        emotion = "happy";
+        if (Math.random() < 0.3) particle = "minecraft:villager_happy";
+    } else if (behavior === "enter_sleep_state" && aff > 300) {
+        emotion = "happy";
+        particle = "minecraft:sculk_soul_particle";
+    } else {
+        emotion = "happy";
+        particle = "minecraft:villager_happy";
+    }
+
+    cat.setProperty("clingy_cats:emotion", emotion);
+    if (particle) {
+        const loc = { x: cat.location.x, y: cat.location.y + 0.6, z: cat.location.z };
+        cat.dimension.spawnParticle(particle, loc);
+    }
+}
+
+// ============================================================
 // BEHAVIOR TICK
 // ============================================================
 
@@ -190,6 +249,8 @@ export function behaviorTick(cat: Entity, state?: string): void {
     );
     applyBondMultipliers(cat, pool);
     const chosen = state || weightedRandom(pool);
+
+    spawnMoodReaction(cat, chosen as BehaviorEntry["behavior"]);
 
     if (chosen === "enter_still_state" || chosen === "enter_sit_state" || chosen === "enter_sleep_state" || chosen === "enter_groom_state") {
         cat.triggerEvent(`clingy_cats:${chosen}`);

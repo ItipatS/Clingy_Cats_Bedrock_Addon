@@ -575,6 +575,26 @@
 								"particle_y_offset": -0.1
 							},			
 							"swing": true
+						},
+						{
+							"play_sounds": "pop",
+							"cooldown": 4,
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{ "test": "is_family", "subject": "other", "value": "player" },
+										{ "test": "is_sneak_held", "subject": "other", "value": true },
+										{ "test": "all_slots_empty", "subject": "other", "value": "hand" },
+										{ "test": "all_slots_empty", "subject": "self", "value": "hand" }
+									]
+								},
+								"event": "clingy_cats:on_wild_pet"
+							},
+							"particle_on_start": {
+								"particle_type": "heart",
+								"particle_y_offset": -0.1
+							},
+							"swing": true
 						}
 					]
 				},
@@ -2131,6 +2151,10 @@
 
 			"clingy_cats:owner_sleeping_nearby": {
 				"queue_command": { "command": "scriptevent clingycats:owner_sleeping" }
+			},
+
+			"clingy_cats:on_wild_pet": {
+				"queue_command": { "command": "scriptevent clingycats:wild_pet" }
 			}
 
 		}

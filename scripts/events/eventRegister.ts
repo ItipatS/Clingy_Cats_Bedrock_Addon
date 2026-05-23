@@ -6,7 +6,7 @@ import { restoreIdentity, behaviorTick } from '../logics/states';
 import { handleGiveItem } from "../logics/interact";
 import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
 import { registerGuideBookEvents } from "../logics/guideBook";
-import { handlePet, handleCatHurt, handleOwnerSleeping } from "../logics/bond";
+import { handlePet, handleCatHurt, handleOwnerSleeping, handleWildPet } from "../logics/bond";
 
 export function registerCatsEvents(): void {
     registerGuideBookEvents();
@@ -86,6 +86,11 @@ export function registerCatsEvents(): void {
 
         if (id === "clingycats:pet") {
             handlePet(sourceEntity);
+            return;
+        }
+
+        if (id === "clingycats:wild_pet") {
+            handleWildPet(sourceEntity);
             return;
         }
 

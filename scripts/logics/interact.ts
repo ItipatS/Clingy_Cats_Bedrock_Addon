@@ -2,17 +2,14 @@ import { Entity, MolangVariableMap, world } from "@minecraft/server";
 import { Personality } from "../configs/catsbreed";
 import { distanceSq } from "./utils";
 import { behaviorTick } from '../logics/states';
-import { addAffection, addTrust } from "./bond";
-
-const TAME_RATES: Record<Personality, { favorite: number; neutral: number }> = {
-    anxious:      { favorite: 0.20, neutral: 0.05 },
-    aloof:        { favorite: 0.25, neutral: 0.08 },
-    playful:      { favorite: 0.35, neutral: 0.15 },
-    calm:         { favorite: 0.40, neutral: 0.15 },
-    confident:    { favorite: 0.45, neutral: 0.20 },
-    affectionate: { favorite: 0.50, neutral: 0.20 },
-};
-const DEFAULT_RATES = { favorite: 0.45, neutral: 0.20 };
+import {
+    addAffection,
+    addTrust,
+    canBond,
+    claimBond,
+    checkAutoTame,
+    FEED_BUMPS,
+} from "./bond";
 
 export function handleGiveItem(cat: Entity): void {
     if (!cat.isValid) return;
@@ -21,12 +18,9 @@ export function handleGiveItem(cat: Entity): void {
     const favoriteFood = cat.getProperty("clingy_cats:favorite_food") as string;
     const personality  = cat.getProperty("clingy_cats:personality")   as Personality;
 
-    const isFavorite = equipment === favoriteFood;
-    const rates      = TAME_RATES[personality] ?? DEFAULT_RATES;
-    const chance     = isFavorite ? rates.favorite : rates.neutral;
-    const success    = Math.random() < chance;
-
     cat.setProperty("clingy_cats:equipment", "none");
+
+    const isFavorite = equipment === favoriteFood;
 
     if (isFavorite) {
         const molang = new MolangVariableMap();
@@ -46,29 +40,30 @@ export function handleGiveItem(cat: Entity): void {
 
     const tameable = cat.getComponent("minecraft:tameable");
 
-    if (!tameable?.isTamed) {
-        behaviorTick(cat, "temp_follow_close")
-    } else if (isFavorite) {
-        // already-tamed cats: favorite-food acceptance reinforces the bond
-        addAffection(cat, 20);
-        addTrust(cat, 5);
+    // Already tamed: favorite food reinforces bond.
+    if (tameable?.isTamed) {
+        if (isFavorite) {
+            addAffection(cat, 20);
+            addTrust(cat, 5);
+        }
+        return;
     }
-    //world.sendMessage(`§e${cat.typeId.replace("clingy_cats:", "")} §7[${favoriteFood}] 7[${chance}] 7success? [${success}] `);
-    if (!success) return;
 
+    // Wild: bonder lock, personality-tuned feed bump, threshold check.
     const player = cat.dimension
         .getPlayers({ location: cat.location, maxDistance: 10 })
         .sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
-
     if (!player) return;
 
-    const wasTamed = tameable?.isTamed;
-    tameable?.tame(player);
-    cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1.0, pitch: 1.2 });
-
-    if (!wasTamed) {
-        // fresh tame: seed bond stats
-        cat.setProperty("clingy_cats:affection_level", 100);
-        cat.setProperty("clingy_cats:trust_level", 500);
+    if (!canBond(cat, player)) {
+        cat.dimension.playSound("mob.cat.hiss", cat.location, { volume: 0.5, pitch: 1.0 });
+        return;
     }
+    claimBond(cat, player);
+
+    const bump = FEED_BUMPS[personality];
+    if (bump) addAffection(cat, isFavorite ? bump.favorite : bump.neutral);
+
+    behaviorTick(cat, "temp_follow_close");
+    checkAutoTame(cat, player);
 }

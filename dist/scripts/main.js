@@ -1309,6 +1309,56 @@ var TRU = "clingy_cats:trust_level";
 var AFF_MAX = 1e3;
 var TRU_MAX = 1e3;
 var TRU_REST = 500;
+var BONDER = "clingy_cats:bonder_id";
+function getBonderId(cat) {
+  return cat.getDynamicProperty(BONDER) ?? "";
+}
+function canBond(cat, player) {
+  const id = getBonderId(cat);
+  return id === "" || id === player.id;
+}
+function claimBond(cat, player) {
+  if (getBonderId(cat) === "") cat.setDynamicProperty(BONDER, player.id);
+}
+var TAME_THRESHOLDS = {
+  affectionate: 150,
+  playful: 250,
+  confident: 250,
+  calm: 300,
+  aloof: 350,
+  anxious: 400
+};
+var PET_BUMPS = {
+  affectionate: 20,
+  playful: 12,
+  confident: 5,
+  calm: 3,
+  aloof: 1,
+  anxious: 0
+};
+var FEED_BUMPS = {
+  affectionate: { favorite: 30, neutral: 12 },
+  playful: { favorite: 25, neutral: 10 },
+  confident: { favorite: 30, neutral: 12 },
+  calm: { favorite: 25, neutral: 10 },
+  aloof: { favorite: 20, neutral: 8 },
+  anxious: { favorite: 15, neutral: 5 }
+};
+function checkAutoTame(cat, player) {
+  if (!cat.isValid) return false;
+  const tame = cat.getComponent("minecraft:tameable");
+  if (!tame || tame.isTamed) return false;
+  const personality = cat.getProperty("clingy_cats:personality");
+  if (!personality) return false;
+  const threshold = TAME_THRESHOLDS[personality];
+  if (getAffection(cat) < threshold) return false;
+  tame.tame(player);
+  cat.setDynamicProperty(BONDER, "");
+  cat.setProperty(AFF, 100);
+  cat.setProperty(TRU, TRU_REST);
+  cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1, pitch: 1.2 });
+  return true;
+}
 function getAffection(cat) {
   return cat.getProperty(AFF) ?? 0;
 }
@@ -1340,13 +1390,25 @@ function registerBondLoop() {
         const t = getTrust(cat);
         if (t !== TRU_REST) setTrust(cat, t + (t < TRU_REST ? 1 : -1));
         const tame = cat.getComponent("minecraft:tameable");
-        if (!tame?.isTamed) continue;
-        if (tame.tamedToPlayerId !== player.id) continue;
         const dx = cat.location.x - player.location.x;
         const dy = cat.location.y - player.location.y;
         const dz = cat.location.z - player.location.z;
-        if (dx * dx + dy * dy + dz * dz > 256) continue;
-        addAffection(cat, 1);
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (tame?.isTamed) {
+          if (tame.tamedToPlayerId !== player.id) continue;
+          if (d2 > 256) continue;
+          addAffection(cat, 1);
+        } else {
+          if (!player.isSneaking) continue;
+          if (d2 > 64) continue;
+          const trait = cat.getProperty("clingy_cats:behavior_trait");
+          const personality = cat.getProperty("clingy_cats:personality");
+          if (trait !== "curious" && personality !== "affectionate") continue;
+          if (!canBond(cat, player)) continue;
+          claimBond(cat, player);
+          addAffection(cat, 1);
+          checkAutoTame(cat, player);
+        }
       }
     }
   }, 20);
@@ -1356,6 +1418,22 @@ function handlePet(cat) {
   addAffection(cat, 5);
   addTrust(cat, 2);
   cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 0.8, pitch: 1.2 });
+}
+function handleWildPet(cat) {
+  if (!cat.isValid) return;
+  const personality = cat.getProperty("clingy_cats:personality");
+  if (!personality) return;
+  const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 3 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
+  if (!player) return;
+  if (!canBond(cat, player)) {
+    cat.dimension.playSound("mob.cat.hiss", cat.location, { volume: 0.5, pitch: 1 });
+    return;
+  }
+  claimBond(cat, player);
+  addAffection(cat, PET_BUMPS[personality]);
+  addTrust(cat, 2);
+  cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 0.8, pitch: 1.2 });
+  checkAutoTame(cat, player);
 }
 function handleCatHurt(cat) {
   if (!cat.isValid) return;
@@ -1500,6 +1578,48 @@ function mergePools(...pools) {
   }
   return Array.from(merged.values());
 }
+function spawnMoodReaction(cat, behavior) {
+  if (Math.random() >= 0.4) return;
+  const personality = cat.getProperty("clingy_cats:personality");
+  const trait = cat.getProperty("clingy_cats:behavior_trait");
+  const aff = getAffection(cat);
+  const trust = getTrust(cat);
+  let emotion = "happy";
+  let particle = null;
+  if (trust < 300) {
+    emotion = "scared";
+    particle = "minecraft:mobspell_ambient";
+  } else if (aff > 600 && (behavior === "enter_sleep_state" || behavior === "enter_sit_state" || behavior === "temp_follow_close")) {
+    emotion = "happy";
+    particle = "minecraft:heart_particle";
+  } else if (personality === "playful" && (behavior === "temp_play" || behavior === "temp_follow_loose")) {
+    emotion = "playful";
+    particle = "minecraft:villager_happy";
+  } else if (personality === "anxious") {
+    emotion = "scared";
+    particle = "minecraft:sneeze";
+  } else if (personality === "affectionate" && behavior === "temp_follow_close") {
+    emotion = "happy";
+    particle = "minecraft:heart_particle";
+  } else if (trait === "curious" && (behavior === "temp_follow_loose" || behavior === "enter_groom_state")) {
+    emotion = "curious";
+    particle = "minecraft:glow_particle";
+  } else if (personality === "aloof") {
+    emotion = "happy";
+    if (Math.random() < 0.3) particle = "minecraft:villager_happy";
+  } else if (behavior === "enter_sleep_state" && aff > 300) {
+    emotion = "happy";
+    particle = "minecraft:sculk_soul_particle";
+  } else {
+    emotion = "happy";
+    particle = "minecraft:villager_happy";
+  }
+  cat.setProperty("clingy_cats:emotion", emotion);
+  if (particle) {
+    const loc = { x: cat.location.x, y: cat.location.y + 0.6, z: cat.location.z };
+    cat.dimension.spawnParticle(particle, loc);
+  }
+}
 function behaviorTick(cat, state) {
   if (!cat.isValid) return;
   const last = cat.getDynamicProperty(LAST_TEMP);
@@ -1518,6 +1638,7 @@ function behaviorTick(cat, state) {
   );
   applyBondMultipliers(cat, pool);
   const chosen = state || weightedRandom2(pool);
+  spawnMoodReaction(cat, chosen);
   if (chosen === "enter_still_state" || chosen === "enter_sit_state" || chosen === "enter_sleep_state" || chosen === "enter_groom_state") {
     cat.triggerEvent(`clingy_cats:${chosen}`);
     cat.setDynamicProperty(LAST_TEMP, "");
@@ -1547,25 +1668,13 @@ function restoreIdentity(cat) {
 
 // scripts/logics/interact.ts
 import { MolangVariableMap } from "@minecraft/server";
-var TAME_RATES = {
-  anxious: { favorite: 0.2, neutral: 0.05 },
-  aloof: { favorite: 0.25, neutral: 0.08 },
-  playful: { favorite: 0.35, neutral: 0.15 },
-  calm: { favorite: 0.4, neutral: 0.15 },
-  confident: { favorite: 0.45, neutral: 0.2 },
-  affectionate: { favorite: 0.5, neutral: 0.2 }
-};
-var DEFAULT_RATES = { favorite: 0.45, neutral: 0.2 };
 function handleGiveItem(cat) {
   if (!cat.isValid) return;
   const equipment = cat.getProperty("clingy_cats:equipment");
   const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
   const personality = cat.getProperty("clingy_cats:personality");
-  const isFavorite = equipment === favoriteFood;
-  const rates = TAME_RATES[personality] ?? DEFAULT_RATES;
-  const chance = isFavorite ? rates.favorite : rates.neutral;
-  const success = Math.random() < chance;
   cat.setProperty("clingy_cats:equipment", "none");
+  const isFavorite = equipment === favoriteFood;
   if (isFavorite) {
     const molang = new MolangVariableMap();
     molang.setVector3("variable.direction", { x: 0, y: 1, z: 0 });
@@ -1582,22 +1691,24 @@ function handleGiveItem(cat) {
     cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 1, pitch: 1 });
   }
   const tameable = cat.getComponent("minecraft:tameable");
-  if (!tameable?.isTamed) {
-    behaviorTick(cat, "temp_follow_close");
-  } else if (isFavorite) {
-    addAffection(cat, 20);
-    addTrust(cat, 5);
+  if (tameable?.isTamed) {
+    if (isFavorite) {
+      addAffection(cat, 20);
+      addTrust(cat, 5);
+    }
+    return;
   }
-  if (!success) return;
   const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 10 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
   if (!player) return;
-  const wasTamed = tameable?.isTamed;
-  tameable?.tame(player);
-  cat.dimension.playSound("mob.cat.meow", cat.location, { volume: 1, pitch: 1.2 });
-  if (!wasTamed) {
-    cat.setProperty("clingy_cats:affection_level", 100);
-    cat.setProperty("clingy_cats:trust_level", 500);
+  if (!canBond(cat, player)) {
+    cat.dimension.playSound("mob.cat.hiss", cat.location, { volume: 0.5, pitch: 1 });
+    return;
   }
+  claimBond(cat, player);
+  const bump = FEED_BUMPS[personality];
+  if (bump) addAffection(cat, isFavorite ? bump.favorite : bump.neutral);
+  behaviorTick(cat, "temp_follow_close");
+  checkAutoTame(cat, player);
 }
 
 // scripts/logics/riding.ts
@@ -1952,6 +2063,10 @@ function registerCatsEvents() {
     }
     if (id === "clingycats:pet") {
       handlePet(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:wild_pet") {
+      handleWildPet(sourceEntity);
       return;
     }
     if (id === "clingycats:cat_hurt") {
