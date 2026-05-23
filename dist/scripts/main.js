@@ -1399,6 +1399,7 @@ function registerBondLoop() {
           if (d2 > 256) continue;
           addAffection(cat, 1);
         } else {
+          if (isHissing(cat)) continue;
           if (!player.isSneaking) continue;
           if (d2 > 64) continue;
           const trait = cat.getProperty("clingy_cats:behavior_trait");
@@ -1421,6 +1422,7 @@ function handlePet(cat) {
 }
 function handleWildPet(cat) {
   if (!cat.isValid) return;
+  if (isHissing(cat)) return;
   const personality = cat.getProperty("clingy_cats:personality");
   if (!personality) return;
   const player = cat.dimension.getPlayers({ location: cat.location, maxDistance: 3 }).sort((a, b) => distanceSq(a, cat) - distanceSq(b, cat))[0];
@@ -1438,6 +1440,68 @@ function handleWildPet(cat) {
 function handleCatHurt(cat) {
   if (!cat.isValid) return;
   addTrust(cat, -15);
+}
+var WRONG_TRUST_DROPS = {
+  anxious: -40,
+  affectionate: -25,
+  aloof: -20,
+  playful: -15,
+  confident: -10,
+  calm: -10
+};
+var HISS_VOLUMES = {
+  anxious: 1,
+  affectionate: 0.8,
+  aloof: 0.8,
+  playful: 0.8,
+  confident: 0.8,
+  calm: 0.6
+};
+var HISSING_UNTIL = "clingy_cats:hissing_until";
+var HISS_LOCKOUT_TICKS = 60;
+var STATE_HISS_TRUST_FLOOR = 300;
+function isHissing(cat) {
+  const until = cat.getDynamicProperty(HISSING_UNTIL) ?? 0;
+  return system.currentTick < until;
+}
+function handleWrongFood(cat) {
+  if (!cat.isValid) return;
+  if (isHissing(cat)) return;
+  const personality = cat.getProperty("clingy_cats:personality");
+  if (!personality) return;
+  const drop = WRONG_TRUST_DROPS[personality];
+  const volume = HISS_VOLUMES[personality];
+  addTrust(cat, drop);
+  cat.setProperty("clingy_cats:emotion", "angry");
+  cat.dimension.playSound("mob.cat.hiss", cat.location, { volume, pitch: 1 });
+  cat.dimension.spawnParticle("minecraft:villager_angry", {
+    x: cat.location.x,
+    y: cat.location.y + 0.6,
+    z: cat.location.z
+  });
+  if (getTrust(cat) >= STATE_HISS_TRUST_FLOOR) return;
+  cat.setProperty("clingy_cats:state", "fleeing");
+  cat.setDynamicProperty(HISSING_UNTIL, system.currentTick + HISS_LOCKOUT_TICKS);
+  system.runTimeout(() => {
+    if (!cat.isValid) return;
+    cat.dimension.spawnParticle("minecraft:villager_angry", {
+      x: cat.location.x,
+      y: cat.location.y + 0.6,
+      z: cat.location.z
+    });
+  }, 20);
+  system.runTimeout(() => {
+    if (!cat.isValid) return;
+    cat.dimension.spawnParticle("minecraft:villager_angry", {
+      x: cat.location.x,
+      y: cat.location.y + 0.6,
+      z: cat.location.z
+    });
+  }, 40);
+  system.runTimeout(() => {
+    if (!cat.isValid) return;
+    behaviorTick(cat);
+  }, HISS_LOCKOUT_TICKS);
 }
 var SLEEP_GATE = "clingy_cats:last_sleep_bump";
 function handleOwnerSleeping(cat) {
@@ -1670,6 +1734,10 @@ function restoreIdentity(cat) {
 import { MolangVariableMap } from "@minecraft/server";
 function handleGiveItem(cat) {
   if (!cat.isValid) return;
+  if (isHissing(cat)) {
+    cat.setProperty("clingy_cats:equipment", "none");
+    return;
+  }
   const equipment = cat.getProperty("clingy_cats:equipment");
   const favoriteFood = cat.getProperty("clingy_cats:favorite_food");
   const personality = cat.getProperty("clingy_cats:personality");
@@ -2093,6 +2161,10 @@ function registerCatsEvents() {
     }
     if (id === "clingycats:wild_pet") {
       handleWildPet(sourceEntity);
+      return;
+    }
+    if (id === "clingycats:wrong_food") {
+      handleWrongFood(sourceEntity);
       return;
     }
     if (id === "clingycats:cat_hurt") {

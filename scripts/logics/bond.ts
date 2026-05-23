@@ -1,6 +1,7 @@
 import { Entity, EntityTameableComponent, Player, system, world } from "@minecraft/server";
 import { Personality } from "../configs/catsbreed";
 import { distanceSq } from "./utils";
+import { behaviorTick } from "./states";
 
 const AFF = "clingy_cats:affection_level";
 const TRU = "clingy_cats:trust_level";
@@ -124,6 +125,7 @@ export function registerBondLoop(): void {
                 } else {
                     // wild proximity tame: trait=curious OR personality=affectionate,
                     // player sneaking within 8 blocks, bonder lock honored
+                    if (isHissing(cat)) continue;
                     if (!player.isSneaking) continue;
                     if (d2 > 64) continue;
                     const trait = cat.getProperty("clingy_cats:behavior_trait") as string | undefined;
@@ -150,6 +152,7 @@ export function handlePet(cat: Entity): void {
 // lock, applies personality-tuned PET_BUMPS, then rolls the threshold check.
 export function handleWildPet(cat: Entity): void {
     if (!cat.isValid) return;
+    if (isHissing(cat)) return;
     const personality = cat.getProperty("clingy_cats:personality") as Personality | undefined;
     if (!personality) return;
 
@@ -174,6 +177,78 @@ export function handleWildPet(cat: Entity): void {
 export function handleCatHurt(cat: Entity): void {
     if (!cat.isValid) return;
     addTrust(cat, -15);
+}
+
+// Wrong-food rejection. Trust drops by personality; if post-drop trust < 300
+// the cat enters a 3s state-hissing lockout (state=fleeing, emotion=angry,
+// extra particles, all interact handlers early-return).
+const WRONG_TRUST_DROPS: Record<Personality, number> = {
+    anxious:      -40,
+    affectionate: -25,
+    aloof:        -20,
+    playful:      -15,
+    confident:    -10,
+    calm:         -10,
+};
+const HISS_VOLUMES: Record<Personality, number> = {
+    anxious:      1.0,
+    affectionate: 0.8,
+    aloof:        0.8,
+    playful:      0.8,
+    confident:    0.8,
+    calm:         0.6,
+};
+const HISSING_UNTIL = "clingy_cats:hissing_until";
+const HISS_LOCKOUT_TICKS = 60;
+const STATE_HISS_TRUST_FLOOR = 300;
+
+export function isHissing(cat: Entity): boolean {
+    const until = (cat.getDynamicProperty(HISSING_UNTIL) as number) ?? 0;
+    return system.currentTick < until;
+}
+
+export function handleWrongFood(cat: Entity): void {
+    if (!cat.isValid) return;
+    if (isHissing(cat)) return; // already mid-hiss; ignore further provocation
+
+    const personality = cat.getProperty("clingy_cats:personality") as Personality | undefined;
+    if (!personality) return;
+
+    const drop   = WRONG_TRUST_DROPS[personality];
+    const volume = HISS_VOLUMES[personality];
+
+    addTrust(cat, drop);
+    cat.setProperty("clingy_cats:emotion", "angry");
+    cat.dimension.playSound("mob.cat.hiss", cat.location, { volume, pitch: 1.0 });
+    cat.dimension.spawnParticle("minecraft:villager_angry", {
+        x: cat.location.x, y: cat.location.y + 0.6, z: cat.location.z,
+    });
+
+    if (getTrust(cat) >= STATE_HISS_TRUST_FLOOR) return;
+
+    // Escalation: brief lockout state. Other handlers honor isHissing().
+    cat.setProperty("clingy_cats:state", "fleeing");
+    cat.setDynamicProperty(HISSING_UNTIL, system.currentTick + HISS_LOCKOUT_TICKS);
+
+    // extra angry puffs over the lockout window
+    system.runTimeout(() => {
+        if (!cat.isValid) return;
+        cat.dimension.spawnParticle("minecraft:villager_angry", {
+            x: cat.location.x, y: cat.location.y + 0.6, z: cat.location.z,
+        });
+    }, 20);
+    system.runTimeout(() => {
+        if (!cat.isValid) return;
+        cat.dimension.spawnParticle("minecraft:villager_angry", {
+            x: cat.location.x, y: cat.location.y + 0.6, z: cat.location.z,
+        });
+    }, 40);
+
+    // clear lockout by re-rolling behavior (also picks a new state)
+    system.runTimeout(() => {
+        if (!cat.isValid) return;
+        behaviorTick(cat);
+    }, HISS_LOCKOUT_TICKS);
 }
 
 const SLEEP_GATE = "clingy_cats:last_sleep_bump";

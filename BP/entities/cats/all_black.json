@@ -595,6 +595,31 @@
 								"particle_y_offset": -0.1
 							},
 							"swing": true
+						}						,
+						{
+							"cooldown": 1,
+							"swing": true,
+							"on_interact": {
+								"filters": {
+									"all_of": [
+										{ "test": "is_family", "subject": "other", "value": "player" },
+										{ "test": "has_equipment_tag", "subject": "other", "domain": "hand", "value": "minecraft:is_food" },
+										{ "any_of": [
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:apple" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:sweet_berries" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:beetroot" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:bread" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:melon_slice" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:red_mushroom" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:brown_mushroom" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:rotten_flesh" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:golden_apple" },
+											{ "test": "has_equipment", "subject": "other", "domain": "hand", "value": "minecraft:pumpkin_pie" }
+										]}
+									]
+								},
+								"event": "clingy_cats:on_wrong_food"
+							}
 						}
 					]
 				},
@@ -2177,6 +2202,10 @@
 
 			"clingy_cats:on_wild_pet": {
 				"queue_command": { "command": "scriptevent clingycats:wild_pet" }
+			},
+
+			"clingy_cats:on_wrong_food": {
+				"queue_command": { "command": "scriptevent clingycats:wrong_food" }
 			}
 
 		}

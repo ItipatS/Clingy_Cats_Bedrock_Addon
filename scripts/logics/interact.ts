@@ -9,10 +9,15 @@ import {
     claimBond,
     checkAutoTame,
     FEED_BUMPS,
+    isHissing,
 } from "./bond";
 
 export function handleGiveItem(cat: Entity): void {
     if (!cat.isValid) return;
+    if (isHissing(cat)) {
+        cat.setProperty("clingy_cats:equipment", "none");
+        return;
+    }
 
     const equipment    = cat.getProperty("clingy_cats:equipment") as string;
     const favoriteFood = cat.getProperty("clingy_cats:favorite_food") as string;
