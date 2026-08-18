@@ -21,7 +21,8 @@
 						"hunting",
 						"grooming",
 						"fleeing",
-						"rubbing"
+						"rubbing",
+						"hissing"
 					],
 					"default": "idle",
 					"client_sync": true
@@ -129,7 +130,7 @@
 				"clingy_cats:whisker_index": { "type": "int", "range": [0, 5], "default": 0, "client_sync": true },
 				"clingy_cats:eye_index": { "type": "int", "range": [0, 33], "default": 0, "client_sync": true },
 				"clingy_cats:affection_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
-				"clingy_cats:trust_level": {"type": "int", "range": [0,1000], "default": 0, "client_sync": false},
+				"clingy_cats:trust_level": {"type": "int", "range": [0,1000], "default": 500, "client_sync": false},
 				"clingy_cats:frequency": {"type": "int", "range": [0,100], "default": 50, "client_sync": false},
 				"clingy_cats:equipment": { "type": "enum",
 					"values": [
@@ -352,7 +353,7 @@
 			"minecraft:behavior.equip_item": {
 				"priority": 2
 			},
-			
+
 			"minecraft:shareables": {
 				"singular_pickup": true,
 				"all_items": true,

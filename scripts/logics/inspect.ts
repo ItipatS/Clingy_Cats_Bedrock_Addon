@@ -1,6 +1,8 @@
 import { Entity, EquipmentSlot, GameMode, Player, system, ItemComponentUseEvent } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { showGuide } from "./guideBook";
+import { C } from "../ui/palette";
+import { SYM, starBar, pretty } from "../ui/symbols";
 
 export function registerItemComponents(): void {
     system.beforeEvents.startup.subscribe((ev) => {
@@ -36,53 +38,77 @@ export function registerItemComponents(): void {
     });
 }
 
-function statBar(val: number, max: number, len = 10): string {
-    const filled = Math.round((val / max) * len);
-    return "§2" + "█".repeat(filled) + "§8" + "░".repeat(len - filled) + `§7 ${val}§8/${max}`;
+// Every breed already ships a spawn-egg texture, so the portrait costs no new art.
+// Custom pack textures need the ".png" suffix on form button icons; only vanilla
+// texture paths may omit it.
+function breedIconPath(cat: Entity): string {
+    const id = cat.typeId.replace("clingy_cats:", "");
+    const file = id === "test" ? "base_spawn_egg" : `${id}_spawn_egg`;
+    return `textures/items/spawn_eggs/${file}.png`;
 }
 
 function showCatForm(player: Player, cat: Entity): void {
-    const breed      = cat.typeId.replace("clingy_cats:", "").replace(/_/g, " ");
+    const breed      = pretty(cat.typeId.replace("clingy_cats:", ""));
     const isBaby     = cat.hasComponent("minecraft:is_baby");
     const isTamed    = cat.hasComponent("minecraft:is_tamed");
     const isImmortal = cat.getProperty("clingy_cats:immortal") as boolean;
 
-    const p  = (key: string) => String(cat.getProperty(`clingy_cats:${key}`) ?? "?").replace(/_/g, " ");
+    const p  = (key: string) => pretty(String(cat.getProperty(`clingy_cats:${key}`) ?? "?"));
     const pi = (key: string) => (cat.getProperty(`clingy_cats:${key}`) as number) ?? 0;
 
-    const stageTag   = isBaby  ? "§b★ Baby"    : "§a★ Adult";
-    const tameTag    = isTamed ? "§d♥ Tamed"   : "§7  Wild";
-    const immortalLine = isImmortal
-        ? `\n§8-=-=-=-=-=-════════§r\n§c§l  ✦ IMMORTAL  §r§7  protected by totem`
-        : "";
+    const stage = isBaby  ? "Kitten" : "Adult";
+    const bond  = isTamed ? `${SYM.heart} Yours` : "Wild";
 
-    const body = [
-        `§e§l${breed.toUpperCase()}§r`,
-        `§8  ${stageTag}§8  |  ${tameTag}`,
-        `§8- - - - - - - - - - - - - - -`,
-        `§6§lIDENTITY`,
-        `§7  Personality  §d${p("personality")}`,
-        `§7  Trait        §b${p("behavior_trait")}`,
-        `§7  Fav. Food    §e${p("favorite_food")}`,
-        `§7  Fav. Block   §3${p("favorite_block")}`,
-        `§8- - - - - - - - - - - - - - -`,
-        `§6§lVITALS`,
-        `§7  Size   §f${p("size")}§7   State  §f${p("state")}`,
-        `§d  Affection  ${statBar(pi("affection_level"), 1000)}`,
-        `§a  Trust      ${statBar(pi("trust_level"),     1000)}`,
-        `§8- - - - - - - - - - - - - - -`,
-        `§6§lAPPEARANCE`,
-        `§7  Eyes  §f${p("eye_shape")} §8/ §f${p("eye_color")}`,
-        `§7  Coat  §f${p("pattern")} §8+ §f${p("color")} §8+ §f${p("hairs")} hair`,
-        `§7  Tail  §f${p("tail")}  §7Snout  §f${p("snout")}  §7Head  §f${p("head")}`,
-        immortalLine,
-    ].join("\n");
+    const affection = pi("affection_level");
+    const trust     = pi("trust_level");
 
-    new ActionFormData()
-        .title("§6§l[ Meownifier ]§r")
-        .body(body)
-        .button("§7Close")
-        .show(player);
+    // No space-padded columns anywhere below: Bedrock's UI font is proportional,
+    // so padded columns can never line up. One fact per line instead.
+    const form = new ActionFormData()
+        .title(`${C.gold}${C.bold}Meownifier`)
+        .body(`${C.muted}${C.italic}A pocket telescope for the things a cat won't say.`)
+
+        // Portrait row. A button is the only element that can carry an image, so
+        // this doubles as the name card — clicking it just re-reads the cat.
+        .button(`${C.paper}${breed}\n${C.muted}${stage} ${C.dim}${SYM.dot} ${C.paper}${bond}`,
+                breedIconPath(cat))
+
+        .divider()
+        .header(`${C.gold}Bond`)
+        .label(`${C.muted}Affection  ${C.copper}${starBar(affection, 1000)}  ${C.dim}${affection}/1000`)
+        .label(`${C.muted}Trust      ${C.diamond}${starBar(trust, 1000)}  ${C.dim}${trust}/1000`)
+
+        .divider()
+        .header(`${C.gold}Temperament`)
+        .label(`${C.muted}Personality  ${C.amethyst}${p("personality")}`)
+        .label(`${C.muted}Trait        ${C.diamond}${p("behavior_trait")}`)
+        .label(`${C.muted}Right now    ${C.paper}${p("state")}`)
+
+        .divider()
+        .header(`${C.gold}Habits`)
+        .label(`${C.muted}Favourite  ${C.copper}${p("favorite_food")}`)
+        .label(`${C.muted}Naps on    ${C.copper}${p("favorite_block")}`)
+
+        .divider()
+        .header(`${C.gold}Markings`)
+        .label(`${C.muted}Size  ${C.paper}${p("size")}`)
+        .label(`${C.muted}Eyes  ${C.paper}${p("eye_shape")}, ${p("eye_color")}`)
+        .label(`${C.muted}Coat  ${C.paper}${p("pattern")} ${p("color")}, ${p("hairs")} hair`)
+        .label(`${C.muted}Build ${C.paper}${p("tail")} tail, ${p("snout")} snout, ${p("head")} head`);
+
+    if (isImmortal) {
+        form.divider()
+            .header(`${C.copper}${SYM.spark} Warded`)
+            .label(`${C.muted}Carries a golden ward. Death passes it by.`);
+    }
+
+    form.button(`${C.muted}Close`)
+        .show(player)
+        .then((res) => {
+            if (res.canceled) return;
+            if (res.selection === 0) showCatForm(player, cat); // portrait = re-read
+        })
+        .catch(() => { /* player left or closed the client */ });
 }
 
 function reduceDurability(player: Player): void {

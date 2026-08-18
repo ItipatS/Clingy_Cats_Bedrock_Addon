@@ -1,6 +1,35 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
+		"animation.clingy_cats.body_language": {
+			"loop": true,
+			"bones": {
+				"tail": {
+					"rotation": ["v.bl_tail_x", "v.bl_tail_y", 0]
+				},
+				"baseears": {
+					"rotation": ["v.bl_ear_x", 0, 0]
+				},
+				"bigears": {
+					"rotation": ["v.bl_ear_x", 0, 0]
+				},
+				"bentears": {
+					"rotation": ["v.bl_ear_x", 0, 0]
+				},
+				"eyes": {
+					"scale": [1, "v.bl_eye", 1]
+				},
+				"lowermuzzle": {
+					"rotation": ["-v.bl_jaw", 0, 0]
+				},
+				"whiskers": {
+					"rotation": [0, 0, "v.bl_whisk"]
+				},
+				"cheekfluff": {
+					"rotation": [0, 0, "v.bl_whisk * 0.4"]
+				}
+			}
+		},
 		"animation.clingy_cats.lookat": {
 			"loop": true,
 			"bones": {

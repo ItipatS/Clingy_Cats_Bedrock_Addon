@@ -7,3 +7,9 @@ Desktop.ini
 builds
 
 node_modules
+# Vanilla reference dumps — kept locally for lookup, not part of the pack
+native_particles/
+Interaction_Particle_list.json
+
+# Superseded by CLAUDE.md + TODO.md
+SESSION_CONTEXT.md

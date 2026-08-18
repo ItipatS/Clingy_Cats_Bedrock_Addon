@@ -1,15 +1,30 @@
 import { ItemStack, Player, system, world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
+import { C } from "../ui/palette";
 
 const GUIDE_TAG = "clingy_cats:welcomed";
 
-const ICON_GUIDE   = "textures/items/guidebook";
-const ICON_MEOW    = "textures/items/meownifier";
-const ICON_TABBY   = "textures/items/spawn_eggs/tabby_spawn_egg";
-const ICON_PERSIAN = "textures/items/spawn_eggs/persian_spawn_egg";
-const ICON_OCELOT  = "textures/items/spawn_eggs/ocelot_spawn_egg";
-const ICON_CALICO  = "textures/items/spawn_eggs/calico_spawn_egg";
-const ICON_RAGDOLL = "textures/items/spawn_eggs/ragdoll_spawn_egg";
+// Custom pack textures require the ".png" suffix on form button icons — only
+// vanilla texture paths may omit it. These previously had no suffix, which is
+// why the icons never appeared.
+const ICON_GUIDE   = "textures/items/guidebook.png";
+const ICON_MEOW    = "textures/items/meownifier.png";
+const ICON_TABBY   = "textures/items/spawn_eggs/tabby_spawn_egg.png";
+const ICON_PERSIAN = "textures/items/spawn_eggs/persian_spawn_egg.png";
+const ICON_OCELOT  = "textures/items/spawn_eggs/ocelot_spawn_egg.png";
+const ICON_CALICO  = "textures/items/spawn_eggs/calico_spawn_egg.png";
+const ICON_RAGDOLL = "textures/items/spawn_eggs/ragdoll_spawn_egg.png";
+
+// Per-page accent, so each page keeps its own identity. Material codes only —
+// the classic §e/§a/§b set reads as terminal colour.
+const A_TAME    = C.gold;
+const A_KINDS   = C.amethyst;
+const A_LIVE    = C.diamond;
+const A_FOUND   = "§q"; // material_emerald — dark, headers only, never body text
+const A_KITTEN  = C.copper;
+const A_LENS    = C.muted;
+const A_SIGNS   = "§m"; // material_redstone (NOT strikethrough — that is Java)
+const A_LOOSE   = C.dim;
 
 export function registerGuideBookEvents(): void {
     world.afterEvents.playerSpawn.subscribe((ev) => {
@@ -26,17 +41,17 @@ export function registerGuideBookEvents(): void {
 
 export function showGuide(player: Player): void {
     new ActionFormData()
-        .title("§6§l◆ Field Notes ◆§r")
-        .body("§7These are notes I've kept\n§7while learning the cats.")
-        .button("§e§lOn Taming", ICON_TABBY)
-        .button("§d§lKinds I've Met", ICON_CALICO)
-        .button("§b§lHow They Live", ICON_OCELOT)
-        .button("§a§lWhere I Found Them", ICON_RAGDOLL)
-        .button("§6§lOn Kittens", ICON_PERSIAN)
-        .button("§3§lThe Meownifier", ICON_MEOW)
-        .button("§9§lSigns They Leave", ICON_GUIDE)
-        .button("§8§l... Loose Pages ...")
-        .button("§7Close the book")
+        .title(`${C.gold}${C.bold}Field Notes`)
+        .body(`${C.muted}${C.italic}These are notes I've kept while learning the cats.`)
+        .button(`${A_TAME}${C.bold}On Taming`, ICON_TABBY)
+        .button(`${A_KINDS}${C.bold}Kinds I've Met`, ICON_CALICO)
+        .button(`${A_LIVE}${C.bold}How They Live`, ICON_OCELOT)
+        .button(`${A_FOUND}${C.bold}Where I Found Them`, ICON_RAGDOLL)
+        .button(`${A_KITTEN}${C.bold}On Kittens`, ICON_PERSIAN)
+        .button(`${A_LENS}${C.bold}The Meownifier`, ICON_MEOW)
+        .button(`${A_SIGNS}${C.bold}Signs They Leave`, ICON_GUIDE)
+        .button(`${A_LOOSE}${C.bold}... Loose Pages ...`)
+        .button(`${C.muted}Close the book`)
         .show(player)
         .then((res) => {
             if (res.canceled || res.selection === 8) return;
@@ -51,7 +66,8 @@ export function showGuide(player: Player): void {
                 pageSecrets,
             ];
             pages[res.selection!]?.(player);
-        });
+        })
+        .catch(() => { /* player left or closed the client */ });
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -64,6 +80,8 @@ function H(text: string): Block { return { kind: "header", text }; }
 function L(text: string): Block { return { kind: "label", text }; }
 function D(): Block             { return { kind: "divider" }; }
 
+// Labels wrap on their own. Never hand-break a line: a break that looks right
+// on one screen width is wrong on every other one.
 function buildPage(player: Player, title: string, intro: string, blocks: Block[]): void {
     const form = new ActionFormData().title(title).body(intro);
     for (const b of blocks) {
@@ -71,206 +89,175 @@ function buildPage(player: Player, title: string, intro: string, blocks: Block[]
         else if (b.kind === "label") form.label(b.text!);
         else form.divider();
     }
-    form.button("§7< Back").button("§8Close")
+    form.button(`${C.muted}< Back`).button(`${C.dim}Close`)
         .show(player)
         .then((res) => {
             if (!res.canceled && res.selection === 0) showGuide(player);
-        });
+        })
+        .catch(() => { /* player left or closed the client */ });
 }
 
 // ─── pages ──────────────────────────────────────────────────────────────────
 
 function pageTaming(player: Player): void {
-    buildPage(player, "§e§lOn Taming§r",
-        "§fIt took me a while to learn that not every cat wants the same thing. Some run off if you crowd them. Some won't even glance at food.",
+    buildPage(player, `${A_TAME}${C.bold}On Taming`,
+        `${C.paper}It took me a while to learn that not every cat wants the same thing. Some run off if you crowd them. Some won't even glance at food.`,
         [
-            H("§eThings I've tried that worked§r"),
-            L("§7Crouching nearby and just waiting."),
-            L("§7Holding out their favorite — you can"),
-            L("§7see which one by their face."),
-            L("§7Reaching slowly with an empty hand."),
+            H(`${A_TAME}Things I've tried that worked`),
+            L(`${C.muted}Crouching nearby and just waiting.`),
+            L(`${C.muted}Holding out their favorite — you can see which one by their face.`),
+            L(`${C.muted}Reaching slowly with an empty hand.`),
             D(),
-            H("§eWhat I had to unlearn§r"),
-            L("§7It's never a coin flip. Each cat"),
-            L("§7keeps its own quiet count."),
-            L("§7Some I tried for weeks. Petting did"),
-            L("§7nothing — they only wanted food."),
-            L("§7Others followed me home after one"),
-            L("§7slow afternoon."),
+            H(`${A_TAME}What I had to unlearn`),
+            L(`${C.muted}It's never a coin flip. Each cat keeps its own quiet count.`),
+            L(`${C.muted}Some I tried for weeks. Petting did nothing — they only wanted food.`),
+            L(`${C.muted}Others followed me home after one slow afternoon.`),
             D(),
-            H("§eHeads-up§r"),
-            L("§7If a cat warms up to you, it's yours."),
-            L("§7Friends who try to feed it get hissed at."),
+            H(`${A_TAME}Heads-up`),
+            L(`${C.muted}If a cat warms up to you, it's yours. Friends who try to feed it get hissed at.`),
         ]);
 }
 
 function pagePersonalities(player: Player): void {
-    buildPage(player, "§d§lKinds I've Met§r",
-        "§fEvery cat is its own creature, but I've started to notice kinds.",
+    buildPage(player, `${A_KINDS}${C.bold}Kinds I've Met`,
+        `${C.paper}Every cat is its own creature, but I've started to notice kinds.`,
         [
-            H("§dAffectionate§r"),
-            L("§7Watches you. Will leave a warm spot"),
-            L("§7to sleep next to a cold one, if you're in it."),
+            H(`${A_KINDS}Affectionate`),
+            L(`${C.muted}Watches you. Will leave a warm spot to sleep next to a cold one, if you're in it.`),
             D(),
-            H("§dAloof§r"),
-            L("§7Sits with its back to you. It's not"),
-            L("§7personal — they're like that with everyone."),
+            H(`${A_KINDS}Aloof`),
+            L(`${C.muted}Sits with its back to you. It's not personal — they're like that with everyone.`),
             D(),
-            H("§dPlayful§r"),
-            L("§7Comes close just to look. Pounces"),
-            L("§7on string like it owes them money."),
+            H(`${A_KINDS}Playful`),
+            L(`${C.muted}Comes close just to look. Pounces on string like it owes them money.`),
             D(),
-            H("§dCalm§r"),
-            L("§7Doesn't startle. Lightning, water,"),
-            L("§7dogs barking — nothing fazes them."),
+            H(`${A_KINDS}Calm`),
+            L(`${C.muted}Doesn't startle. Lightning, water, dogs barking — nothing fazes them.`),
             D(),
-            H("§dAnxious§r"),
-            L("§7Flees anything that isn't sneaking."),
-            L("§7Make yourself small."),
+            H(`${A_KINDS}Anxious`),
+            L(`${C.muted}Flees anything that isn't sneaking. Make yourself small.`),
             D(),
-            H("§dConfident§r"),
-            L("§7Stares from across the room. Owns"),
-            L("§7the place. Easy if you feed them right."),
+            H(`${A_KINDS}Confident`),
+            L(`${C.muted}Stares from across the room. Owns the place. Easy if you feed them right.`),
         ]);
 }
 
 function pageTraits(player: Player): void {
-    buildPage(player, "§b§lHow They Live§r",
-        "§fPersonality is who they are. Traits are how they spend their days. Different thing.",
+    buildPage(player, `${A_LIVE}${C.bold}How They Live`,
+        `${C.paper}Personality is who they are. Traits are how they spend their days. Different thing.`,
         [
-            H("§bThe homebodies§r"),
-            L("§7Some cats sit for hours. Long naps,"),
-            L("§7slow stretches. Nothing much pulls them out."),
+            H(`${A_LIVE}The homebodies`),
+            L(`${C.muted}Some cats sit for hours. Long naps, slow stretches. Nothing much pulls them out.`),
             D(),
-            H("§bThe wanderers§r"),
-            L("§7Others can't sit still. Always pacing,"),
-            L("§7always somewhere just past the door."),
+            H(`${A_LIVE}The wanderers`),
+            L(`${C.muted}Others can't sit still. Always pacing, always somewhere just past the door.`),
             D(),
-            H("§bThe nosy ones§r"),
-            L("§7Some come up to investigate everything."),
-            L("§7Sit quietly near one and they notice you."),
+            H(`${A_LIVE}The nosy ones`),
+            L(`${C.muted}Some come up to investigate everything. Sit quietly near one and they notice you.`),
             D(),
-            H("§bThe skittish ones§r"),
-            L("§7Big personal-space bubble. Sneak"),
-            L("§7or they're gone."),
+            H(`${A_LIVE}The skittish ones`),
+            L(`${C.muted}Big personal-space bubble. Sneak or they're gone.`),
             D(),
-            H("§bThe loose followers§r"),
-            L("§7Tame, but on their own schedule."),
-            L("§7They'll come back. Eventually."),
+            H(`${A_LIVE}The loose followers`),
+            L(`${C.muted}Tame, but on their own schedule. They'll come back. Eventually.`),
         ]);
 }
 
 function pageBreeds(player: Player): void {
-    buildPage(player, "§a§lWhere I Found Them§r",
-        "§fTwelve coats, twelve homes. I've found them all eventually. The same breed can look different depending where you stand.",
+    buildPage(player, `${A_FOUND}${C.bold}Where I Found Them`,
+        `${C.paper}Twelve coats, twelve homes. I've found them all eventually. The same breed can look different depending where you stand.`,
         [
-            H("§aThe common ones§r"),
-            L("§7Tabby — forest, birch forest"),
-            L("§7Black — plains, sunflower plains"),
-            L("§7Siamese — savanna"),
-            L("§7Red — desert, badlands"),
-            L("§7British — taiga (not mega)"),
-            L("§7All Black — dark oak, swamp"),
-            L("§7Calico — cherry, meadow, flower forest"),
+            H(`${A_FOUND}The common ones`),
+            L(`${C.muted}Tabby — forest, birch forest`),
+            L(`${C.muted}Black — plains, sunflower plains`),
+            L(`${C.muted}Siamese — savanna`),
+            L(`${C.muted}Red — desert, badlands`),
+            L(`${C.muted}British — taiga (not mega)`),
+            L(`${C.muted}All Black — dark oak, swamp`),
+            L(`${C.muted}Calico — cherry, meadow, flower forest`),
             D(),
-            H("§6Harder to find§r"),
-            L("§7Ragdoll — snowy slopes, grove"),
-            L("§7Persian — high peaks only"),
-            L("§7Jellie — mangrove, mushroom island"),
-            L("§7Ocelot — deep jungle, not the edges"),
+            H(`${C.copper}Harder to find`),
+            L(`${C.muted}Ragdoll — snowy slopes, grove`),
+            L(`${C.muted}Persian — high peaks only`),
+            L(`${C.muted}Jellie — mangrove, mushroom island`),
+            L(`${C.muted}Ocelot — deep jungle, not the edges`),
             D(),
-            H("§5The strange one§r"),
-            L("§7White — pale garden, ice spikes."),
-            L("§7Sphinx pattern, no hair. Spawns"),
-            L("§7alone in the strangest places."),
+            H(`${C.amethyst}The strange one`),
+            L(`${C.muted}White — pale garden, ice spikes. Sphinx pattern, no hair. Spawns alone in the strangest places.`),
         ]);
 }
 
 function pageBreeding(player: Player): void {
-    buildPage(player, "§6§lOn Kittens§r",
-        "§fTwo of mine, both content, both fed what they love — there will be a kitten. Doesn't matter if they match.",
+    buildPage(player, `${A_KITTEN}${C.bold}On Kittens`,
+        `${C.paper}Two of mine, both content, both fed what they love — there will be a kitten. Doesn't matter if they match.`,
         [
-            H("§6Whose kitten is it§r"),
-            L("§7Mostly it looks like one of them."),
-            L("§7Now and then, neither. Something"),
-            L("§7older pulls through."),
+            H(`${A_KITTEN}Whose kitten is it`),
+            L(`${C.muted}Mostly it looks like one of them. Now and then, neither. Something older pulls through.`),
             D(),
-            H("§6What they keep§r"),
-            L("§7Coat patterns and colors usually carry."),
-            L("§7Tail, ear shape, face — almost always."),
-            L("§7Eye color, almost always. Shape drifts."),
-            L("§7Size mostly carries. Sometimes a runt"),
-            L("§7or a giant turns up."),
+            H(`${A_KITTEN}What they keep`),
+            L(`${C.muted}Coat patterns and colors usually carry.`),
+            L(`${C.muted}Tail, ear shape, face — almost always.`),
+            L(`${C.muted}Eye color, almost always. Shape drifts.`),
+            L(`${C.muted}Size mostly carries. Sometimes a runt or a giant turns up.`),
             D(),
-            H("§6Rare§r"),
-            L("§7Now and then a kitten has mismatched"),
-            L("§7eyes. They tell me that's lucky."),
+            H(`${A_KITTEN}Rare`),
+            L(`${C.muted}Now and then a kitten has mismatched eyes. They tell me that's lucky.`),
             D(),
-            H("§6Growing up§r"),
-            L("§7A huge cat starts small. Fills out slowly."),
+            H(`${A_KITTEN}Growing up`),
+            L(`${C.muted}A huge cat starts small. Fills out slowly.`),
         ]);
 }
 
 function pageMeownifier(player: Player): void {
-    buildPage(player, "§3§lThe Meownifier§r",
-        "§fA pocket telescope for the things a cat won't say. Aim at any cat within a few houses' distance and click. They don't notice.",
+    buildPage(player, `${A_LENS}${C.bold}The Meownifier`,
+        `${C.paper}A pocket telescope for the things a cat won't say. Aim at any cat within a few houses' distance and click. They don't notice.`,
         [
-            H("§3How to build one§r"),
-            L("§f  §7. §eG §7."),
-            L("§f  §eG §cE §eG     §eG§f Gold · §cE§f Eye of Ender"),
-            L("§f  §7. §bA §7.     §bA§f Amethyst"),
+            H(`${A_LENS}How to build one`),
+            L(`${C.muted}An eye of ender at the centre.`),
+            L(`${C.muted}Gold above it and to either side.`),
+            L(`${C.muted}One amethyst shard below.`),
             D(),
-            H("§3What it tells me§r"),
-            L("§7Breed. Who they love best."),
-            L("§7What they like to eat, where they sit."),
-            L("§7Their state, their feelings, the numbers."),
+            H(`${A_LENS}What it tells me`),
+            L(`${C.muted}Breed. Who they love best. What they like to eat, where they sit.`),
+            L(`${C.muted}Their state, their feelings, the numbers.`),
             D(),
-            H("§3Keeping it sharp§r"),
-            L("§7Sixty-some uses before it dulls."),
-            L("§7Amethyst or gold sharpens it on an anvil."),
-            L("§7Mending keeps it forever."),
+            H(`${A_LENS}Keeping it sharp`),
+            L(`${C.muted}Sixty-some uses before it dulls.`),
+            L(`${C.muted}Amethyst or gold sharpens it on an anvil. Mending keeps it forever.`),
         ]);
 }
 
 function pageMoodSignals(player: Player): void {
-    buildPage(player, "§9§lSigns They Leave§r",
-        "§fCats don't make faces. They make signs. I've started to notice them in the air around them.",
+    buildPage(player, `${A_SIGNS}${C.bold}Signs They Leave`,
+        `${C.paper}Cats don't make faces. They make signs. I've started to notice them in the air around them.`,
         [
-            H("§9What I've seen§r"),
-            L("§c♥§7 hearts — they love it here. Usually me."),
-            L("§agreen sparkles§7 — content. The most common."),
-            L("§ewhite puff§7 — startled. I crowded them."),
-            L("§bsoft glow§7 — curious. They're watching."),
-            L("§5dark wisp§7 — deep peace. Always sleeping."),
-            L("§9blue mist§7 — they don't trust me. Something hurt them."),
+            H(`${A_SIGNS}What I've seen`),
+            L(`${C.copper}Hearts ${C.muted}— they love it here. Usually me.`),
+            L(`${C.paper}Green sparkles ${C.muted}— content. The most common.`),
+            L(`${C.paper}White puff ${C.muted}— startled. I crowded them.`),
+            L(`${C.diamond}Soft glow ${C.muted}— curious. They're watching.`),
+            L(`${C.amethyst}Dark wisp ${C.muted}— deep peace. Always sleeping.`),
+            L(`${C.diamond}Blue mist ${C.muted}— they don't trust me. Something hurt them.`),
             D(),
-            H("§9What I haven't figured out§r"),
-            L("§7Some cats show nothing at all."),
-            L("§7Aloof ones, mostly. That seems to be"),
-            L("§7its own kind of mood."),
-            L("§7The signs come when they decide"),
-            L("§7what to do next. Not all the time."),
+            H(`${A_SIGNS}What I haven't figured out`),
+            L(`${C.muted}Some cats show nothing at all. Aloof ones, mostly. That seems to be its own kind of mood.`),
+            L(`${C.muted}The signs come when they decide what to do next. Not all the time.`),
         ]);
 }
 
 function pageSecrets(player: Player): void {
-    buildPage(player, "§8§l... Loose Pages ...§r",
-        "§8Some things I've written down only once.",
+    buildPage(player, `${A_LOOSE}${C.bold}... Loose Pages ...`,
+        `${C.dim}Some things I've written down only once.`,
         [
-            H("§8On the moon§r"),
-            L("§8Watch the sky. The moon keeps old promises."),
-            L("§8Pale coats and mismatched eyes walk at night"),
-            L("§8when the world is brightest dark."),
+            H(`${A_LOOSE}On the moon`),
+            L(`${C.dim}Watch the sky. The moon keeps old promises. Pale coats and mismatched eyes walk at night when the world is brightest dark.`),
             D(),
-            H("§8On death§r"),
-            L("§8A cat that has witnessed death"),
-            L("§8and carries a golden ward..."),
-            L("§8may never witness it again."),
+            H(`${A_LOOSE}On death`),
+            L(`${C.dim}A cat that has witnessed death and carries a golden ward... may never witness it again.`),
             D(),
-            H("§8On the telescope§r"),
-            L("§8It reveals what the eye cannot see."),
-            L("§8Look closely at the numbers."),
+            H(`${A_LOOSE}On the telescope`),
+            L(`${C.dim}It reveals what the eye cannot see. Look closely at the numbers.`),
             D(),
-            L("§8§o— that is all that will be said here."),
+            L(`${C.dim}${C.italic}— that is all that will be said here.`),
         ]);
 }

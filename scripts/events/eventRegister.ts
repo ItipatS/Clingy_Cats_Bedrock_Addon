@@ -7,6 +7,7 @@ import { handleGiveItem } from "../logics/interact";
 import { handleRequestShoulderMount, handleAnchorExpire } from "../logics/riding";
 import { registerGuideBookEvents } from "../logics/guideBook";
 import { handlePet, handleCatHurt, handleOwnerSleeping, handleWildPet, handleWrongFood } from "../logics/bond";
+import { toggleFeedDebug } from "../debug/feedDebug";
 
 export function registerCatsEvents(): void {
     registerGuideBookEvents();
@@ -106,6 +107,12 @@ export function registerCatsEvents(): void {
 
         if (id === "clingycats:owner_sleeping") {
             handleOwnerSleeping(sourceEntity);
+            return;
+        }
+
+        // /scriptevent clingycats:debug_feed — trace throw-feeding in chat
+        if (id === "clingycats:debug_feed") {
+            toggleFeedDebug();
             return;
         }
 

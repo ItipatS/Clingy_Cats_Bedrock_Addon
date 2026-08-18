@@ -3,6 +3,7 @@ import { distanceSq } from './utils';
 import { ParentGeneData, ConceptionRecord, determineBabyBreed } from './genetics';
 import { assignInheritedAppearanceFromGenes, assignInheritedEyesAndWhiskersFromGenes, assignInheritedSize } from './appearance';
 import { assignBreedPersonality } from './personality';
+import { getOwnerId, markOwner } from './bond';
 
 // ============================================================
 // GENE CAPTURE
@@ -89,11 +90,19 @@ export function handleGiveBirth(mother: Entity): void {
         const babyBreed = determineBabyBreed(momGenes, dadGenes);
         const baby = mother.dimension.spawnEntity(babyBreed, mother.location);
 
-        const owner = mother.dimension.getPlayers({ location: mother.location, maxDistance: 10 })[0];
-     
+        // Prefer the mother's actual owner; fall back to the nearest player only if she has
+        // none recorded. Breeding requires a tamed mother, so the fallback is a safety net —
+        // without it a bystander standing closer than the owner walks off with the kitten.
+        const motherOwnerId = getOwnerId(mother);
+        const nearby = mother.dimension
+            .getPlayers({ location: mother.location, maxDistance: 10 })
+            .sort((a, b) => distanceSq(a, mother) - distanceSq(b, mother));
+        const owner = nearby.find(p => p.id === motherOwnerId) ?? nearby[0];
+
         if (owner) {
-           const tameable = baby.getComponent("minecraft:tameable");
-            tameable?.tame(owner) 
+            const tameable = baby.getComponent("minecraft:tameable");
+            tameable?.tame(owner);
+            markOwner(baby, owner);
         }
         
         // Tag before clingycats:catspawn fires next tick so that handler skips random appearance

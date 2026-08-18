@@ -64,7 +64,7 @@ task("package", series("clean-collateral", "copyArtifacts"));
 task(
   "local-deploy",
   watchTask(
-    ["scripts/**/*.ts", "behavior_packs/**/*.{json,lang,png}", "resource_packs/**/*.{json,lang,png}"],
+    ["scripts/**/*.ts", "BP/**/*.{json,lang,png}", "RP/**/*.{json,lang,png}"],
     series("clean-local", "build", "package")
   )
 );

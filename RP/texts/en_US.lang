@@ -17,7 +17,6 @@ entity.clingy_cats:tabby.name= Tabby
 entity.clingy_cats:white.name= White
 
 ###spawnegg
-item.spawn_egg.entity.clingy_cats:test.name= Test Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:all_black.name= All Black Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:black.name= Black Cat Spawn Egg
 item.spawn_egg.entity.clingy_cats:british.name= British Cat Spawn Egg

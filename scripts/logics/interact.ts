@@ -1,4 +1,4 @@
-import { Entity, MolangVariableMap, world } from "@minecraft/server";
+import { Entity, MolangVariableMap, system, world } from "@minecraft/server";
 import { Personality } from "../configs/catsbreed";
 import { distanceSq } from "./utils";
 import { behaviorTick } from '../logics/states';
@@ -10,10 +10,28 @@ import {
     checkAutoTame,
     FEED_BUMPS,
     isHissing,
+    isTamed,
 } from "./bond";
+import { feedLog, tag } from "../debug/feedDebug";
+
+// Two BP paths now reach the feed chain: the sneak-feed interact (take_item: true)
+// and minecraft:on_equipment_changed, which fires when a thrown item is picked up
+// into the mainhand. The interact path trips BOTH — it hands the cat the food, so
+// the equipment hook fires right after. Without this gate a sneak-feed pays twice.
+const FEED_GATE = "clingy_cats:last_feed_tick";
+const FEED_GATE_TICKS = 10;
 
 export function handleGiveItem(cat: Entity): void {
     if (!cat.isValid) return;
+
+    const now = system.currentTick;
+    const last = (cat.getDynamicProperty(FEED_GATE) as number) ?? -9999;
+    if (now - last < FEED_GATE_TICKS) {
+        feedLog(`§8gated§r ${tag(cat)} (${now - last}t since last)`);
+        return;
+    }
+    cat.setDynamicProperty(FEED_GATE, now);
+
     if (isHissing(cat)) {
         cat.setProperty("clingy_cats:equipment", "none");
         return;
@@ -26,6 +44,7 @@ export function handleGiveItem(cat: Entity): void {
     cat.setProperty("clingy_cats:equipment", "none");
 
     const isFavorite = equipment === favoriteFood;
+    feedLog(`§aFED§r ${tag(cat)} ate §e${equipment}§r (fav=${favoriteFood}${isFavorite ? " §a✓" : ""}§r)`);
 
     if (isFavorite) {
         const molang = new MolangVariableMap();
@@ -43,10 +62,10 @@ export function handleGiveItem(cat: Entity): void {
         cat.dimension.playSound("mob.cat.purr", cat.location, { volume: 1.0, pitch: 1.0 });
     }
 
-    const tameable = cat.getComponent("minecraft:tameable");
-
     // Already tamed: favorite food reinforces bond.
-    if (tameable?.isTamed) {
+    // isTamed() tests minecraft:is_tamed — minecraft:tameable is gone once the wild
+    // component group is swapped out on tame, so it cannot answer this question.
+    if (isTamed(cat)) {
         if (isFavorite) {
             addAffection(cat, 20);
             addTrust(cat, 5);
@@ -70,5 +89,7 @@ export function handleGiveItem(cat: Entity): void {
     if (bump) addAffection(cat, isFavorite ? bump.favorite : bump.neutral);
 
     behaviorTick(cat, "temp_follow_close");
-    checkAutoTame(cat, player);
+    // Favourite food is worth two marbles — an affectionate cat (bag of 2) can be
+    // won over with a single correct meal.
+    checkAutoTame(cat, player, isFavorite ? 2 : 1);
 }

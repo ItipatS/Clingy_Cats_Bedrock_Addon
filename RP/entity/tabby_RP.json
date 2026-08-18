@@ -89,6 +89,7 @@
         "hunt":       "animation.clingy_cats.hunting",
         "angry":      "animation.clingy_cats.angry",
         "rub":        "animation.clingy_cats.rub",
+        "body_lang":  "animation.clingy_cats.body_language",
         "ac.state":   "controller.animation.clingy_cats.state"
       },
       "scripts": {
@@ -96,9 +97,47 @@
           "v.update_time_moving = 0;",
           "v.idle_pick = 0;",
           "v.idle_time = 0;",
-          "v.hunt_speed = 0;"
+          "v.hunt_speed = 0;",
+
+          "v.bl_phase = math.random(0, 6);",
+          "v.bl_tail_x = 0;",
+          "v.bl_tail_y = 0;",
+          "v.bl_ear_x = 0;",
+          "v.bl_jaw = 0;",
+          "v.bl_whisk = 0;",
+          "v.bl_eye = 1;"
         ],
-        "animate": [ "lookat", "ac.state" ]
+        "pre_animation": [
+          "v.e_happy   = q.property('clingy_cats:emotion') == 'happy';",
+          "v.e_sad     = q.property('clingy_cats:emotion') == 'sad';",
+          "v.e_angry   = q.property('clingy_cats:emotion') == 'angry';",
+          "v.e_scared  = q.property('clingy_cats:emotion') == 'scared';",
+          "v.e_curious = q.property('clingy_cats:emotion') == 'curious';",
+          "v.e_playful = q.property('clingy_cats:emotion') == 'playful';",
+          "v.bl_settled = (q.property('clingy_cats:state') == 'sitting') || (q.property('clingy_cats:state') == 'purring') || (q.property('clingy_cats:state') == 'idle');",
+
+          "v.tgt_tail_x = v.e_happy * -22 + v.e_curious * -14 + v.e_playful * -8 + v.e_angry * 12 + v.e_scared * 34 + v.e_sad * 18;",
+          "v.tgt_ear_x  = v.e_curious * 12 + v.e_playful * 9 + v.e_happy * 4 + v.e_angry * -18 + v.e_scared * -22 + v.e_sad * -9;",
+          "v.tgt_jaw    = v.e_angry * 28 + v.e_playful * 7;",
+
+          "v.bl_sway_speed = 60 + v.e_angry * 400 + v.e_playful * 280 + v.e_curious * 120 + v.e_happy * 90;",
+          "v.bl_sway_amp   = 2 + v.e_angry * 20 + v.e_playful * 15 + v.e_curious * 5 + v.e_happy * 6;",
+          "v.tgt_tail_y = math.sin((q.life_time + v.bl_phase) * v.bl_sway_speed) * v.bl_sway_amp;",
+
+          "v.bl_tail_x = math.lerp(v.bl_tail_x, v.tgt_tail_x, 0.08);",
+          "v.bl_tail_y = math.lerp(v.bl_tail_y, v.tgt_tail_y, 0.40);",
+          "v.bl_ear_x  = math.lerp(v.bl_ear_x,  v.tgt_ear_x,  0.12);",
+          "v.bl_jaw    = math.lerp(v.bl_jaw,    v.tgt_jaw,    0.25);",
+          "v.bl_whisk  = math.sin((q.life_time + v.bl_phase) * 70) * (2 + v.e_curious * 3 + v.e_playful * 3);",
+
+          "v.bl_blink_gap = (v.e_happy && v.bl_settled) ? 5.5 : 4.0;",
+          "v.bl_blink_len = (v.e_happy && v.bl_settled) ? 0.85 : 0.16;",
+          "v.bl_blink_t = math.mod(q.life_time + v.bl_phase * 2, v.bl_blink_gap);",
+          "v.bl_blink = v.bl_blink_t < v.bl_blink_len ? math.sin(v.bl_blink_t / v.bl_blink_len * 180) : 0;",
+          "v.bl_squint = v.e_happy * 0.22 + v.e_sad * 0.18;",
+          "v.bl_eye = 1 - math.max(v.bl_blink, v.bl_squint);"
+        ],
+        "animate": [ "lookat", "body_lang", "ac.state" ]
       },
       "render_controllers": [
         "controller.render.clingy_cats_collar",
